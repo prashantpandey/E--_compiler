@@ -1,10 +1,32 @@
 CC = g++
 CFLAGS = -c -g -Wno-deprecated
+CXX = g++
+CXXFLAGS = -c -g -O -Wno-deprecated -std=c++0x -Wall
 FLEX = flex
 BISON = bison
 
-demo:	driver.o ICode_lexer.o ICode_parser.o ICode.tab.h 
+assembler:	driver.o ICode_lexer.o ICode_parser.o ICode.tab.h 
 	$(CC) -o demo ICode_lexer.o ICode_parser.o driver.o -lfl
+
+parser:   driveParse.o E--_lexer.o E--_parser.o Ast.o STEClasses.o SymTabMgr.o Value.o Type.o SymTabEntry.o Error.o ParserUtil.o SymTab.o
+	$(CXX) -o $@ $^ -lfl
+
+E--_lexer.o:    E--_lexer.C E--.tab.h
+E--_parser.o:	E--_parser.C E--.tab.h
+
+E--_parser.C: 	E--_parser.y++
+	$(BISON) -t -d -v -o E--_parser.C E--_parser.y++; \
+  mv E--_parser.H E--.tab.h
+
+SymTabMgr.o: SymTabMgr.h SymTabMgr.C
+SymTabEntry.o: SymTabEntry.h SymTabEntry.C
+STEClasses.o: STEClasses.h STEClasses.C
+Ast.o: Ast.h Ast.C
+Value.o: Value.h Value.C
+Type.o: Type.h Type.C
+Error.o: Error.h Error.C
+ParserUtil.o: ParserUtil.h ParserUtil.C
+SymTab.o: SymTab.h SymTab.C
 
 ICode_parser.o:	ICode_parser.C ICode.tab.h
 	$(CC) $(CFLAGS) ICode_parser.C
@@ -20,8 +42,10 @@ ICode_parser.C: ICode.y
     mv ICode_parser.H ICode.tab.h
 
 driver.o: driver.C ICode_parser.C
-	$(CC) -c $(CFLAGS) driver.C
+	$(CXX) -c $(CFLAGS) driver.C
 
 clean:
 	-echo "Removing all object files and compiled lexer and bison files!"
 	-rm -f demo *.o ICode_parser.C ICode_lexer.C ICode.tab.h
+	-echo "Removing intermediate C files!"
+	-rm -f E--_parser.C
