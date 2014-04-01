@@ -1,0 +1,51 @@
+
+	> While loops / break
+	> Error Handling
+	> Type Checking
+	> Memory Allocation
+	> Implementing functions
+	> Compilation of event matching
+	> Intermediate code generation
+	> Optimization
+
+
+	Meeting 29 March:
+		> Size of Int and Float : 4 bytes	: 32 bit machine
+		> While/break 		: How to support TOK_WHILE and TOK_BREAK in the assign3 code.
+		> Error Handling 	: Implement error wrapper functions for all the symtab_entry calls.
+						 	: Support rest of the error handling code
+
+
+
+		> typeCheck			:	Ast.h 
+		> memAlloc			:
+		> codeGen			: 	Ast.h
+
+	Important links:
+		> http://gcc.godbolt.org/
+
+
+	TypeChecking: (http://www.sci.tamucc.edu/~sking/Courses/Compilers/Slides/type_checking.pdf)
+		> We need to add the functions to the respective classes.
+			> first component involves the checking the "isSubType" function.
+			> expressions (statemnts), static declaration, functions and rules
+
+	Memory Allocation: (and function implementation : http://www.ict.griffith.edu.au/teaching/3516ICT/Lectures/lec8.pdf)
+		> Static allocation
+			> Un-initialized data (bss section)
+			> Initialized data (writable) (data section)
+			> Initialized data (const) (const section)
+
+		> Dynamic
+			> stack allocation
+			> heap allocation
+
+		> Temporary (especially for heavy expressions) **Register Allocation
+			> Assigning a set of variables to resisters. 
+			> More than one variable can be assigned to one register.
+			> But while accessing the variables that not in the register will require RAM access.
+			> Here we have to think in terms of compiler optimization.
+				> Through liveness analysis, compilers can determine which sets of variables are live at the same time, as well as variables which are involved in move instructions. Using this information, the compiler can construct a graph such that every vertex represents a unique variable in the program. Interference edges connect pairs of vertices which are live at the same time, and preference edges connect pairs of vertices which are involved in move instructions. Register allocation can then be reduced to the problem of K-coloring the resulting graph, where K is the number of registers available on the target architecture. No two vertices sharing an interference edge may be assigned the same color, and vertices sharing a preference edge should be assigned the same color if possible. Some of the vertices may be precolored to begin with, representing variables which must be kept in certain registers due to calling conventions or communication between modules. As graph coloring in general is NP-complete, so is register allocation. However, good algorithms exist which balance performance with quality of compiled code.
+
+				The graph coloring technique is so effective because it takes into account not only a variable being considered for register allocation, but also all the variables which are live at the same time. The logic is that if all the neighboring live variables of variable V can be assigned registers, then so can V plus all the neighbors. So it is a recursive case of removing a variable from the set of live variables at a point, called the graph, and then examining the resulting "graph" minus one variable. The loop continues until the reduced graph can be allocated, and all the other variables are spilled to memory.
+
