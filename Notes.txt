@@ -41,12 +41,15 @@
 	Wrong operator on data types
 	
 	Typecheck:
-		> functions: 	
+		> functions:
 			> number of args mismatch
 			> type of args mismatch
 			> return type mismatch
 		> If/While stmt
 			> return type should be boolean
+		> Operator
+			> Wrong number of operands
+			> Wrong type of operands
 		> Expression evaluation
 			> type LHS mismatch type RHS
 			> type LHS is sub type of of type RHS
