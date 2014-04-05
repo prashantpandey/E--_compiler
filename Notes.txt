@@ -28,8 +28,20 @@
 	TypeChecking: (http://www.sci.tamucc.edu/~sking/Courses/Compilers/Slides/type_checking.pdf)
 		> We need to add the functions to the respective classes.
 			> first component involves the checking the "isSubType" function.
-			> expressions (statemnts), static declaration, functions and rules
+				> expressions (statemnts), static declaration, functions and rules
+	CHecks:-
+	Arguement type mismatch
+	Mismatch in number of arguements
+	Incompatible types
+	Assignment subtype error , double to int
+	return type mismatch void int
+	boolean expected suppose if and while
+	Event pattern error
+	Wrong operator on data types
+	
 
+
+	
 	Memory Allocation: (and function implementation : http://www.ict.griffith.edu.au/teaching/3516ICT/Lectures/lec8.pdf)
 		> Static allocation
 			> Un-initialized data (bss section)
