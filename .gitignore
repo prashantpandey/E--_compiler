@@ -1,9 +1,11 @@
 ICode.tab.h
 ICode_lexer.C
-ICode_lexer.o
 ICode_parser.C
-ICode_parser.o
-ICode_parser.output
+*.output
+E--_parser.C
+outputs
+parser
 demo
-driver.o
+*.o
+E--.tab.h
 
