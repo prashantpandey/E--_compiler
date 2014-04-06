@@ -504,7 +504,7 @@ evn_param_list		: TOK_IDENT {
 				VariableEntry *ve = (VariableEntry*) ste;
 				$$->push_back(ve);
 			    }
-			    else if(ste->kind() != SymTabEntry::Kind::VARIABLE_KIND) {
+			    else {
 				$$->push_back(NULL);
 			    }
 			}      	
