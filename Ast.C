@@ -41,6 +41,21 @@ const Type* ExprNode::typeCheck()
     Type *val_type = value()->type();
     Type coerced_type = coercedType();
 
+    switch(ExprNodeType())
+    {
+    case REF_EXPR_NODE:
+			typeCheck();
+			break;
+    case OP_NODE:	
+
+			break;
+    case VALUE_NODE:	
+			break;
+    case INV_NODE:  
+			break;
+    default:
+			return errorType(ERROR);
+    }
     return NULL;
 };
 
@@ -61,7 +76,7 @@ const Type* RefExprNode::typeCheck()
     }
     else
     {
-	    errMsg("Not of variable kind");
+	    errMsg("%s Not of variable kind", ext());
 	    return errorType(ERROR);
     }
 }
@@ -108,7 +123,7 @@ void ValueNode::print(ostream& os, int indent) const
     value()->print(os, indent);
 }
 
-const Type* ValueNode::typeCheck() {
+Type* ValueNode::typeCheck() {
     return type();
 }
 
@@ -141,13 +156,6 @@ const Type* ExprNode::typeCheck()
 
     return NULL;
 };
-
-
-const Type* RefExprNode::typeCheck()
-{
-
-
-}
 
 void RefExprNode::print(ostream& os, int indent) const
 {
