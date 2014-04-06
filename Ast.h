@@ -131,7 +131,7 @@ class RefExprNode: public ExprNode {
   string ext() const { return ext_;};
   void ext(string str) { ext_ = str;}; 
 
-  const Type* typeCheck() {return NULL;};
+  const Type* typeCheck();
   const SymTabEntry* symTabEntry() const { return sym_;};
   void symTabEntry(const SymTabEntry *ste)  { sym_ = ste;};
 
@@ -460,6 +460,7 @@ class IfNode: public StmtNode{
   const StmtNode* elseStmt() const { return else_;};
   const StmtNode* thenStmt() const  { return then_;};
 
+  const Type* typeCheck();
   ExprNode* cond() {return cond_;}      
   StmtNode* elseStmt() { return else_;};
   StmtNode* thenStmt() { return then_;};

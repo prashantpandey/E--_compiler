@@ -43,16 +43,13 @@ RefExprNode::RefExprNode(const RefExprNode& re) : ExprNode(re)
 /* Added by KA */
 const Type* RefExprNode::typeCheck()
 {
-    SymTabEntry *ste = symTabEntry();
-    if(ste->kindTag() == SymTabEntry::Kind::VARIABLE_KIND)
+    const SymTabEntry *ste = symTabEntry();
+    if(ste->kind()!= SymTabEntry::Kind::VARIABLE_KIND)
     {
+	    errMsg(ext() + " Not of variable kind");
+	    return &Type::errorType;
+    }
 	    return ste->type();
-    }
-    else
-    {
-	    errMsg("%s Not of variable kind", ext());
-	    return Type::errorType;
-    }
 }
 
 RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, int line,
@@ -73,6 +70,18 @@ IfNode::IfNode(ExprNode* cond, StmtNode* thenStmt,
     then_ = thenStmt;
     else_ = elseStmt;
 }
+
+/* Added by KA */
+const Type* IfNode::typeCheck()
+{
+	const Type *cond_type = cond()->type();
+	if(cond_type != &Type::errorType)
+	{
+	    return cond_type;
+	}
+	    return &Type::unkType;
+}
+
 PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* params,
 	ExprNode* c,
 	int line, int column, string file):
@@ -97,7 +106,8 @@ void ValueNode::print(ostream& os, int indent) const
     value()->print(os, indent);
 }
 
-Type* ValueNode::typeCheck() {
+
+const Type* ValueNode::typeCheck() {
     return type();
 }
 
@@ -120,16 +130,6 @@ void IfNode::print(ostream& os, int indent) const
 
 }
 
-
-const Type* ExprNode::typeCheck()
-{
-    
-    Type *val_type = value()->type();
-    Type coerced_type = coercedType();
-    isSubType
-
-    return NULL;
-};
 
 void RefExprNode::print(ostream& os, int indent) const
 {
