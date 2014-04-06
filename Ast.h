@@ -190,7 +190,7 @@ class OpNode: public ExprNode {
     { return (i < arg_.size())? arg_[i] : NULL; };
   vector<ExprNode*>* args() 
     { return &arg_; }
-
+  const Type* typeCheck();
   void print(ostream& os, int indent=0) const;  
   
  private: 
