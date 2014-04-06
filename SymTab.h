@@ -5,7 +5,6 @@
 #include <hash_fun.h>
 #include <ext/hash_map>
 using namespace std;
-
 class SymTabEntry;
 
 struct string_eq {

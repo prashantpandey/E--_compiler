@@ -7,5 +7,4 @@ outputs
 parser
 demo
 *.o
-E--.tab.h
 

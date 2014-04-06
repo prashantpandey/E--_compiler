@@ -99,12 +99,15 @@ parseOptions(int argc, char* argv[]) {
   }
 
   while (1) {
-	if ((argc > 2) || (argc < 2)) {
+	if ((argc > 3) || (argc < 2)) {
 		cerr << "Please specify only a single input file\n";
 		return -1;
 	}
 	else {
 	  inputFile = argv[1];
+	  if(argc > 2){
+	  cout << argc << endl;
+	    Value::printType = atoi(argv[2]);}
 	  return 0;
 	}
   }

@@ -7,8 +7,10 @@ class Value;
 class ProgramElem;
 class SymTabEntry; 
 
+
 class Value {
  public:
+  static int printType;
   Value() // void value
     { type_ = &Type::voidType;}
   Value(const char* s)
