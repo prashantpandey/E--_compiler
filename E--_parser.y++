@@ -13,7 +13,19 @@ int offSet;
 extern const OpNode::OpInfo opInfo[];
 //extern static void errPrint(ErrorST code, const string& sym);
 
-
+void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
+    SymTabEntry *currentScope = stm.currentScope();
+    VariableEntry::VarKind v = VariableEntry::VarKind::LOCAL_VAR;
+    if(currentScope->kind() == SymTabEntry::Kind::GLOBAL_KIND) {
+	v = VariableEntry::VarKind::GLOBAL_VAR;
+    }
+    for (vector<VariableEntry*>::const_iterator it=var_list->begin(); it != var_list->end(); ++it) {
+	VariableEntry *varEntry = *it;
+	varEntry->varKind(v);
+	varEntry->type(type);
+	insertSymbolErrCheck(varEntry);
+    }
+}
 
 %}
 
@@ -143,7 +155,7 @@ specification		: ifc_decl_star rule_star { }
 
 ifc_decl_star		: /* empty */ {}
 			| ifc_decl_star ifc_decl {}
-			| ifc_decl_star error TOK_SEMICOLON {}
+			| ifc_decl_star error TOK_SEMICOLON { yyerror("Syntax error, expecting a declaration"); }
 ;
 
 ifc_decl		: var_dec 
@@ -180,6 +192,11 @@ event_decl_hdr 		: TOK_EVENT TOK_IDENT {
 						    insertSymbolErrCheck($$);
 				 		    enterScopeErrCheck($$);
 					      }
+			| TOK_EVENT error { // If event name not found, then don't make an entry in Symtab
+			    yyerror("Syntax error in event declaration: Expected an event name");
+			    // TODO: We can implement passing an event with NULL name and later if an event is called
+			    // with same number and order of params then give a context specific error.
+			}
 		
 event_decl_params	: TOK_LPAREN formal_param_list_star TOK_RPAREN TOK_SEMICOLON {
 											 stm.leaveScope();
@@ -192,6 +209,9 @@ class_dec		: TOK_CLASS TOK_IDENT TOK_SEMICOLON {
 								$$ = new ClassEntry($2); 
 								insertSymbolErrCheck($$);
 							     }
+			| TOK_CLASS error { // If class name not found, then don't make an entry in Symtab
+			    yyerror("Syntax error in class declaration: expecting a class name"); 
+			}
 ;
 
 func_decl_star		: func_decl TOK_SEMICOLON { stm.leaveScope(); } | func_decl func_body{ stm.leaveScope(); }
@@ -251,6 +271,10 @@ statement 		: empty_stmt {$$ = NULL;}
 			| ret_stmt TOK_SEMICOLON { $$ = $1; }
 			| if_then_stmt { $$ = $1; }			%prec "then"
 			| if_then_else_stmt { $$ = $1; }
+			| error TOK_SEMICOLON { 
+			    yyerror("Syntax error while parsing a statemnt");
+			    $$ = NULL;		// return NULL statement
+			}
 ;
 
 if_then_else_stmt	: if_then_stmt TOK_ELSE statement_star { 
@@ -272,7 +296,7 @@ func_invoc_stmt		: func_invoc TOK_SEMICOLON { if ($1 == NULL ) $$ = NULL; else $
 
 func_invoc		: TOK_IDENT TOK_LPAREN expr_list_plus TOK_RPAREN { 
 									    SymTabEntry *ste = stm.lookUp($1);
-									    if(ste == NULL || ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
+									    if(ste == NULL || ste->kind() != SymTabEntry::Kind::FUNCTION_KIND)										  {
 										$$ = NULL;
 									    } else {
 										$$ = new InvocationNode(ste, $3);
@@ -293,20 +317,12 @@ var_dec_list		: var_dec
 			| var_dec_list var_dec
 ;
 var_dec			: type_star var_list TOK_SEMICOLON {
-								SymTabEntry *currentScope = stm.currentScope();
-								VariableEntry::VarKind v = VariableEntry::VarKind::LOCAL_VAR;
-
-								if(currentScope->kind() == SymTabEntry::Kind::GLOBAL_KIND) {
-									v = VariableEntry::VarKind::GLOBAL_VAR;
-								}
-								for (vector<VariableEntry*>::const_iterator it=$2->begin(); it != $2->end(); ++it) {
-									VariableEntry *varEntry = *it;
-									varEntry->varKind(v);
-									varEntry->type($1);
-									insertSymbolErrCheck(varEntry);
-								}
-								
-							    }	
+			    varListEntry($2, $1);
+			}	
+			| type_star TOK_COMMA var_list TOK_SEMICOLON { // If error then don't insert variable in Symtab
+			    yyerror("Sytax error in variable declaration: Maybe a missing identifier");
+			    varListEntry($3, $1);
+			}
 ;
 
 var_list		: TOK_IDENT { 
@@ -315,13 +331,24 @@ var_list		: TOK_IDENT {
 				    }
 			| var_assign {
 					$$ = new vector<VariableEntry*>();
-					$$->push_back($1);
+					if($1 != NULL)
+					    $$->push_back($1);
 				    }
 			| var_list TOK_COMMA TOK_IDENT { $$->push_back(new VariableEntry($3,VariableEntry::VarKind::LOCAL_VAR)); }
-			| var_list TOK_COMMA var_assign { $$->push_back($3); }
+			| var_list TOK_COMMA var_assign {
+			    if($1 != NULL)			    
+				$$->push_back($3); 
+			}
+			| var_list error { // If error then don't add to the vector list
+			    yyerror("Error in variable declaration: Maybe a missing \",\" or identifier");
+			}
 ;
 
 var_assign		: TOK_IDENT TOK_ASSIGN expr_star { $$ = new VariableEntry($1,VariableEntry::VarKind::LOCAL_VAR, NULL, $3); }
+			| error TOK_ASSIGN expr_star { 
+			    yyerror("Error in variale declaration: Maybe a missing identifier");
+			    $$ = NULL;
+			}
 ;
 
 ref_expr		: TOK_IDENT { $$ = new RefExprNode($1, stm.currentScope()); }
@@ -374,12 +401,18 @@ literal			: TOK_STRCONST	{ $$ = new Value($1); }
 
 formal_param_list 	: formal_param 
 			| formal_param_list TOK_COMMA formal_param
+			| formal_param error formal_param { yyerror("Error encountered while parsing the parameter list"); }
 ;
 
 formal_param		: type_star TOK_IDENT { 
 						$$ = new VariableEntry($2,VariableEntry::VarKind::PARAM_VAR,$1);
 						insertSymbolErrCheck($$);
 					      }
+			| type_star error { 
+			    yyerror("Syntax error in formal parameter declaration");
+			    $$ = new VariableEntry(NULL,VariableEntry::VarKind::PARAM_VAR,$1);
+			    insertSymbolErrCheck($$);
+			}
 ;
 
 evn_pat_star		: evn_pat {$$ = $1;}
