@@ -34,32 +34,6 @@ ExprNode::ExprNode(const ExprNode& e) : AstNode(e)
 }
 
 
-/* Added By KA */
-const Type* ExprNode::typeCheck()
-{
-    
-    Type *val_type = value()->type();
-    Type coerced_type = coercedType();
-
-    switch(ExprNodeType())
-    {
-    case REF_EXPR_NODE:
-			typeCheck();
-			break;
-    case OP_NODE:	
-
-			break;
-    case VALUE_NODE:	
-			break;
-    case INV_NODE:  
-			break;
-    default:
-			return errorType(ERROR);
-    }
-    return NULL;
-};
-
-
 RefExprNode::RefExprNode(const RefExprNode& re) : ExprNode(re)
 {
     ext_ = re.ext();
@@ -77,7 +51,7 @@ const Type* RefExprNode::typeCheck()
     else
     {
 	    errMsg("%s Not of variable kind", ext());
-	    return errorType(ERROR);
+	    return Type::errorType;
     }
 }
 
