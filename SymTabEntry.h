@@ -61,6 +61,7 @@ class SymTabEntry: public ProgramElem {
     return st_->insert(ste);
   }
 
+  virtual void checkType() const {}; //Empty Implementation
   virtual bool operator==(const SymTabEntry&) const;
   virtual bool operator!=(const SymTabEntry& ste) const 
   { return !operator==(ste); };

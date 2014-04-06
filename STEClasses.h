@@ -24,7 +24,7 @@ class GlobalEntry: public SymTabEntry {
   GlobalEntry(string name, int line=0, int column=0, string file=""):
     SymTabEntry(name, SymTabEntry::Kind::GLOBAL_KIND, line, column,file), rules_() {};
   ~GlobalEntry() {};
-
+  void checkType() const;
   const vector<RuleNode*> rules() const { return rules_;};
   vector<RuleNode*> rules() { return rules_;};
   const RuleNode* rule(int i) const { return rules_[i];}
@@ -76,6 +76,8 @@ class VariableEntry: public SymTabEntry {
 
   int offSet() const { return offSet_;} ;
   void offSet(int o) {offSet_ = o;};
+
+  void checkType() const;
 
   const ExprNode* initVal() const { return initVal_;}
   ExprNode* initVal() { return initVal_;};

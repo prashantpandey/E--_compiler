@@ -18,6 +18,26 @@ void GlobalEntry::print(ostream& out, int indent) const
 }
 
 
+void GlobalEntry::checkType() const
+{
+    const SymTab *st = NULL;
+    if ((st = symTab()) != nullptr) {
+	SymTab::const_iterator it = st->begin();
+	for (int i=0; it != (st->end()); i++, ++it)  {
+	    SymTabEntry *ste = (SymTabEntry *)(*it);
+	    ste->checkType();
+	}
+    }   /*if(rules_.size() == 0) {
+	  prtln(out, indent);
+	  } else {
+	  for(vector<RuleNode*>::const_iterator it = rules_.begin(); it != rules_.end(); ++it) {
+	  (*it)->print(out, indent+STEP_INDENT);
+	  endln(out, indent);
+	  }
+	  }*/
+}
+
+
 void EventEntry::print(ostream& out, int indent) const
 {
     out << "event"  << " " << name() ;
@@ -31,6 +51,19 @@ void VariableEntry::print(ostream& out, int indent) const
     if (initVal()) {
 	out << " = ";
 	initVal()->print(out);
+    }	
+}
+
+
+void VariableEntry::checkType() const
+{
+    if (initVal()) {
+	const Type *rhsT = initVal()->typeCheck();
+	if (rhsT->tag() != Type::TypeTag::ERROR) {
+	    if(!Type::isSubType(rhsT, type())) {
+		errMsg("Assignment between incompatible types");
+	    }
+	}
     }	
 }
 

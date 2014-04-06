@@ -106,7 +106,7 @@ class ExprNode: public AstNode {
   void exprNodeType(ExprNodeType t) { exprType_ = t; };
 
   const Value* value() const { return val_; }
-
+  virtual const Type* typeCheck() const = 0; 
   const Type* coercedType() const { return coercedType_; }
   void coercedType(const Type* type) { coercedType_ = type; }
 
@@ -131,7 +131,7 @@ class RefExprNode: public ExprNode {
   string ext() const { return ext_;};
   void ext(string str) { ext_ = str;}; 
 
-  const Type* typeCheck();
+  const Type* typeCheck() const;
   const SymTabEntry* symTabEntry() const { return sym_;};
   void symTabEntry(const SymTabEntry *ste)  { sym_ = ste;};
 
@@ -190,7 +190,7 @@ class OpNode: public ExprNode {
     { return (i < arg_.size())? arg_[i] : NULL; };
   vector<ExprNode*>* args() 
     { return &arg_; }
-  const Type* typeCheck();
+  const Type* typeCheck() const;
   void print(ostream& os, int indent=0) const;  
   
  private: 
@@ -209,7 +209,7 @@ class ValueNode: public ExprNode {
   }
   ValueNode(const ValueNode& val): ExprNode(val) {};
   ExprNode* clone() const { return new ValueNode(*this); }
-  const Type* typeCheck();
+  const Type* typeCheck() const;
   ~ValueNode() {};
 
   void print(ostream& os, int indent=0) const;
@@ -242,7 +242,7 @@ class InvocationNode: public ExprNode {
     { if (params_ != NULL && i < params_->size()) (*params_)[i] = arg;};
 
   void print(ostream& os, int indent=0) const;
-  const Type* typeCheck();
+  const Type* typeCheck() const;
 
  private:
   vector<ExprNode*>* params_;
@@ -461,7 +461,7 @@ class IfNode: public StmtNode{
   const StmtNode* elseStmt() const { return else_;};
   const StmtNode* thenStmt() const  { return then_;};
 
-  const Type* typeCheck();
+  const Type* typeCheck() const;
   ExprNode* cond() {return cond_;}      
   StmtNode* elseStmt() { return else_;};
   StmtNode* thenStmt() { return then_;};

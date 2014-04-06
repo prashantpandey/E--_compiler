@@ -41,7 +41,7 @@ RefExprNode::RefExprNode(const RefExprNode& re) : ExprNode(re)
 }
 
 /* Added by KA */
-const Type* RefExprNode::typeCheck()
+const Type* RefExprNode::typeCheck() const
 {
     const SymTabEntry *ste = symTabEntry();
     if (ste->kind()!= SymTabEntry::Kind::VARIABLE_KIND)
@@ -72,7 +72,7 @@ IfNode::IfNode(ExprNode* cond, StmtNode* thenStmt,
 }
 
 /* Added by KA */
-const Type* IfNode::typeCheck()
+const Type* IfNode::typeCheck() const
 {
     const Type *cond_type = cond()->type();
     if (cond_type != Type::type[0])
@@ -107,7 +107,7 @@ void ValueNode::print(ostream& os, int indent) const
 }
 
 
-const Type* ValueNode::typeCheck() {
+const Type* ValueNode::typeCheck() const {
     return type();
 }
 
@@ -173,7 +173,7 @@ void InvocationNode::print(ostream& os, int indent) const
 
 }
 
-const Type* InvocationNode::typeCheck() {
+const Type* InvocationNode::typeCheck() const {
     const SymTabEntry *ste = symTabEntry();
     if (ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
         errMsg("Error: " + ste->name() + " was not declared in the current scope");
@@ -461,7 +461,7 @@ bool argTypeCheck(const Type::TypeTag argType[], unsigned arity, const Type** ar
     return true;
 }
 
-const Type* OpNode::typeCheck() {
+const Type* OpNode::typeCheck() const {
     //TODO: try to write generic code for n operands
     int iopcode = static_cast<int>(opCode_);
     const Type** argTypes = (const Type**)new Type*[arity_];
@@ -471,7 +471,7 @@ const Type* OpNode::typeCheck() {
             argTypes[i] = type;
             if (type->tag() == Type::TypeTag::ERROR) {
                 errMsg("Argument " + to_string(i+1) + " should be " + type->name());
-                delete *argTypes;
+                delete[] argTypes;
                 return Type::type[0];
             }
         }
@@ -500,7 +500,7 @@ const Type* OpNode::typeCheck() {
     }
 
     if (error) {
-        delete *argTypes;
+        delete[] argTypes;
         return Type::type[0];
     }
 
@@ -527,7 +527,7 @@ const Type* OpNode::typeCheck() {
         else
             returnType = argTypes[1];
     }
-    delete *argTypes;
+    delete[] argTypes;
     return returnType;
 }
 
