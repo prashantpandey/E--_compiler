@@ -82,7 +82,10 @@ SymTab::printST(ostream& os, int indent, char leftdelim, char rightdelim,
 		  (ste->kind() != SymTabEntry::Kind::EVENT_BLOCK_KIND) && 
 		  (ste->name() != "any")) {
 		ste->print(os,indent+STEP_INDENT);
-		if ((leftdelim == '\0') && (rightdelim != '\0'))
+		
+		if ((leftdelim == '\0') && (rightdelim != '\0') && 
+		    (rightdelim != ';' || 
+			ste->kind() != SymTabEntry::Kind::VARIABLE_KIND))
 		  os << rightdelim;
 		if (--n_printed > 0) {
 		  if (linebreak)

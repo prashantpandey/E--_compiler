@@ -5,6 +5,7 @@
 #include "all.h"
 #include "Ast.h"
 #include <stdio.h>
+#include <string.h>
 #include "SymTabMgr.h"
 #include "STEClasses.h"
 #include "SymTab.h"
@@ -105,9 +106,9 @@ parseOptions(int argc, char* argv[]) {
 	}
 	else {
 	  inputFile = argv[1];
-	  if(argc > 2){
-	  cout << argc << endl;
-	    Value::printType = atoi(argv[2]);}
+
+	  if(argc > 2 && strcasecmp(argv[2],"prtType") == 0)
+	    Value::printType = 1 ;
 	  return 0;
 	}
   }
