@@ -455,7 +455,7 @@ bool argTypeCheck(const Type::TypeTag argType[], unsigned arity, const Type** ar
     for (unsigned i=0; i < arity; i++) {
         const Type *type = argTypes[i];
         if (!(checkType(argType[i], type))) {
-	    errMsg("Argument " + to_string(i+1) + " should be " + type->name(), opNode);
+	    errMsg("Argument " + to_string(i+1) + " should be " + Type::name(argType[i]), opNode);
             return false;
         }
     }
@@ -486,13 +486,17 @@ const Type* OpNode::typeCheck() const {
     case 'S':
         if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this))
             error = true;
+	if(argTypes[1]->tag() == argTypes[0]->tag())
+	    break;
         if (Type::isSubType(argTypes[1], argTypes[0]))
             arg_[1]->coercedType(argTypes[0]);
-        else
+        else if(Type::isSubType(argTypes[0], argTypes[1]))
             arg_[0]->coercedType(argTypes[1]);
+	else
+	    errMsg("Incompatiable operands.", this);
         break;
     case 'A':
-        if (!Type::isSubType(argTypes[1], argTypes[0])) {
+        if (argTypes[1]->tag() != argTypes[0]->tag() && !Type::isSubType(argTypes[1], argTypes[0])) {
             errMsg("First operand should be supertype of second operand.", this);
             error = true;
         }
