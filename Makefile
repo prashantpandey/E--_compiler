@@ -6,10 +6,10 @@ FLEX = flex
 BISON = bison
 
 assembler:	driver.o ICode_lexer.o ICode_parser.o ICode.tab.h 
-	$(CC) -o demo ICode_lexer.o ICode_parser.o driver.o -lfl
+	$(CC) -o $@ ICode_lexer.o ICode_parser.o driver.o -lfl
 
 parser:   driveParse.o E--_lexer.o E--_parser.o Ast.o STEClasses.o SymTabMgr.o Value.o Type.o SymTabEntry.o Error.o ParserUtil.o SymTab.o
-	$(CXX) -o $@ $^ -lfl
+	$(CXX) -o demo  $^ -lfl
 
 E--_lexer.o:    E--_lexer.C E--.tab.h
 E--_parser.o:	E--_parser.C E--.tab.h
