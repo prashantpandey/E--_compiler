@@ -46,7 +46,7 @@ const Type* RefExprNode::typeCheck() const
     const SymTabEntry *ste = symTabEntry();
     if (ste->kind()!= SymTabEntry::Kind::VARIABLE_KIND)
     {
-        errMsg(ext() + " Not of variable kind");
+        errMsg(ext() + " Not of variable kind", this);
         return Type::type[0];
     }
     return ste->type();
@@ -176,7 +176,7 @@ void InvocationNode::print(ostream& os, int indent) const
 const Type* InvocationNode::typeCheck() const {
     const SymTabEntry *ste = symTabEntry();
     if (ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
-        errMsg("Error: " + ste->name() + " was not declared in the current scope");
+        errMsg("Error: " + ste->name() + " was not declared in the current scope", this);
     }
     else {
         const vector<ExprNode*>* callParams = params();
@@ -190,19 +190,19 @@ const Type* InvocationNode::typeCheck() const {
                 VariableEntry *ve = (VariableEntry*) (*it);
                 if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
                     if (ve->type()->tag() != (*ic)->type()->tag()) {
-                        errMsg("Error: Type mismatch for argument " + to_string(i) + " of " + ste->name());
+                        errMsg("Error: Type mismatch for argument " + to_string(i) + " of " + ste->name(), this);
                         return &Type::errorType;
                     }
                     i++;
                 }
             }
             if (i != callParamsSize) {
-                errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments");
+                errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments", this);
                 return &Type::errorType;
             }
         }
         else if (callParamsSize > 0) {
-            errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments");
+            errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments", this);
             return &Type::errorType;
         }
         else {
@@ -450,11 +450,12 @@ bool checkType(const Type::TypeTag typeTag, const Type *type) {
     return false;
 }
 
-bool argTypeCheck(const Type::TypeTag argType[], unsigned arity, const Type** argTypes) {
+bool argTypeCheck(const Type::TypeTag argType[], unsigned arity, const Type** argTypes, const OpNode* opNode) {
 
     for (unsigned i=0; i < arity; i++) {
         const Type *type = argTypes[i];
         if (!(checkType(argType[i], type))) {
+	    errMsg("Argument " + to_string(i+1) + " should be " + type->name(), opNode);
             return false;
         }
     }
@@ -470,7 +471,6 @@ const Type* OpNode::typeCheck() const {
             const Type *type = arg_[i]->typeCheck();
             argTypes[i] = type;
             if (type->tag() == Type::TypeTag::ERROR) {
-                errMsg("Argument " + to_string(i+1) + " should be " + type->name());
                 delete[] argTypes;
                 return Type::type[0];
             }
@@ -480,11 +480,11 @@ const Type* OpNode::typeCheck() const {
     switch (opInfo[iopcode].typeConstraints_[0])
     {
     case 'N':
-        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes))
+        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this))
             error = true;
         break;
     case 'S':
-        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes))
+        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this))
             error = true;
         if (Type::isSubType(argTypes[1], argTypes[0]))
             arg_[1]->coercedType(argTypes[0]);
@@ -493,7 +493,7 @@ const Type* OpNode::typeCheck() const {
         break;
     case 'A':
         if (!Type::isSubType(argTypes[1], argTypes[0])) {
-            errMsg("First operand should be supertype of second operand.");
+            errMsg("First operand should be supertype of second operand.", this);
             error = true;
         }
         break;

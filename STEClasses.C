@@ -61,7 +61,7 @@ void VariableEntry::checkType() const
 	const Type *rhsT = initVal()->typeCheck();
 	if (rhsT->tag() != Type::TypeTag::ERROR) {
 	    if(!Type::isSubType(rhsT, type())) {
-		errMsg("Assignment between incompatible types");
+		errMsg("Assignment between incompatible types", this);
 	    }
 	}
     }	
