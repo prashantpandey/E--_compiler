@@ -208,6 +208,7 @@ class ValueNode: public ExprNode {
   }
   ValueNode(const ValueNode& val): ExprNode(val) {};
   ExprNode* clone() const { return new ValueNode(*this); }
+  const Type* typeCheck();
   ~ValueNode() {};
 
   void print(ostream& os, int indent=0) const;
