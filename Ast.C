@@ -33,10 +33,37 @@ ExprNode::ExprNode(const ExprNode& e) : AstNode(e)
     coercedType_ = e.coercedType();
 }
 
+
+/* Added By KA */
+const Type* ExprNode::typeCheck()
+{
+    
+    Type *val_type = value()->type();
+    Type coerced_type = coercedType();
+
+    return NULL;
+};
+
+
 RefExprNode::RefExprNode(const RefExprNode& re) : ExprNode(re)
 {
     ext_ = re.ext();
     sym_ = re.symTabEntry();
+}
+
+/* Added by KA */
+const Type* RefExprNode::typeCheck()
+{
+    SymTabEntry *ste = symTabEntry();
+    if(ste->kindTag() == SymTabEntry::Kind::VARIABLE_KIND)
+    {
+	    return ste->type();
+    }
+    else
+    {
+	    errMsg("Not of variable kind");
+	    return errorType(ERROR);
+    }
 }
 
 RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, int line,
@@ -101,6 +128,25 @@ void IfNode::print(ostream& os, int indent) const
 	 if (!elseStmt() || elseStmt()->stmtNodeKind() != StmtNode::StmtNodeKind::COMPOUND)
 	    endln(os, indent);
     }
+
+}
+
+
+const Type* ExprNode::typeCheck()
+{
+    
+    Type *val_type = value()->type();
+    Type coerced_type = coercedType();
+    isSubType
+
+    return NULL;
+};
+
+
+const Type* RefExprNode::typeCheck()
+{
+
+
 }
 
 void RefExprNode::print(ostream& os, int indent) const
