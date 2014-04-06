@@ -108,7 +108,7 @@ void ValueNode::print(ostream& os, int indent) const
     value()->print(os, indent);
 }
 
-Type* ValueNode::typeCheck() {
+const Type* ValueNode::typeCheck() {
     return type();
 }
 
