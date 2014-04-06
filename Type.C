@@ -29,6 +29,14 @@ const string Type::name(TypeTag t) {
   else return string();
 }
 
+Type
+  Type::errorT(ERROR), Type::unkT(UNKNOWN), Type::voidT(VOID),
+  Type::boolT(BOOL),
+  Type::stringT(STRING),
+  Type::byteT(BYTE), 
+  Type::uintT(UINT), Type::intT(INT), 
+  Type::doubleT(DOUBLE);
+
 const Type
   Type::errorType(ERROR), Type::unkType(UNKNOWN), Type::voidType(VOID),
   Type::boolType(BOOL),
@@ -147,4 +155,15 @@ Type::operator=(const Type& t) {
 void 
 Type::print(ostream& os, int indent) const {
   os << fullName();
+}
+
+bool Type::isSubType(const Type *type1, const Type *type2) {
+    const Type::TypeTag curTag = type1->tag();
+    if(isNumeric(curTag)) {
+	if(curTag < type2->tag()) {
+	    return true;
+	}
+	return false;
+    }
+    return false;
 }

@@ -85,7 +85,7 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 %type <cVal> TOK_IDENT TOK_PRINT
 %type <variableEntry> formal_param var_assign
 %type <typeVal> type base_type type_star 
-%type <varEntryList> var_list
+%type <varEntryList> var_list evn_param_list evn_param_list_star
 %type <classEntry> class_dec
 %type <functionEntry> func_decl_hdr
 %type <valVal> literal
@@ -101,7 +101,6 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 %type <primPatVal> normal_event primitive_pat primitive_pat_star any_event
 %type <patVal> evn_pat_star evn_pat rule_hdr
 %type <ruleNode> rule
-%type <strVector> evn_param_list evn_param_list_star
 /* Uncomment types below as you start adding rules.
    They are commented right now to prevent compile errors.
 %type <typeList> formal_param_list formal_param_plus 
@@ -278,9 +277,9 @@ statement 		: empty_stmt {$$ = NULL;}
 ;
 
 if_then_else_stmt	: if_then_stmt TOK_ELSE statement_star { 
-								    IfNode *ifn = (IfNode *) $1;
-								    $$ = new IfNode(ifn->cond(), ifn->thenStmt(), $3); 
-							       }
+			    IfNode *ifn = (IfNode *) $1;
+			    $$ = new IfNode(ifn->cond(), ifn->thenStmt(), $3); 
+			}
 ;
 
 if_then_stmt		: TOK_IF expr_star statement_star { $$ = new IfNode($2, $3); }
@@ -291,17 +290,23 @@ ret_stmt		: TOK_RETURN expr_star { $$ = new ReturnStmtNode($2, (FunctionEntry *)
 empty_stmt		: /*empty statement*/ TOK_SEMICOLON
 ;
 
-func_invoc_stmt		: func_invoc TOK_SEMICOLON { if ($1 == NULL ) $$ = NULL; else $$ = new ExprStmtNode($1); }
+func_invoc_stmt		: func_invoc TOK_SEMICOLON { 
+			    if ($1 == NULL ) 
+				$$ = NULL; 
+			    else 
+				$$ = new ExprStmtNode($1);
+			}
 ;
 
 func_invoc		: TOK_IDENT TOK_LPAREN expr_list_plus TOK_RPAREN { 
-									    SymTabEntry *ste = stm.lookUp($1);
-									    if(ste == NULL || ste->kind() != SymTabEntry::Kind::FUNCTION_KIND)										  {
-										$$ = NULL;
-									    } else {
-										$$ = new InvocationNode(ste, $3);
-									    }
-									 }
+			    SymTabEntry *ste = stm.lookUp($1);
+			    if(ste == NULL || ste->kind() != SymTabEntry::Kind::FUNCTION_KIND)										  {
+				const FunctionEntry *newSymTab = new FunctionEntry($1, &Type::unkT);
+				$$ = new InvocationNode(newSymTab, $3);
+			    } else {
+				$$ = new InvocationNode(ste, $3);
+			    }
+			 }
 ;
 
 expr_list_plus		: expr_list {$$ = $1;}
@@ -326,14 +331,14 @@ var_dec			: type_star var_list TOK_SEMICOLON {
 ;
 
 var_list		: TOK_IDENT { 
-					$$ = new vector<VariableEntry*>();
-					$$->push_back(new VariableEntry($1,VariableEntry::VarKind::LOCAL_VAR));
-				    }
+			    $$ = new vector<VariableEntry*>();
+			    $$->push_back(new VariableEntry($1,VariableEntry::VarKind::LOCAL_VAR));
+			}
 			| var_assign {
-					$$ = new vector<VariableEntry*>();
-					if($1 != NULL)
-					    $$->push_back($1);
-				    }
+			    $$ = new vector<VariableEntry*>();
+			    if($1 != NULL)
+			        $$->push_back($1);
+			}
 			| var_list TOK_COMMA TOK_IDENT { $$->push_back(new VariableEntry($3,VariableEntry::VarKind::LOCAL_VAR)); }
 			| var_list TOK_COMMA var_assign {
 			    if($1 != NULL)			    
@@ -433,9 +438,9 @@ evn_pat 		: primitive_pat_star { if ($1->event() == NULL)
 
 primitive_pat_star	: primitive_pat { $$ = $1; }
 			| primitive_pat TOK_BITOR expr_star { 
-								$$ = $1;
-								$$->cond($3);
-							    }
+			    $$ = $1;
+			    $$->cond($3);
+			}
 ;
 
 primitive_pat 		: normal_event { $$ = $1; }
@@ -443,25 +448,25 @@ primitive_pat 		: normal_event { $$ = $1; }
 ;
 
 normal_event		: TOK_IDENT TOK_LPAREN evn_param_list_star TOK_RPAREN { 
-										    SymTabEntry *ste = stm.lookUp($1); 
-										    EventEntry *ee = NULL;
-										    vector<VariableEntry*> *varList = new vector<VariableEntry*>();
-										    if (ste != NULL && ste->kind() == SymTabEntry::Kind::EVENT_KIND) {
-											ee = (EventEntry *) ste;
-											const SymTab *st = ee->symTab();
-
-											if($3 != NULL && st != NULL) {
-											    vector<string>::const_iterator si = $3->begin();
-											    SymTab::const_iterator sti = st->begin();
-											    for(;sti != st->end() && si != $3->end(); ++sti, ++si) {
-												    VariableEntry *ve = (VariableEntry *) (*sti);
-												    varList->push_back(new VariableEntry(*si, ve->varKind(), ve->type()));
-											    }
-											}
-
-										    }
-										    $$ = new PrimitivePatNode(ee, varList);
-										}
+			    SymTabEntry *ste = stm.lookUp($1); 
+			    EventEntry *ee = NULL;
+			    // vector<VariableEntry*> *varList = new vector<VariableEntry*>();
+			    if (ste != NULL && ste->kind() == SymTabEntry::Kind::EVENT_KIND) {
+				ee = (EventEntry *) ste;
+			    }
+			    /*
+				const SymTab *st = ee->symTab();
+				if($3 != NULL && st != NULL) {
+				    vector<string>::const_iterator si = $3->begin();
+				    SymTab::const_iterator sti = st->begin();
+				    for(;sti != st->end() && si != $3->end(); ++sti, ++si) {
+					    VariableEntry *ve = (VariableEntry *) (*sti);
+					    varList->push_back(new VariableEntry(*si, ve->varKind(), ve->type()));
+				    }
+				}
+			    */
+			    $$ = new PrimitivePatNode(ee, $3);
+			}
 ;
 
 
@@ -469,14 +474,24 @@ any_event		: TOK_ANY { $$ = new PrimitivePatNode(new EventEntry("any"),NULL); }
 ;
 
 evn_param_list_star 	: evn_param_list { $$ = $1; }
-			| /*empty*/ { $$ = new vector<string>(); }
+			| /*empty*/ { $$ = new vector<VariableEntry*>(); }
 ;
 
 evn_param_list		: TOK_IDENT { 
-					$$ = new vector<string>();
-					$$->push_back($1);
-				      }      	
-			| evn_param_list TOK_COMMA TOK_IDENT { $$->push_back($3); }
+			    $$ = new vector<VariableEntry*>();
+			    SymTabEntry *ste = stm.lookUp($1);
+			    if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND) {
+				VariableEntry *ve = (VariableEntry*) ste;
+				$$->push_back(ve);
+			    }
+			}      	
+			| evn_param_list TOK_COMMA TOK_IDENT {
+			    SymTabEntry *ste = stm.lookUp($3);
+			    if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND) {
+				VariableEntry *ve = (VariableEntry*) ste;
+				$$->push_back(ve);
+			    }
+			}
 ;
 
 
@@ -487,21 +502,21 @@ type_star 		: type {$$ = $1;}
 
 
 type			: base_type { $$ = $1;}
-			| TOK_UNSIGNED TOK_INT { $$ = new Type(Type::TypeTag::UINT);  }
+			| TOK_UNSIGNED TOK_INT { $$ = &Type::uintT;  }
 			| TOK_IDENT { 
-					SymTabEntry *entry = stm.lookUp($1);
-					if(entry == 0) {
-						$$ = new Type(Type::TypeTag::UNKNOWN); 
-					} else {
-						$$ = new Type(entry, Type::TypeTag::CLASS);
-					}
-				     }
+			    SymTabEntry *entry = stm.lookUp($1);
+			    if(entry == 0) {
+				$$ = &Type::unkT; 
+			    } else {
+				$$ = new Type(entry, Type::TypeTag::CLASS);
+			    }
+			}
 
-base_type		: TOK_VOID { $$ = new Type(Type::TypeTag::VOID); }
-			| TOK_STRING { $$ = new Type(Type::TypeTag::STRING); }
-			| TOK_INT { $$ = new Type(Type::TypeTag::INT); }
-			| TOK_BOOL { $$ = new Type(Type::TypeTag::BOOL); }
-			| TOK_BYTE { $$ = new Type(Type::TypeTag::BYTE); }
-			| TOK_DOUBLE { $$ = new Type(Type::TypeTag::DOUBLE); }
+base_type		: TOK_VOID { $$ = &Type::voidT; }
+			| TOK_STRING { $$ = &Type::stringT; }
+			| TOK_INT { $$ = &Type::intT; }
+			| TOK_BOOL { $$ = &Type::boolT; }
+			| TOK_BYTE { $$ = &Type::byteT; }
+			| TOK_DOUBLE { $$ = &Type::doubleT; }
 ;
 %%

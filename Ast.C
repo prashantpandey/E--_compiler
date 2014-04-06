@@ -173,6 +173,45 @@ void InvocationNode::print(ostream& os, int indent) const
 
 }
 
+const Type* InvocationNode::typeCheck() {
+    const SymTabEntry *ste = symTabEntry();
+    if(ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
+	errMsg("Error: " + ste->name() + " was not declared in the current scope");
+    }	
+    else {	
+	const vector<ExprNode*>* callParams = params();
+	int callParamsSize = callParams->size();
+	const SymTab *st = ste->symTab();
+	if(st != NULL) {
+	    int i = 0;
+	    vector<ExprNode*>::const_iterator ic = callParams->begin();
+	    SymTab::const_iterator it = st->begin();
+	    for (i=1; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
+		VariableEntry *ve = (VariableEntry*) (*it);
+		if(ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
+		    if(ve->type()->tag() != (*ic)->type()->tag()) {
+			errMsg("Error: Type mismatch for argument " + to_string(i) + " of " + ste->name());
+			return &Type::errorType;
+		    }
+		    i++;
+		}
+	    }
+	    if(i != callParamsSize) {
+		errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments");
+		return &Type::errorType;
+	    }
+	}
+	else if(callParamsSize > 0) {
+		errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments");
+		return &Type::errorType;
+	}
+	else {
+	    return ((FunctionEntry*)ste)->type();
+	}
+    }
+    return &Type::errorType;
+}
+
 void RuleNode::print(ostream& os, int indent) const
 {
     prtSpace(os, indent);

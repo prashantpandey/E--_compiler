@@ -242,6 +242,7 @@ class InvocationNode: public ExprNode {
     { if (params_ != NULL && i < params_->size()) (*params_)[i] = arg;};
 
   void print(ostream& os, int indent=0) const;
+  const Type* typeCheck();
 
  private:
   vector<ExprNode*>* params_;

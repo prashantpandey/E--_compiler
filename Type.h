@@ -45,6 +45,13 @@ class Type {
     uintType, intType, 
     doubleType;
   
+  static Type errorT, voidT, unkT;
+  static Type boolT;
+  static Type stringT; 
+  static Type byteT, 
+    uintT, intT, 
+    doubleT;
+  
   static const Type* type[];
   static bool isString(TypeTag t) { return (t==STRING);}
   static bool isNumeric(TypeTag t) { return ((t >= BYTE) && (t <= DOUBLE));}
@@ -132,6 +139,7 @@ class Type {
     else errMsg("Type::retType(Type *) called when type = " + name());
   };
 
+  static bool isSubType(const Type *type1, const Type *type2);
   void print(ostream &os, int indent=0) const;
 };
 
