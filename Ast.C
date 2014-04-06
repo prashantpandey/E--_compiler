@@ -44,7 +44,7 @@ RefExprNode::RefExprNode(const RefExprNode& re) : ExprNode(re)
 const Type* RefExprNode::typeCheck()
 {
     const SymTabEntry *ste = symTabEntry();
-    if(ste->kind()!= SymTabEntry::Kind::VARIABLE_KIND)
+    if (ste->kind()!= SymTabEntry::Kind::VARIABLE_KIND)
     {
         errMsg(ext() + " Not of variable kind");
         return Type::type[0];
@@ -75,7 +75,7 @@ IfNode::IfNode(ExprNode* cond, StmtNode* thenStmt,
 const Type* IfNode::typeCheck()
 {
     const Type *cond_type = cond()->type();
-    if(cond_type != Type::type[0])
+    if (cond_type != Type::type[0])
     {
         return cond_type;
     }
@@ -153,16 +153,16 @@ InvocationNode::InvocationNode(const InvocationNode &ie):ExprNode(ie)
 void InvocationNode::print(ostream& os, int indent) const
 {
     const SymTabEntry *ste = symTabEntry();
-    if(ste == nullptr) {
+    if (ste == nullptr) {
         os << "Function not defined";
     }
     else {
         FunctionEntry *fe = (FunctionEntry *) ste;
         os << fe -> name() << "(";
-        if(params() != nullptr) {
+        if (params() != nullptr) {
             bool prtComma = false;
             for (std::vector<ExprNode*>::const_iterator it = params()->begin(); it != params()->end(); ++it) {
-                if(prtComma)
+                if (prtComma)
                     os << ", ";
                 (*it)->print(os, indent);
                 prtComma = true;
@@ -175,33 +175,33 @@ void InvocationNode::print(ostream& os, int indent) const
 
 const Type* InvocationNode::typeCheck() {
     const SymTabEntry *ste = symTabEntry();
-    if(ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
+    if (ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
         errMsg("Error: " + ste->name() + " was not declared in the current scope");
     }
     else {
         const vector<ExprNode*>* callParams = params();
         int callParamsSize = callParams->size();
         const SymTab *st = ste->symTab();
-        if(st != NULL) {
+        if (st != NULL) {
             int i = 0;
             vector<ExprNode*>::const_iterator ic = callParams->begin();
             SymTab::const_iterator it = st->begin();
             for (i=1; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
                 VariableEntry *ve = (VariableEntry*) (*it);
-                if(ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
-                    if(ve->type()->tag() != (*ic)->type()->tag()) {
+                if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
+                    if (ve->type()->tag() != (*ic)->type()->tag()) {
                         errMsg("Error: Type mismatch for argument " + to_string(i) + " of " + ste->name());
                         return &Type::errorType;
                     }
                     i++;
                 }
             }
-            if(i != callParamsSize) {
+            if (i != callParamsSize) {
                 errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments");
                 return &Type::errorType;
             }
         }
-        else if(callParamsSize > 0) {
+        else if (callParamsSize > 0) {
             errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments");
             return &Type::errorType;
         }
@@ -217,7 +217,7 @@ void RuleNode::print(ostream& os, int indent) const
     prtSpace(os, indent);
     pat_->print(os,indent);
     os << "-->  ";
-    if(reaction_)
+    if (reaction_)
         reaction_->print(os, indent);
     os << ";";
 }
@@ -225,12 +225,12 @@ void RuleNode::print(ostream& os, int indent) const
 void PrimitivePatNode::print(ostream& os, int indent) const
 {
     os << ee_->name();
-    if(ee_->name().compare("any")) {
+    if (ee_->name().compare("any")) {
         os << "(";
         bool printComma = false;
         for (vector<VariableEntry*>::const_iterator it = params_->begin();
                 it != params_->end(); ++it) {
-            if(printComma)
+            if (printComma)
                 os << ", ";
             (*it)->print(os, indent);
             printComma = true;
@@ -454,7 +454,7 @@ bool argTypeCheck(const Type::TypeTag argType[], unsigned arity, const Type** ar
 
     for (unsigned i=0; i < arity; i++) {
         const Type *type = argTypes[i];
-        if(!(checkType(argType[i], type))) {
+        if (!(checkType(argType[i], type))) {
             return false;
         }
     }
@@ -469,7 +469,7 @@ const Type* OpNode::typeCheck() {
         if (arg_[i]) {
             const Type *type = arg_[i]->typeCheck();
             argTypes[i] = type;
-            if(type->tag() == Type::TypeTag::ERROR) {
+            if (type->tag() == Type::TypeTag::ERROR) {
                 errMsg("Argument " + to_string(i+1) + " should be " + type->name());
                 delete *argTypes;
                 return Type::type[0];
@@ -480,19 +480,19 @@ const Type* OpNode::typeCheck() {
     switch (opInfo[iopcode].typeConstraints_[0])
     {
     case 'N':
-        if(!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes))
+        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes))
             error = true;
         break;
     case 'S':
-        if(!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes))
+        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes))
             error = true;
-        if(Type::isSubType(argTypes[1], argTypes[0]))
+        if (Type::isSubType(argTypes[1], argTypes[0]))
             arg_[1]->coercedType(argTypes[0]);
         else
             arg_[0]->coercedType(argTypes[1]);
         break;
     case 'A':
-        if(!Type::isSubType(argTypes[1], argTypes[0])) {
+        if (!Type::isSubType(argTypes[1], argTypes[0])) {
             errMsg("First operand should be supertype of second operand.");
             error = true;
         }
@@ -517,12 +517,12 @@ const Type* OpNode::typeCheck() {
         returnType = Type::type[opInfo[iopcode].outType_];
         break;
     case 's':
-        if(Type::isSubType(argTypes[1], argTypes[0]))
+        if (Type::isSubType(argTypes[1], argTypes[0]))
             returnType = argTypes[1];
         else
             returnType = argTypes[0];
     case 'S':
-        if(Type::isSubType(argTypes[1], argTypes[0]))
+        if (Type::isSubType(argTypes[1], argTypes[0]))
             returnType = argTypes[0];
         else
             returnType = argTypes[1];
@@ -583,11 +583,11 @@ OpNode::print(ostream& os, int indent) const {
     else if ((opInfo[iopcode].prtType_ == OpNode::OpPrintType::INFIX) && (arity_ == 2)) {
         if (opInfo[iopcode].needParen_)
             os << "(";
-        if(arg_[0])
+        if (arg_[0])
             arg_[0]->print(os, indent);
         else os << "NULL";
         os << opInfo[iopcode].name_;
-        if(arg_[1])
+        if (arg_[1])
             arg_[1]->print(os, indent);
         else os << "NULL";
         if (opInfo[iopcode].needParen_)
