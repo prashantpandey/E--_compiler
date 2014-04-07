@@ -75,11 +75,15 @@ IfNode::IfNode(ExprNode* cond, StmtNode* thenStmt,
 const Type* IfNode::typeCheck() const
 {
     const Type *cond_type = cond()->type();
-    if (cond_type != Type::type[0])
+    if (cond_type->tag() == Type::TypeTag::BOOL)
     {
-        return cond_type;
+	return &Type::unkType;
     }
-    return &Type::unkType;
+    else if (cond_type->tag() != Type::TypeTag::ERROR) {
+	errMsg("Error: return type of expression is not bool", this);
+	return &Type::errorType;
+    }
+    return &Type::errorType;
 }
 
 PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* params,
@@ -174,8 +178,13 @@ void InvocationNode::print(ostream& os, int indent) const
 
 const Type* InvocationNode::typeCheck() const {
     const SymTabEntry *ste = symTabEntry();
-    if (ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
+    if(ste != nullptr && ste->kind() == SymTabEntry::Kind::UNKNOWN_KIND) {	
+        errMsg("Error: undefined reference to " + ste->name(), this);
+        return &Type::errorType;
+    }
+    else if (ste != nullptr && ste->kind() != SymTabEntry::Kind::UNKNOWN_KIND && ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
         errMsg("Error: " + ste->name() + " was not declared in the current scope", this);
+        return &Type::errorType;
     }
     else {
         const vector<ExprNode*>* callParams = params();

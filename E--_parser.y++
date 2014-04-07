@@ -170,28 +170,27 @@ rule_star		: rule
 ;
 
 rule 			: rule_hdr statement_star  {
-							$$ = new RuleNode((RuleBlockEntry *)(stm.currentScope()),$1,$2, yylinenum);
-							stm.leaveScope();
-							GlobalEntry *ge = (GlobalEntry *)(stm.currentScope());
-							ge->addRule($$);
-						    }
-								    
+				$$ = new RuleNode((RuleBlockEntry *)(stm.currentScope()),$1,$2, yylinenum);
+				stm.leaveScope();
+				GlobalEntry *ge = (GlobalEntry *)(stm.currentScope());
+				ge->addRule($$);
+		        }						    
 ;
 
 rule_hdr		: evn_pat_star TOK_ARROW {
-						    RuleBlockEntry *rbe = new RuleBlockEntry(yylinenum);
-						    enterScopeErrCheck(rbe);
-						    $$ = $1;
-						}
+			    RuleBlockEntry *rbe = new RuleBlockEntry(yylinenum);
+			    enterScopeErrCheck(rbe);
+			    $$ = $1;
+			}
 
 event_dec_star		: event_decl_hdr event_decl_params {}
 ;
 
 event_decl_hdr 		: TOK_EVENT TOK_IDENT {
-						    $$ = new EventEntry($2, yylinenum);
-						    insertSymbolErrCheck($$);
-				 		    enterScopeErrCheck($$);
-					      }
+			    $$ = new EventEntry($2, yylinenum);
+			    insertSymbolErrCheck($$);
+			    enterScopeErrCheck($$);
+			}
 			| TOK_EVENT error { // If event name not found, then don't make an entry in Symtab
 			    yyerror("Syntax error in event declaration: Expected an event name");
 			    // TODO: We can implement passing an event with NULL name and later if an event is called
@@ -201,8 +200,6 @@ event_decl_hdr 		: TOK_EVENT TOK_IDENT {
 event_decl_params	: TOK_LPAREN formal_param_list_star TOK_RPAREN TOK_SEMICOLON {
 			    stm.leaveScope();
 			}
-
-
 ;
     
 class_dec		: TOK_CLASS TOK_IDENT TOK_SEMICOLON { 
@@ -311,11 +308,17 @@ func_invoc_stmt		: func_invoc TOK_SEMICOLON {
 
 func_invoc		: TOK_IDENT TOK_LPAREN expr_list_plus TOK_RPAREN { 
 			    SymTabEntry *ste = stm.lookUp($1);
-			    if(ste == NULL || ste->kind() != SymTabEntry::Kind::FUNCTION_KIND)										  {
-				const FunctionEntry *newSymTab = new FunctionEntry($1, &Type::unkT, yylinenum);
-				$$ = new InvocationNode(newSymTab, $3, yylinenum);
-			    } else {
-				$$ = new InvocationNode(ste, $3, yylinenum);
+			    if(ste == NULL) {
+				SymTabEntry *newSt = new UnknownKindEntry($1);
+				$$ = new InvocationNode(newSt, $3, yylinenum); 
+			    }
+			    else if (ste != NULL && ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
+				SymTabEntry *newSt = new UnknownKindEntry($1, ste->kind());
+				$$ = new InvocationNode(newSt, $3, yylinenum); 
+			    }
+			    else if (ste != NULL && ste->kind() == SymTabEntry::Kind::FUNCTION_KIND) {
+				FunctionEntry *funEnt = (FunctionEntry*) ste;
+				$$ = new InvocationNode(funEnt, $3, yylinenum);
 			    }
 			 }
 ;
@@ -428,9 +431,9 @@ formal_param_list 	: formal_param
 ;
 
 formal_param		: type_star TOK_IDENT { 
-						$$ = new VariableEntry($2,VariableEntry::VarKind::PARAM_VAR,$1, NULL, yylinenum);
-						insertSymbolErrCheck($$);
-					      }
+			    $$ = new VariableEntry($2,VariableEntry::VarKind::PARAM_VAR,$1, NULL, yylinenum);
+			    insertSymbolErrCheck($$);
+			}
 			| type_star error { 
 			    yyerror("Syntax error in formal parameter declaration");
 			    $$ = new VariableEntry(NULL,VariableEntry::VarKind::PARAM_VAR,$1, NULL, yylinenum);
@@ -470,7 +473,10 @@ normal_event		: TOK_IDENT TOK_LPAREN evn_param_list_star TOK_RPAREN {
 			    SymTabEntry *ste = stm.lookUp($1); 
 			    EventEntry *ee = NULL;
 			    // vector<VariableEntry*> *varList = new vector<VariableEntry*>();
-			    if (ste != NULL && ste->kind() == SymTabEntry::Kind::EVENT_KIND) {
+			    if(ste == NULL || (ste != NULL && ste->kind() != SymTabEntry::Kind::EVENT_KIND)) {
+				ee = new EventEntry($1, SymTabEntry::Kind::UNKNOWN_KIND);
+			    }
+			    else if (ste != NULL && ste->kind() == SymTabEntry::Kind::EVENT_KIND) {
 				ee = (EventEntry *) ste;
 			    }
 			    /*
@@ -517,12 +523,8 @@ evn_param_list		: TOK_IDENT {
 			}
 ;
 
-
-
 type_star 		: type {$$ = $1;}
 ;
-
-
 
 type			: base_type { $$ = $1;}
 			| TOK_UNSIGNED TOK_INT { $$ = &Type::uintT;  }

@@ -123,6 +123,10 @@ class EventEntry: public SymTabEntry {
  public:
   EventEntry(string name, int line=0, int column=0, string file=""):
     SymTabEntry(name, SymTabEntry::Kind::EVENT_KIND, line,column, file) {};
+  
+  EventEntry(string name, Kind kind, int line=0, int column=0, string file=""):
+    SymTabEntry(name, kind, line,column, file) {};
+  
   ~EventEntry() {};
 
   void print(ostream& out, int indent=0) const; 
@@ -132,6 +136,10 @@ class UnknownKindEntry: public SymTabEntry {
  public:
   UnknownKindEntry(string name, int line=0, int column=0, string file=""):
     SymTabEntry(name, SymTabEntry::Kind::UNKNOWN_KIND, line,column, file) {};
+
+  UnknownKindEntry(string name, Kind kind, int line=0, int column=0, string file=""):
+    SymTabEntry(name, kind, line,column, file) {};
+  
   ~UnknownKindEntry() {};
 
   void print(ostream& out, int indent=0) const; 

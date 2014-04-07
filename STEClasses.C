@@ -72,6 +72,11 @@ void ClassEntry::print(ostream& out, int indent) const
     out << "class" << " " << name();
 }
 
+void UnknownKindEntry::print(ostream& out, int indent) const
+{
+    // Nothing required to be printed.
+}
+
 void BlockEntry::print(ostream& out, int indent) const
 {
     out << " {";
