@@ -199,32 +199,33 @@ event_decl_hdr 		: TOK_EVENT TOK_IDENT {
 			}
 		
 event_decl_params	: TOK_LPAREN formal_param_list_star TOK_RPAREN TOK_SEMICOLON {
-											 stm.leaveScope();
-										     }
+			    stm.leaveScope();
+			}
 
 
 ;
     
 class_dec		: TOK_CLASS TOK_IDENT TOK_SEMICOLON { 
-								$$ = new ClassEntry($2, yylinenum); 
-								insertSymbolErrCheck($$);
-							     }
+			    $$ = new ClassEntry($2, yylinenum); 
+			    insertSymbolErrCheck($$);
+			}
 			| TOK_CLASS error { // If class name not found, then don't make an entry in Symtab
 			    yyerror("Syntax error in class declaration: expecting a class name"); 
 			}
 ;
 
-func_decl_star		: func_decl TOK_SEMICOLON { stm.leaveScope(); } | func_decl func_body{ stm.leaveScope(); }
+func_decl_star		: func_decl TOK_SEMICOLON { stm.leaveScope(); } 
+			| func_decl func_body{ stm.leaveScope(); }
 ;
 
 func_decl 		: func_decl_hdr func_decl_params
 ;
 
 func_decl_hdr		: type_star TOK_IDENT { 
-						$$ = new FunctionEntry($2, $1, yylinenum);
-						insertSymbolErrCheck($$);
-						enterScopeErrCheck($$);
-					      }
+			    $$ = new FunctionEntry($2, $1, yylinenum);
+			    insertSymbolErrCheck($$);
+			    enterScopeErrCheck($$);
+			}
 ;
 func_decl_params	: TOK_LPAREN formal_param_list_star TOK_RPAREN
 ;
@@ -232,8 +233,12 @@ func_decl_params	: TOK_LPAREN formal_param_list_star TOK_RPAREN
 func_body		: TOK_LBRACE func_body_inner TOK_RBRACE { }
 ;
 
-func_body_inner		: stmt_list { ((FunctionEntry *)(stm.currentScope()))->body(new CompoundStmtNode($1, yylinenum)); }
-			| var_dec_list stmt_list { ((FunctionEntry *)(stm.currentScope()))->body(new CompoundStmtNode($2, yylinenum)); }
+func_body_inner		: stmt_list { 
+			    ((FunctionEntry *)(stm.currentScope()))->body(new CompoundStmtNode($1, yylinenum)); 
+			}
+			| var_dec_list stmt_list { 
+			    ((FunctionEntry *)(stm.currentScope()))->body(new CompoundStmtNode($2, yylinenum)); 
+			}
 ;
 
 formal_param_list_star 	: /*empty*/
@@ -252,15 +257,14 @@ com_stmt		: TOK_LBRACE stmt_list TOK_RBRACE { $$ = new CompoundStmtNode($2, yyli
 ;
 
 stmt_list		: statement_star { 
-					    $$ = new list<StmtNode*>();
-					    if ($1 != NULL)
-						$$->push_back($1);
-					 } 
-
+			    $$ = new list<StmtNode*>();
+			    if ($1 != NULL)
+				$$->push_back($1);
+			    } 
 			| stmt_list statement_star {
-							if ($1 != NULL)
-							    $$->push_back($2);
-						   }
+			    if ($1 != NULL)
+			        $$->push_back($2);
+			}
 ;
 
 
@@ -286,7 +290,13 @@ if_then_else_stmt	: if_then_stmt TOK_ELSE statement_star {
 if_then_stmt		: TOK_IF expr_star statement_star { $$ = new IfNode($2, $3, NULL, yylinenum); }
 ;
 
-ret_stmt		: TOK_RETURN expr_star { $$ = new ReturnStmtNode($2, (FunctionEntry *) stm.currentScope(), yylinenum); }
+ret_stmt		: TOK_RETURN expr_star {
+			    SymTabEntry *ste = stm.currentScope();
+			    if(ste->kind() == SymTabEntry::Kind::FUNCTION_KIND)
+				$$ = new ReturnStmtNode($2, (FunctionEntry *) stm.currentScope(), yylinenum);
+			    else 
+				$$ = new ReturnStmtNode($2, NULL, yylinenum);
+			}
 
 empty_stmt		: /*empty statement*/ TOK_SEMICOLON
 ;
@@ -340,7 +350,9 @@ var_list		: TOK_IDENT {
 			    if($1 != NULL)
 			        $$->push_back($1);
 			}
-			| var_list TOK_COMMA TOK_IDENT { $$->push_back(new VariableEntry($3,VariableEntry::VarKind::LOCAL_VAR, NULL, NULL, yylinenum)); }
+			| var_list TOK_COMMA TOK_IDENT { 
+			    $$->push_back(new VariableEntry($3,VariableEntry::VarKind::LOCAL_VAR, NULL, NULL, yylinenum)); 
+			}
 			| var_list TOK_COMMA var_assign {
 			    if($1 != NULL)			    
 				$$->push_back($3); 
@@ -358,10 +370,11 @@ var_assign		: TOK_IDENT TOK_ASSIGN expr_star { $$ = new VariableEntry($1,Variabl
 ;
 
 ref_expr		: TOK_IDENT {
-					SymTabEntry *ste = stm.lookUp($1);  
-					if(!ste)
-					    ste = new VariableEntry($1, VariableEntry::VarKind::UNDEFINED);
-					$$ = new RefExprNode($1, ste, yylinenum); }
+			    SymTabEntry *ste = stm.lookUp($1);  
+			    if(!ste)
+			        ste = new VariableEntry($1, VariableEntry::VarKind::UNDEFINED);
+			    $$ = new RefExprNode($1, ste, yylinenum); 
+			}
 ;
 
 expr_star		: expr { $$ = $1; }
@@ -429,11 +442,12 @@ evn_pat_star		: evn_pat {$$ = $1;}
 ;
 
 
-evn_pat 		: primitive_pat_star { if ($1->event() == NULL) 
-						    $$ = new PatNode(BasePatNode::PatNodeKind::UNDEFINED, $1, NULL, yylinenum);
-						else
-						    $$ = new PatNode(BasePatNode::PatNodeKind::PRIMITIVE, $1, NULL, yylinenum);
-					    }
+evn_pat 		: primitive_pat_star { 
+			    if ($1->event() == NULL) 
+			        $$ = new PatNode(BasePatNode::PatNodeKind::UNDEFINED, $1, NULL, yylinenum);
+			    else
+			        $$ = new PatNode(BasePatNode::PatNodeKind::PRIMITIVE, $1, NULL, yylinenum);
+			}
 			| TOK_NOT evn_pat 	{ $$ = new PatNode(BasePatNode::PatNodeKind::NEG, $2, NULL, yylinenum);}
 			| evn_pat TOK_PAT_STAR { $$ = new PatNode(BasePatNode::PatNodeKind::STAR, $1, NULL, yylinenum); }
 			| evn_pat TOK_PAT_OR evn_pat { $$ = new PatNode(BasePatNode::PatNodeKind::OR, $1, $3, yylinenum); }
@@ -471,6 +485,7 @@ normal_event		: TOK_IDENT TOK_LPAREN evn_param_list_star TOK_RPAREN {
 				}
 			    */
 			    $$ = new PrimitivePatNode(ee, $3, NULL, yylinenum);
+
 			}
 ;
 
@@ -485,9 +500,12 @@ evn_param_list_star 	: evn_param_list { $$ = $1; }
 evn_param_list		: TOK_IDENT { 
 			    $$ = new vector<VariableEntry*>();
 			    SymTabEntry *ste = stm.lookUp($1);
-			    if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND) {
+			    if(ste != NULL && ste->kind() == SymTabEntry::Kind::VARIABLE_KIND) {
 				VariableEntry *ve = (VariableEntry*) ste;
 				$$->push_back(ve);
+			    }
+			    else if(ste->kind() != SymTabEntry::Kind::VARIABLE_KIND) {
+				$$->push_back(NULL);
 			    }
 			}      	
 			| evn_param_list TOK_COMMA TOK_IDENT {

@@ -34,9 +34,9 @@ class VariableEntry;
      |      |         |          |           |                     |
      |  RefExprNode  OpNode  ValueNode  InvocationNode             |
      |                                                             |
-     |                                      +---------------+------+-----+
-     |                                      |               |            |
-     |                                 ExprStmtNode   CompoundStmtNode IfNode
+     |                                      +---------------+------+-----+------------+-------------+--------------+
+     |                                      |               |            |	      |	            |		   |
+     |                                 ExprStmtNode   CompoundStmtNode IfNode	  WhileNode    ReturnStmtNode  BreakStmtNode
      |
      |
    +-+------------------+
@@ -371,7 +371,7 @@ class PatNode: public BasePatNode {
 
 class StmtNode: public AstNode {
  public:
-  enum class StmtNodeKind { ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN};
+  enum class StmtNodeKind { ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE, BREAK};
  public: 
   StmtNode(StmtNodeKind skm, int line=0, int column=0, string file=""):
 	AstNode(AstNode::NodeType::STMT_NODE, line,column,file) { skind_ = skm; };
@@ -395,6 +395,14 @@ class ReturnStmtNode: public StmtNode {
     StmtNode(StmtNode::StmtNodeKind::RETURN,line,column,file) { expr_ = e; fun_ = fe;};
   ~ReturnStmtNode() {};
 
+  const ExprNode* exprNode() const { return expr_; }
+  const FunctionEntry* funEntry() const { return fun_; }
+
+  ExprNode* exprNode() { return expr_; }
+  FunctionEntry* funEntry() { return fun_; }
+
+  const Type* typeCheck() const;
+  
   void print(ostream& os, int indent) const {
 	os << "return "; 
 	if(expr_ != NULL) expr_->print(os, indent); else os << "NULL";};
@@ -402,6 +410,32 @@ class ReturnStmtNode: public StmtNode {
  private:
   ExprNode* expr_;
   FunctionEntry* fun_;
+};
+
+/****************************************************************/
+
+class BreakStmtNode: public StmtNode {
+ public:
+  BreakStmtNode(int num, StmtNode* whileNode, 
+				 int line=0, int column=0, string file="");
+    // StmtNode(StmtNode::StmtNodeKind::RETURN,line,column,file) { expr_ = e; fun_ = fe;};
+  ~BreakStmtNode() {};
+  
+  const int num() const { return num_; }
+  const StmtNode* whileNode() const { return whileNode_; }
+
+  const Type* typeCheck() const;
+  
+  int num() { return num_; }
+  StmtNode* whileNode() { return whileNode_; }
+
+  void print(ostream& os, int indent) const {
+	os << "break " << num_; 
+  }
+
+ private:
+  int num_;
+  StmtNode *whileNode_;
 };
 
 /****************************************************************/
@@ -473,6 +507,31 @@ class IfNode: public StmtNode{
   StmtNode *then_, *else_;
 
   IfNode(const IfNode&);
+};
+
+/****************************************************************/
+
+class WhileNode: public StmtNode{
+ public: 
+  
+  WhileNode(ExprNode* cond, StmtNode* compStmt, 
+		 int line=0, int column=0, string file="");
+  ~WhileNode(){};
+
+  const ExprNode* cond() const {return cond_;}
+  const StmtNode* compStmt() const { return comp_;};
+
+  const Type* typeCheck() const;
+  ExprNode* cond() {return cond_;}      
+  StmtNode* compStmt() { return comp_;};
+
+  void print(ostream& os, int indent) const;
+
+ private: 
+  ExprNode *cond_;
+  StmtNode *comp_;
+
+  WhileNode(const WhileNode&);
 };
 
 /****************************************************************/

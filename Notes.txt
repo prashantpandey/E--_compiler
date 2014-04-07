@@ -30,6 +30,10 @@
 			> first component involves the checking the "isSubType" function.
 				> expressions (statemnts), static declaration, functions and rules
 
+	Error checking:
+		> If an error is encountered during function declaration/definition:
+			> Will make prepare a graph of dependencies between types of errors and based upon that 
+
 	CHecks:-
 	Arguement type mismatch
 	Mismatch in number of arguements
@@ -41,19 +45,22 @@
 	Wrong operator on data types
 	
 	Typecheck:
-		> functions:
-			> number of args mismatch
-			> type of args mismatch
+		> functions:		(stmt)
+			> number of args mismatch 			[Done]
+			> type of args mismatch 			[Done]
 			> return type mismatch
-		> If/While stmt
-			> return type should be boolean
-		> Operator
-			> Wrong number of operands
-			> Wrong type of operands
-		> Expression evaluation
-			> type LHS mismatch type RHS
-			> type LHS is sub type of of type RHS
+		> If/While 			(stmt)
+			> return type should be boolean 	[If: Done]
+		> operator 			(stmt)
+			> Wrong number of operands 			[Done]
+			> Wrong type of operands 			[Done]
+			> Coercion 							
+		> Expression evaluation 	
+			> Variable initialization type check 	[Done]
+			> type LHS mismatch type RHS         	[Done]
+			> type LHS is sub type of of type RHS 	[Done]
 		> Event pattern operator mismatch
+	
 	
 	Memory Allocation: (and function implementation : http://www.ict.griffith.edu.au/teaching/3516ICT/Lectures/lec8.pdf)
 		> Static allocation

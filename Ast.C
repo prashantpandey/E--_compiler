@@ -130,7 +130,6 @@ void IfNode::print(ostream& os, int indent) const
 
 }
 
-
 void RefExprNode::print(ostream& os, int indent) const
 {
     os << ext();
@@ -209,6 +208,38 @@ const Type* InvocationNode::typeCheck() const {
             return ((FunctionEntry*)ste)->type();
         }
     }
+    return &Type::errorType;
+}
+
+const Type* ReturnStmtNode::typeCheck() const {
+    const ExprNode *expr = exprNode();
+    const FunctionEntry* funEnt = funEntry();
+    if(expr != nullptr) {
+	const Type* retType = expr->typeCheck();
+	if(funEnt != nullptr) {
+	    const Type* funRetType = funEnt->type();
+	    if(retType->tag() == funRetType->tag()) {
+		return retType;
+	    }
+	    else if(funRetType->tag() == Type::TypeTag::VOID) {
+		errMsg("Error: " + funEnt->name() + ": doesn't have a return type", this);
+		return &Type::errorType;	
+	    }
+	    else {
+		errMsg("Error: " + funEnt->name() + ": mismatch in the return type of the argument", this);
+		return &Type::errorType;
+	    }
+	}
+	else {
+	    errMsg("Error: return statement is not defined in the scope of the function", this);
+	    return &Type::errorType;
+	}
+    }
+    else if(funEnt != nullptr) {
+	if(funEnt->type()->tag() != Type::TypeTag::VOID)
+	   errMsg("Error: return statement doesn't have a return value", this);
+	   return &Type::errorType;
+    } 
     return &Type::errorType;
 }
 
