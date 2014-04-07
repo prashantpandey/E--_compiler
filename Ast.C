@@ -393,7 +393,7 @@ extern const OpNode::OpInfo opInfo[] = {
     //    e: Output type is the same as type of element of list arguments.
     //        Can be used only in conjunction with first character L.
     //
-    {OpNode::OpCode::UMINUS, "-",  1, 0, OpNode::OpPrintType::PREFIX, {Type::SIGNED}, Type::SIGNED, "N1"},
+    {OpNode::OpCode::UMINUS, "-",  1, 0, OpNode::OpPrintType::PREFIX, {Type::NUMERIC}, Type::SIGNED, "N1"},
     {OpNode::OpCode::PLUS, "+",  2, 1, OpNode::OpPrintType::INFIX, {Type::NUMERIC, Type::NUMERIC}, Type::NUMERIC, "SS"},
     {OpNode::OpCode::MINUS, "-",  2, 1, OpNode::OpPrintType::INFIX, {Type::NUMERIC, Type::NUMERIC}, Type::NUMERIC, "SS"},
     {OpNode::OpCode::MULT, "*",  2, 0, OpNode::OpPrintType::INFIX, {Type::NUMERIC, Type::NUMERIC}, Type::NUMERIC, "SS"},
@@ -480,12 +480,15 @@ const Type* OpNode::typeCheck() const {
     switch (opInfo[iopcode].typeConstraints_[0])
     {
     case 'N':
-        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this))
+        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
             error = true;
+	}
         break;
     case 'S':
-        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this))
+        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
             error = true;
+	    break;
+	}
 	if(argTypes[1]->tag() == argTypes[0]->tag())
 	    break;
         if (Type::isSubType(argTypes[1], argTypes[0]))
@@ -512,11 +515,26 @@ const Type* OpNode::typeCheck() const {
     switch(opInfo[iopcode].typeConstraints_[1])
     {
     case '1':
-        returnType  = argTypes[0];
-        break;
     case '2':
-        returnType = argTypes[1];
+	{
+	int index = atoi(&opInfo[iopcode].typeConstraints_[1]) - 1;
+	const Type *oprType = arg_[index]->coercedType() != NULL ? arg_[index]->coercedType():argTypes[index];
+	if(!checkType(opInfo[iopcode].outType_, oprType)) {
+	   if((returnType = Type::getCoercedType(opInfo[iopcode].outType_, oprType))) {
+		arg_[index]->coercedType(returnType);
+		break;
+	   }
+	   else {
+		returnType = Type::type[0];
+		error = true;
+		//TODO: show correct error
+		errMsg("Incorrect Operand", this);
+	   }
+	}
+	else
+	    returnType = oprType;
         break;
+	}
     case '0':
         returnType = Type::type[opInfo[iopcode].outType_];
         break;

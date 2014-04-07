@@ -52,6 +52,7 @@ class Type {
     uintT, intT, 
     doubleT;
   
+  static const Type* getCoercedType(const Type::TypeTag tag, const Type* type);
   static const Type* type[];
   static bool isString(TypeTag t) { return (t==STRING);}
   static bool isNumeric(TypeTag t) { return ((t >= BYTE) && (t <= DOUBLE));}

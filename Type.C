@@ -157,6 +157,21 @@ Type::print(ostream& os, int indent) const {
   os << fullName();
 }
 
+const Type* Type::getCoercedType(const Type::TypeTag tag, const Type* type) {
+    switch(tag)
+    {
+	case TypeTag::SIGNED: if(isIntegral(type->tag()))
+				return &intType;
+			      else if (isFloat(type->tag()))
+				return &doubleType;
+			      break;
+	//TODO: Need to handle more cases
+	default : break;
+			     
+    }
+    return &errorType;
+}
+
 bool Type::isSubType(const Type *type1, const Type *type2) {
     const Type::TypeTag curTag = type1->tag();
     if(isNumeric(curTag)) {
