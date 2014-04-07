@@ -236,14 +236,6 @@ PatNode::PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2, int line, int 
     pat2_ = p2;
 }
 
-PatNode::hasNeg() const{
-
-	BasePatNode *pat1 = pat1();
-	if(pat->kind() == BasePatNode::PatNodeKind::NEG)
-	BasePatNode *pat2 = pat2();
-		
-
-}
 
 void ValueNode::print(ostream& os, int indent) const
 {
@@ -433,13 +425,95 @@ void PatNode::print(ostream& os, int indent) const
     os << ")";
 }
 
+/* Added by KA */
 
 const Type* PatNode::typeCheck() const{
 
-    if(isNegatable())
-	return true;
-  return false;
+
+    const BasePatNode *p1 = pat1();
+    const BasePatNode *p2 = pat2();
+    
+    if(p1 == NULL)
+    {	
+	errMsg(" Atleast one event pattern operand expected ", this);
+    }
+    else if(p1 != NULL)	    /* Atleast PAT1 should not be NULL  */
+    {
+	switch(kind())
+	{
+	    case BasePatNode::PatNodeKind::PRIMITIVE:
+
+				if(p2 != NULL)
+				{
+				    errMsg(" Only one event pattern operand expected ", this);
+				    return &Type::errorType;
+				}
+				break;
+
+	    case BasePatNode::PatNodeKind::EMPTY:		
+				break;
+	    
+	    case BasePatNode::PatNodeKind::NEG:
+				
+				if(p2 != NULL)
+				{
+				    errMsg(" Only one event pattern operand expected ", this);
+				    return &Type::errorType;
+				}
+				else 
+				if(!p1->isNegatable())
+				{
+				    errMsg(" Event pattern operand is not negatable ", this);
+				    return &Type::errorType;
+				}
+			    	break;
+	    
+	    case BasePatNode::PatNodeKind::SEQ:
+				if(p2 != NULL)
+				{
+				    errMsg(" Only one event pattern operand expected ", this);
+				    return &Type::errorType;
+				}
+				break;
+	    
+	    case BasePatNode::PatNodeKind::OR:
+				if(p2 == NULL)
+				{
+				    errMsg(" Event pattern operand expected ", this);
+				    return &Type::errorType;
+				}
+				break;
+
+	    case BasePatNode::PatNodeKind::STAR:
+				if(p2 != NULL)
+				{
+				    errMsg(" Only one event pattern operand expected ", this);
+				    return &Type::errorType;
+				}
+				break;
+
+	    case BasePatNode::PatNodeKind::UNDEFINED:
+				if(p2 != NULL)
+				{
+				    errMsg(" Only one event pattern operand expected ", this);
+				    return &Type::errorType;
+				}
+				break;
+	    default :		
+				errMsg(" No such event pattern operand kind ", this);
+				    return &Type::errorType;
+        }
+    
+	ExprNode *exp = ((PrimitivePatNode *)p1)->cond();
+	if (exp!= NULL && exp->exprNodeType() == ExprNode::ExprNodeType::OP_NODE)
+	{
+	    return exp->typeCheck();
+	}
+    }
+	return &Type::unkType;
 }
+
+/* Check if PrimitivePatNode is of NegationKind */
 bool PrimitivePatNode::hasNeg() const
 {
     if(kind() == BasePatNode::PatNodeKind::SEQ)
@@ -447,6 +521,8 @@ bool PrimitivePatNode::hasNeg() const
     return false;
 }
 
+
+/* Check if PrimitivePatNode is of NegationKind */
 bool PrimitivePatNode::hasSeqOps() const
 {
     if(kind() == BasePatNode::PatNodeKind::SEQ)
@@ -454,6 +530,8 @@ bool PrimitivePatNode::hasSeqOps() const
     return false;
 }
 
+
+/* Check if PrimitivePatNode is of NegationKind */
 bool PrimitivePatNode::hasAnyOrOther() const
 {
     if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
