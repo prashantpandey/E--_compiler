@@ -161,6 +161,17 @@ PatNode::PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2, int line, int 
     pat2_ = p2;
 }
 
+PatNode::hasNeg() const{
+
+	BasePatNode *pat1 = pat1();
+	if(pat->kind() == BasePatNode::PatNodeKind::NEG)
+	BasePatNode *pat2 = pat2();
+		
+
+}
+
+
+
 void ValueNode::print(ostream& os, int indent) const
 {
     
@@ -380,33 +391,52 @@ void PatNode::print(ostream& os, int indent) const
 }
 
 
+const Type* PatNode::typeCheck() const{
+
+    if(isNegatable())
+	return true;
+  return false;
+}
 bool PrimitivePatNode::hasNeg() const
 {
-    return true;
+    if(kind() == BasePatNode::PatNodeKind::SEQ)
+	return true;
+    return false;
 }
 
 bool PrimitivePatNode::hasSeqOps() const
 {
+    if(kind() == BasePatNode::PatNodeKind::SEQ)
+	return true;
     return false;
 }
 
 bool PrimitivePatNode::hasAnyOrOther() const
 {
+    if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
+	return true;
     return false;
 }
 
 bool PatNode::hasNeg() const
 {
-    return true;
+    if(kind() == BasePatNode::PatNodeKind::NEG)
+	return true;
+    return false;
 }
 
 bool PatNode::hasSeqOps() const
 {
+
+    if(kind() == BasePatNode::PatNodeKind::SEQ)
+	return true;
     return false;
 }
 
 bool PatNode::hasAnyOrOther() const
 {
+    if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
+	return true;
     return false;
 }
 

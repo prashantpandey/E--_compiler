@@ -359,7 +359,7 @@ class PatNode: public BasePatNode {
   bool hasAnyOrOther() const;
 
   void print(ostream& os, int indent=0) const; 
-
+  const Type* typeCheck() const;
  private: 
   PatNode(const PatNode&);
 
