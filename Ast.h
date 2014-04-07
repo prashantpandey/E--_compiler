@@ -276,6 +276,8 @@ class BasePatNode: public AstNode {
   PatNodeKind kind() const { return patKind_; };
   void kind(PatNodeKind p) {patKind_ = p;}
 
+  virtual const Type* typeCheck() const = 0; 
+  
   const BasePatNode* parent() const { return parent_; } 
   BasePatNode* parent() { return parent_;} 
 
@@ -381,6 +383,8 @@ class StmtNode: public AstNode {
   //  { return new StmtNode(*this); }
 
   StmtNodeKind stmtNodeKind() const { return skind_;}
+  
+  virtual const Type* typeCheck() const = 0; 
 
   void print(ostream& os, int indent) const = 0;
  private:
@@ -417,18 +421,18 @@ class ReturnStmtNode: public StmtNode {
 
 class BreakStmtNode: public StmtNode {
  public:
-  BreakStmtNode(int num, StmtNode* whileNode, 
-				 int line=0, int column=0, string file="");
-    // StmtNode(StmtNode::StmtNodeKind::RETURN,line,column,file) { expr_ = e; fun_ = fe;};
+  BreakStmtNode(int num, BlockEntry* be, 
+				 int line=0, int column=0, string file=""):
+     StmtNode(StmtNode::StmtNodeKind::BREAK, line, column, file) { num_ = num; blockEntry_ = be;};
   ~BreakStmtNode() {};
   
   const int num() const { return num_; }
-  const StmtNode* whileNode() const { return whileNode_; }
+  const BlockEntry* blockEntry() const { return blockEntry_; }
 
   const Type* typeCheck() const;
   
   int num() { return num_; }
-  StmtNode* whileNode() { return whileNode_; }
+  BlockEntry* blockEntry() { return blockEntry_; }
 
   void print(ostream& os, int indent) const {
 	os << "break " << num_; 
@@ -436,7 +440,7 @@ class BreakStmtNode: public StmtNode {
 
  private:
   int num_;
-  StmtNode *whileNode_;
+  BlockEntry *blockEntry_;
 };
 
 /****************************************************************/
@@ -561,6 +565,8 @@ class RuleNode: public AstNode {
   const StmtNode* reaction() const { return reaction_; };   
   StmtNode* reaction() { return reaction_; };   
 
+  const Type* typeCheck() const;
+  
   void print(ostream& os, int indent=0) const;
 
  private:

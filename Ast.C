@@ -29,8 +29,9 @@ ExprNode::ExprNode(ExprNodeType et, const Value* val, int line, int column,
 
 ExprNode::ExprNode(const ExprNode& e) : AstNode(e)
 {
-    val_ = e.value();
-    coercedType_ = e.coercedType();
+    ExprNode::exprType_ = e.exprNodeType();
+    ExprNode::val_ = new Value(*e.value());
+    ExprNode::coercedType_ = e.coercedType();
 }
 
 
@@ -65,14 +66,91 @@ RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, int lin
     reaction_ = reaction;
 }
 
+void RuleNode::print(ostream& os, int indent) const
+{
+    prtSpace(os, indent);
+    pat_->print(os,indent);
+    os << "-->  ";
+    if (reaction_)
+        reaction_->print(os, indent);
+    os << ";";
+}
+
+const Type*  RuleNode::typeCheck() const {
+    bool flag = false;
+    if(pat()->typeCheck()->tag() == Type::TypeTag::ERROR) {
+	flag = true;
+    }
+    else if(reaction()->typeCheck()->tag() == Type::TypeTag::ERROR) {
+	flag = true;
+    }
+
+    if(flag) {	
+	return &Type::errorType;
+    }
+    else {
+	return &Type::unkType;
+    }
+}
+
+WhileNode::WhileNode(ExprNode* cond, StmtNode* compStmt,
+                 int line, int column, string file):
+    StmtNode(StmtNode::StmtNodeKind::WHILE, line, column, file) 
+{
+    cond_ = cond;
+    comp_ = compStmt;
+}
+
+void WhileNode::print(ostream& os, int indent) const {
+    os << "while (";
+    cond()->print(os, indent);
+    os << ")";
+    if(compStmt()) {
+	compStmt()->print(os, indent);
+    }
+    if(!compStmt() || compStmt()->stmtNodeKind() != StmtNode::StmtNodeKind::COMPOUND) {
+	endln(os, indent);
+    }
+}
+
+const Type* WhileNode::typeCheck() const {
+    const Type *cond_type = cond()->type();
+    if (cond_type->tag() == Type::TypeTag::BOOL)
+    {
+	return &Type::unkType;
+    }
+    else if (cond_type->tag() != Type::TypeTag::ERROR) {
+	errMsg("return type of expression is not bool", this);
+	return &Type::errorType;
+    }
+    return &Type::errorType; 
+}
 
 IfNode::IfNode(ExprNode* cond, StmtNode* thenStmt,
                StmtNode* elseStmt, int line, int column, string file):
-    StmtNode(StmtNode::StmtNodeKind::IF, line,column,file)
+    StmtNode(StmtNode::StmtNodeKind::IF, line, column, file)
 {
     cond_ = cond;
     then_ = thenStmt;
     else_ = elseStmt;
+}
+
+void IfNode::print(ostream& os, int indent) const
+{
+    os << "if (";
+    cond()->print(os, indent);
+    os << ") ";
+    if (thenStmt())
+        thenStmt()->print(os, indent);
+    if (!thenStmt() || thenStmt()->stmtNodeKind() != StmtNode::StmtNodeKind::COMPOUND)
+        endln(os, indent);
+    if (elseStmt()) {
+        prtSpace(os, indent);
+        os << "else ";
+        elseStmt()->print(os, indent);
+        if (!elseStmt() || elseStmt()->stmtNodeKind() != StmtNode::StmtNodeKind::COMPOUND)
+            endln(os, indent);
+    }
 }
 
 /* Added by KA */
@@ -151,9 +229,6 @@ const Type* PrimitivePatNode::typeCheck() const {
     return &Type::errorType;
 }
 
-
-
-
 PatNode::PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2, int line, int column, string file):
     BasePatNode(pk, line, column, file)
 {
@@ -170,8 +245,6 @@ PatNode::hasNeg() const{
 
 }
 
-
-
 void ValueNode::print(ostream& os, int indent) const
 {
     
@@ -180,28 +253,8 @@ void ValueNode::print(ostream& os, int indent) const
 	value()->print(os, indent);
 }
 
-
 const Type* ValueNode::typeCheck() const {
     return type();
-}
-
-void IfNode::print(ostream& os, int indent) const
-{
-    os << "if (";
-    cond()->print(os, indent);
-    os << ") ";
-    if (thenStmt())
-        thenStmt()->print(os, indent);
-    if (!thenStmt() || thenStmt()->stmtNodeKind() != StmtNode::StmtNodeKind::COMPOUND)
-        endln(os, indent);
-    if (elseStmt()) {
-        prtSpace(os, indent);
-        os << "else ";
-        elseStmt()->print(os, indent);
-        if (!elseStmt() || elseStmt()->stmtNodeKind() != StmtNode::StmtNodeKind::COMPOUND)
-            endln(os, indent);
-    }
-
 }
 
 void RefExprNode::print(ostream& os, int indent) const
@@ -334,16 +387,6 @@ const Type* ExprStmtNode::typeCheck() const {
 	return &Type::unkType;
     }
     return &Type::errorType;
-}
-
-void RuleNode::print(ostream& os, int indent) const
-{
-    prtSpace(os, indent);
-    pat_->print(os,indent);
-    os << "-->  ";
-    if (reaction_)
-        reaction_->print(os, indent);
-    os << ";";
 }
 
 void PrimitivePatNode::print(ostream& os, int indent) const
