@@ -102,6 +102,58 @@ PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* param
 
 }
 
+const Type* PrimitivePatNode::typeCheck() const {
+
+    const EventEntry *ee = event();
+
+    if(ee != NULL && ee->kind() == SymTabEntry::Kind::UNKNOWN_KIND) {
+	errMsg("Undefined reference to " + ee->name(), this);
+	return &Type::errorType;
+    }
+    
+    else if (ee != NULL && ee->kind() != SymTabEntry::Kind::UNKNOWN_KIND && ee->kind() != SymTabEntry::Kind::EVENT_KIND) {
+	errMsg(ee->name() + " was not declared in the current scope", this);
+	return &Type::errorType;
+    }
+
+    else {
+	const vector<const VariableEntry*>* callParams = params();
+	int callParamsSize = callParams->size();
+	const SymTab *st = ee->symTab();
+	if (st != NULL) {
+	    int i = 0;
+	    vector<const VariableEntry*>::const_iterator ic = callParams->begin();
+	    SymTab::const_iterator it = st->begin();
+	    for (i=1; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
+		VariableEntry *ve = (VariableEntry*) (*it);
+
+		if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
+		    if (ve->type()->tag() != (*ic)->type()->tag()) {
+			errMsg("Type mismatch for argument " + to_string(i) + " of " + ee->name(), this);
+			return &Type::errorType;
+		    }
+		    i++;
+		}
+	    }
+	    if (i != callParamsSize) {
+		errMsg(ee->name() +  ": mismatch in the number of arguments", this);
+		return &Type::errorType;
+	    }
+	}
+	else if (callParamsSize > 0) {
+	    errMsg(ee->name() +  ": mismatch in the number of arguments", this);
+	    return &Type::errorType;
+	}
+	else {
+	    return ((EventEntry*)ee)->type();
+	}
+    }
+    return &Type::errorType;
+}
+
+
+
+
 PatNode::PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2, int line, int column, string file):
     BasePatNode(pk, line, column, file)
 {
