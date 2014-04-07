@@ -320,6 +320,7 @@ class PrimitivePatNode: public BasePatNode {
 	return (list<const OpNode*>&)asgs_; }  
   list<OpNode*>& asgs() { return asgs_; }  
 
+  const Type* typeCheck() const;
   bool hasSeqOps() const;
   bool hasNeg() const;
   bool hasAnyOrOther() const;
