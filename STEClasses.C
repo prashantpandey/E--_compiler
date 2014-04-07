@@ -27,14 +27,12 @@ void GlobalEntry::checkType() const
 	    SymTabEntry *ste = (SymTabEntry *)(*it);
 	    ste->checkType();
 	}
-    }   /*if(rules_.size() == 0) {
-	  prtln(out, indent);
-	  } else {
-	  for(vector<RuleNode*>::const_iterator it = rules_.begin(); it != rules_.end(); ++it) {
-	  (*it)->print(out, indent+STEP_INDENT);
-	  endln(out, indent);
-	  }
-	  }*/
+    }   
+    if(rules_.size() != 0) {
+	for(vector<RuleNode*>::const_iterator it = rules_.begin(); it != rules_.end(); ++it) {
+	    (*it)->typeCheck();
+	}
+    }
 }
 
 
