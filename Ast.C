@@ -44,10 +44,14 @@ RefExprNode::RefExprNode(const RefExprNode& re) : ExprNode(re)
 const Type* RefExprNode::typeCheck() const
 {
     const SymTabEntry *ste = symTabEntry();
-    if (ste->kind()!= SymTabEntry::Kind::VARIABLE_KIND)
+    if (ste != nullptr && ste->kind()!= SymTabEntry::Kind::VARIABLE_KIND)
     {
         errMsg(ext() + " Not of variable kind", this);
-        return Type::type[0];
+	return &Type::errorType;
+    }
+    else if (ste != nullptr && ((VariableEntry*)(ste))->varKind() == VariableEntry::VarKind::UNDEFINED) {
+        errMsg("undefined variable " + ext(), this);
+	return &Type::errorType;
     }
     return ste->type();
 }
@@ -80,7 +84,7 @@ const Type* IfNode::typeCheck() const
 	return &Type::unkType;
     }
     else if (cond_type->tag() != Type::TypeTag::ERROR) {
-	errMsg("Error: return type of expression is not bool", this);
+	errMsg("return type of expression is not bool", this);
 	return &Type::errorType;
     }
     return &Type::errorType;
@@ -179,11 +183,11 @@ void InvocationNode::print(ostream& os, int indent) const
 const Type* InvocationNode::typeCheck() const {
     const SymTabEntry *ste = symTabEntry();
     if(ste != nullptr && ste->kind() == SymTabEntry::Kind::UNKNOWN_KIND) {	
-        errMsg("Error: undefined reference to " + ste->name(), this);
+        errMsg("undefined reference to " + ste->name(), this);
         return &Type::errorType;
     }
     else if (ste != nullptr && ste->kind() != SymTabEntry::Kind::UNKNOWN_KIND && ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
-        errMsg("Error: " + ste->name() + " was not declared in the current scope", this);
+        errMsg(ste->name() + " was not declared in the current scope", this);
         return &Type::errorType;
     }
     else {
@@ -198,19 +202,19 @@ const Type* InvocationNode::typeCheck() const {
                 VariableEntry *ve = (VariableEntry*) (*it);
                 if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
                     if (ve->type()->tag() != (*ic)->type()->tag()) {
-                        errMsg("Error: Type mismatch for argument " + to_string(i) + " of " + ste->name(), this);
+                        errMsg("Type mismatch for argument " + to_string(i) + " of " + ste->name(), this);
                         return &Type::errorType;
                     }
                     i++;
                 }
             }
             if (i != callParamsSize) {
-                errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments", this);
+                errMsg(ste->name() +  ": mismatch in the number of arguments", this);
                 return &Type::errorType;
             }
         }
         else if (callParamsSize > 0) {
-            errMsg("Error: " + ste->name() +  ": mismatch in the number of arguments", this);
+            errMsg(ste->name() +  ": mismatch in the number of arguments", this);
             return &Type::errorType;
         }
         else {
@@ -231,22 +235,22 @@ const Type* ReturnStmtNode::typeCheck() const {
 		return retType;
 	    }
 	    else if(funRetType->tag() == Type::TypeTag::VOID) {
-		errMsg("Error: " + funEnt->name() + ": doesn't have a return type", this);
+		errMsg(funEnt->name() + ": doesn't have a return type", this);
 		return &Type::errorType;	
 	    }
 	    else {
-		errMsg("Error: " + funEnt->name() + ": mismatch in the return type of the argument", this);
+		errMsg(funEnt->name() + ": mismatch in the return type of the argument", this);
 		return &Type::errorType;
 	    }
 	}
 	else {
-	    errMsg("Error: return statement is not defined in the scope of the function", this);
+	    errMsg("return statement is not defined in the scope of the function", this);
 	    return &Type::errorType;
 	}
     }
     else if(funEnt != nullptr) {
 	if(funEnt->type()->tag() != Type::TypeTag::VOID)
-	   errMsg("Error: return statement doesn't have a return value", this);
+	   errMsg("return statement doesn't have a return value", this);
 	   return &Type::errorType;
     } 
     return &Type::errorType;
