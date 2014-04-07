@@ -256,6 +256,14 @@ const Type* ReturnStmtNode::typeCheck() const {
     return &Type::errorType;
 }
 
+const Type* ExprStmtNode::typeCheck() const {
+    const ExprNode *expr = exprNode();
+    if(expr->type()->tag() != Type::TypeTag::ERROR) {
+	return &Type::unkType;
+    }
+    return &Type::errorType;
+}
+
 void RuleNode::print(ostream& os, int indent) const
 {
     prtSpace(os, indent);

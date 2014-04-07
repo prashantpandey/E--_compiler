@@ -23,10 +23,10 @@ class VariableEntry;
 /*****************************************************************************
    Here is the class hierarchy:
                                                ProgramElem
-											       |
+					           |
                                                 AstNode
      +--------------------------------------------+----------------+
-     |		         |                 |                           | 
+     |		         |             |                           | 
  BasePatNode      ExprNode          RuleNode                    StmtNode
      |               |                                             |
      |               |                                             |
@@ -447,6 +447,11 @@ class ExprStmtNode: public StmtNode {
   ~ExprStmtNode() {};
   //AstNode* clone() 
   //  { return new ExprStmtNode(*this); }
+
+  const ExprNode* exprNode() const { return expr_; }
+  ExprNode* exprNode() { return expr_; }
+
+  const Type* typeCheck() const;
 
   void print(ostream& os, int indent) const { 
 	if (expr_ != NULL) { expr_->print(os, indent);}};
