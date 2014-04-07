@@ -156,7 +156,7 @@ void IfNode::print(ostream& os, int indent) const
 /* Added by KA */
 const Type* IfNode::typeCheck() const
 {
-    const Type *cond_type = cond()->type();
+    const Type *cond_type = cond()->typeCheck();
     if (cond_type->tag() == Type::TypeTag::BOOL)
     {
 	return &Type::unkType;
@@ -576,6 +576,22 @@ void CompoundStmtNode::print(ostream& os, int indent) const
     }
     os << "}";
     endln(os, indent);
+}
+
+const Type* CompoundStmtNode::typeCheck() const {
+    bool flag = false;
+    const list<StmtNode*>* listStmts = stmts();
+
+    for(list<StmtNode*>::const_iterator it = listStmts->begin(); it != listStmts->end(); ++it) {
+	if((*it)->typeCheck()->tag() != Type::TypeTag::UNKNOWN) {
+	    flag = true;
+	}
+    }
+    if (flag) {
+	return &Type::errorType;
+    }
+
+    return &Type::unkType; 
 }
 
 RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
