@@ -24,7 +24,7 @@ internalError(const string& s, int line, const char* file) {
 }
 
 void errMsg(const string& errorMsg, int line, int col, const char* file) {
-  msg("Error: ", errorMsg, line, col, file);
+  msg(" Error:", errorMsg, line, col, file);
   errorCount++;
   if (errorCount > MAX_ERROR_BEFORE_QUIT) {
     cerr << "Too many errors.  Exiting ... " << endl;
