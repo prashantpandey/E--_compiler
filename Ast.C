@@ -239,10 +239,7 @@ PatNode::PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2, int line, int 
 
 void ValueNode::print(ostream& os, int indent) const
 {
-    
-	if(Value::printType && coercedType())
-	    os << "(" << Type::name(coercedType()->tag()) << ")";
-	value()->print(os, indent);
+    value()->print(os, indent);
 }
 
 const Type* ValueNode::typeCheck() const {
@@ -251,13 +248,7 @@ const Type* ValueNode::typeCheck() const {
 
 void RefExprNode::print(ostream& os, int indent) const
 {
-    if(!Value::printType)
-	os << ext();
-    else {
-	if(coercedType())
-	    os << "(" << Type::name(coercedType()->tag()) << ")";
-	os << Type::name(typeCheck()->tag());
-    }
+    os << ext();
 }
 
 InvocationNode::InvocationNode(const SymTabEntry *ste, vector<ExprNode*>* param,
@@ -539,6 +530,7 @@ bool PrimitivePatNode::hasAnyOrOther() const
     return false;
 }
 
+/* */
 bool PatNode::hasNeg() const
 {
     if(kind() == BasePatNode::PatNodeKind::NEG)
@@ -584,22 +576,6 @@ void CompoundStmtNode::print(ostream& os, int indent) const
     }
     os << "}";
     endln(os, indent);
-}
-
-const Type* CompoundStmtNode::typeCheck() const {
-    bool flag = false;
-    const list<StmtNode*>* listStmts = stmts();
-    
-    for(list<StmtNode*>::const_iterator it = listStmts->begin(); it != listStmts->end(); ++it) {
-	if((*it)->typeCheck()->tag() != Type::TypeTag::UNKNOWN) {
-	    flag = true;
-	}
-    }
-    if (flag) {
-	return &Type::errorType;
-    }
-
-    return &Type::unkType;
 }
 
 RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
