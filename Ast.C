@@ -374,6 +374,22 @@ void CompoundStmtNode::print(ostream& os, int indent) const
     endln(os, indent);
 }
 
+const Type* CompoundStmtNode::typeCheck() const {
+    bool flag = false;
+    const list<StmtNode*>* listStmts = stmts();
+    
+    for(list<StmtNode*>::const_iterator it = listStmts->begin(); it != listStmts->end(); ++it) {
+	if((*it)->typeCheck()->tag() != Type::TypeTag::UNKNOWN) {
+	    flag = true;
+	}
+    }
+    if (flag) {
+	return &Type::errorType;
+    }
+
+    return &Type::unkType;
+}
+
 RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
                          int line, int column, string file):
     ExprNode(ExprNode::ExprNodeType::REF_EXPR_NODE, NULL, line, column, file)

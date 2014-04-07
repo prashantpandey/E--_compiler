@@ -471,6 +471,8 @@ class CompoundStmtNode: public StmtNode{
   //  { return new CompoundStmtNode(*this); }
 
   const list<StmtNode*>* stmts() const { return stmts_;}
+  
+  const Type* typeCheck() const;
 
   list<StmtNode*>* stmts() { return stmts_;}
   void add(StmtNode *s) 
