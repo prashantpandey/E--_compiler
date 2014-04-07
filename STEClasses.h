@@ -85,7 +85,7 @@ class VariableEntry: public SymTabEntry {
 
   /* Adding this field to mark variable as constant. */
   void setConst(bool isConst) { const_ = isConst;}
-  bool isConst() { return const_;};
+  bool isConst() const { return const_;};
 
   void initVal(ExprNode *init) { initVal_ = init;};
 

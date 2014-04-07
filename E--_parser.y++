@@ -508,6 +508,7 @@ evn_param_list		: TOK_IDENT {
 			    SymTabEntry *ste = stm.lookUp($1);
 			    if(ste != NULL && ste->kind() == SymTabEntry::Kind::VARIABLE_KIND) {
 				VariableEntry *ve = (VariableEntry*) ste;
+				ve->setConst(true);
 				$$->push_back(ve);
 			    }
 			    else {
@@ -518,6 +519,7 @@ evn_param_list		: TOK_IDENT {
 			    SymTabEntry *ste = stm.lookUp($3);
 			    if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND) {
 				VariableEntry *ve = (VariableEntry*) ste;
+				ve->setConst(true);
 				$$->push_back(ve);
 			    }
 			}
