@@ -66,6 +66,7 @@ class VariableEntry: public SymTabEntry {
 				ExprNode* init=nullptr, int ln=0, int col=0, string file=""):
     SymTabEntry(name, SymTabEntry::Kind::VARIABLE_KIND, ln, col, file, type) {
     vkind_ = v; initVal(init);
+    const_ = false;
  };
 
   VariableEntry(const VariableEntry &v);
@@ -81,6 +82,11 @@ class VariableEntry: public SymTabEntry {
 
   const ExprNode* initVal() const { return initVal_;}
   ExprNode* initVal() { return initVal_;};
+
+  /* Adding this field to mark variable as constant. */
+  void setConst(bool isConst) { const_ = isConst;}
+  bool isConst() { return const_;};
+
   void initVal(ExprNode *init) { initVal_ = init;};
 
   void print(ostream& os, int indent=0) const;
@@ -88,6 +94,7 @@ class VariableEntry: public SymTabEntry {
  private:
   VarKind vkind_;
   int offSet_;
+  bool const_;
   ExprNode* initVal_;
 };
 
