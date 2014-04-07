@@ -382,6 +382,8 @@ void PrimitivePatNode::print(ostream& os, int indent) const
                 it != params_->end(); ++it) {
             if (printComma)
                 os << ", ";
+
+	    // TODO: handle the unknown param type in PrimitivePatNode::print().
             (*it)->print(os, indent);
             printComma = true;
         }

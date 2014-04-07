@@ -375,7 +375,7 @@ var_assign		: TOK_IDENT TOK_ASSIGN expr_star { $$ = new VariableEntry($1,Variabl
 ref_expr		: TOK_IDENT {
 			    SymTabEntry *ste = stm.lookUp($1);  
 			    if(!ste)
-			        ste = new VariableEntry($1, VariableEntry::VarKind::UNDEFINED, NULL);
+			        ste = new VariableEntry($1, VariableEntry::VarKind::UNDEFINED, NULL, NULL, yylinenum);
 			    $$ = new RefExprNode($1, ste, yylinenum); 
 			}
 ;
@@ -507,14 +507,13 @@ evn_param_list		: TOK_IDENT {
 			    $$ = new vector<VariableEntry*>();
 			    SymTabEntry *ste = stm.lookUp($1);
 			    if(ste != NULL && ste->kind() == SymTabEntry::Kind::VARIABLE_KIND) {
+				//TODO: Call clone on this
 				VariableEntry *ve = (VariableEntry*) ste;
 				ve->setConst(true);
 				$$->push_back(ve);
 			    }
 			    else {
-				// TODO:: Have to generate not null value for variable kind the 
-				// handle the corresponding param type in PrimitivePatNode::print().
-				$$->push_back(NULL);
+				$$->push_back(new VariableEntry($1, VariableEntry::VarKind::PARAM_VAR, &Type::unkT, NULL, yylinenum));
 			    }
 			}      	
 			| evn_param_list TOK_COMMA TOK_IDENT {
