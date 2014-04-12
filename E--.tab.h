@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
+/* A Bison parser, made by GNU Bison 2.5.  */
 
 /* Bison interface for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,15 +30,6 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_E_PARSER_H_INCLUDED
-# define YY_YY_E_PARSER_H_INCLUDED
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 1
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -80,39 +71,48 @@ extern int yydebug;
      TOK_RBRACE = 289,
      TOK_LPAREN = 290,
      TOK_RPAREN = 291,
-     TOK_IF = 292,
-     TOK_ELSE = 293,
-     TOK_CLASS = 294,
-     TOK_RETURN = 295,
-     TOK_EVENT = 296,
-     TOK_ANY = 297,
-     TOK_PRINT = 298,
-     TOK_UINTNUM = 299,
-     TOK_DOUBLENUM = 300,
-     TOK_VOID = 301,
-     TOK_STRING = 302,
-     TOK_STRCONST = 303,
-     TOK_INT = 304,
-     TOK_UNSIGNED = 305,
-     TOK_BOOL = 306,
-     TOK_BYTE = 307,
-     TOK_DOUBLE = 308,
-     TOK_SHORT = 309,
-     TOK_TRUE = 310,
-     TOK_FALSE = 311,
-     TOK_IDENT = 312,
-     TOK_DOUBLE_COLON = 314,
-     TOK_LBRACK = 316,
-     TOK_DOT = 317
+     TOK_LBRACK = 292,
+     TOK_RBRACK = 293,
+     TOK_QMARK = 294,
+     TOK_IF = 295,
+     TOK_ELSE = 296,
+     TOK_CLASS = 297,
+     TOK_RETURN = 298,
+     TOK_EVENT = 299,
+     TOK_ANY = 300,
+     TOK_PRINT = 301,
+     TOK_WHILE = 302,
+     TOK_BREAK = 303,
+     TOK_UINTNUM = 304,
+     TOK_DOUBLENUM = 305,
+     TOK_VOID = 306,
+     TOK_STRING = 307,
+     TOK_STRCONST = 308,
+     TOK_BIT = 309,
+     TOK_ENUM = 310,
+     TOK_LONG = 311,
+     TOK_INT = 312,
+     TOK_UNSIGNED = 313,
+     TOK_BOOL = 314,
+     TOK_BYTE = 315,
+     TOK_DOUBLE = 316,
+     TOK_SHORT = 317,
+     TOK_TRUE = 318,
+     TOK_FALSE = 319,
+     TOK_IDENT = 320,
+     TOK_DOUBLE_COLON = 321,
+     TOK_DOT = 322
    };
 #endif
+
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 {
-/* Line 2053 of yacc.c  */
-#line 33 "E--_parser.y++"
+
+/* Line 2068 of yacc.c  */
+#line 25 "E--_parser.y++"
 
   unsigned int 		 uVal;
   double             dVal;
@@ -136,7 +136,6 @@ typedef union YYSTYPE
   PrimitivePatNode*  primPatVal;
   StmtNode*          stmtVal;
   list<StmtNode*>*   stmtList;
-  vector<VariableEntry*>* varEntryList;
   IfNode*            ifVal;
   CompoundStmtNode*  compoundStmtVal;
   RuleNode*          ruleNode;
@@ -147,7 +146,8 @@ typedef union YYSTYPE
   const OpNode::OpInfo*    funIval;
 
 
-/* Line 2053 of yacc.c  */
+
+/* Line 2068 of yacc.c  */
 #line 152 "E--_parser.H"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
@@ -157,18 +157,4 @@ typedef union YYSTYPE
 
 extern YYSTYPE yylval;
 
-#ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
-int yyparse (void *YYPARSE_PARAM);
-#else
-int yyparse ();
-#endif
-#else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
-int yyparse (void);
-#else
-int yyparse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
 
-#endif /* !YY_YY_E_PARSER_H_INCLUDED  */
