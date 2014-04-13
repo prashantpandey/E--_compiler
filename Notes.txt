@@ -62,6 +62,21 @@
 		> Event pattern operator mismatch
 	
 	
+	Variable Declaration:
+		> bool 		: 1 Byte
+		> byte 		: 1 Byte
+		> char 		: 2 Bytes
+		> int  		: 4 Bytes
+		> double 	: 8 Bytes
+		> string	: ? maybe treat them as a pointer (8 Bytes)
+		> class 	: ? maybe treat them as a pointer (8 Bytes)
+
+	Things to do:
+		> Maintain a counter to manage the offset for variables in a scope:
+			> Maintain a counter for global_entry scope: for Global/Static variables
+			> Maintain a counter for 
+
+
 	Memory Allocation: (and function implementation : http://www.ict.griffith.edu.au/teaching/3516ICT/Lectures/lec8.pdf)
 		> Static allocation
 			> Un-initialized data (bss section)
