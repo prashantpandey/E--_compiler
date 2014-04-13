@@ -182,3 +182,29 @@ bool Type::isSubType(const Type *type1, const Type *type2) {
     }
     return false;
 }
+
+int Type::getTypeSize(const Type *type) {
+    switch(type->tag()) 
+    {
+	case TypeTag::BOOL:
+	    return 1;
+	case TypeTag::BYTE:
+	    return 1;
+	case TypeTag::UINT:
+	    return 4;
+	case TypeTag::INT:
+	    return 4;
+	case TypeTag::DOUBLE:
+	    return 8;
+	case TypeTag::STRING:
+	    return 8;
+	case TypeTag::CLASS:
+	    return 8;
+	case TypeTag::EVENT:
+	    return 8;
+	case TypeTag::FUNCTION:
+	    return 8;
+	default:
+	    return 0;
+    }
+}

@@ -29,6 +29,7 @@ SymTabEntry::SymTabEntry(string name, SymTabEntry::Kind k,
     type(new Type(Type::voidType));
   st_ = NULL;
   next_ = prev_ = NULL;
+  cnt_ = 0;
 }
 
 bool 

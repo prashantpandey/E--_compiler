@@ -113,17 +113,22 @@ class FunctionEntry: public SymTabEntry {
 				int line=0, int column=0, string file=""):
     SymTabEntry(name, SymTabEntry::Kind::FUNCTION_KIND, line,column, file, type) {
       body_ = nullptr;
- 	};
+ 	argCnt_ = 0;
+	};
   ~FunctionEntry() {};
 
   const CompoundStmtNode* body() const { return body_;};
   CompoundStmtNode* body() {return body_;};
   void body(CompoundStmtNode* n) { body_ = n;};
 
+  int getArgCnt() const { return argCnt_; }
+  void incrementArgCnt(int offset) { argCnt_ += offset; }
+
   void print(ostream& os, int indent) const;
 
  private:
   CompoundStmtNode* body_;
+  int argCnt_;
 };
 
 class EventEntry: public SymTabEntry {
@@ -136,7 +141,13 @@ class EventEntry: public SymTabEntry {
   
   ~EventEntry() {};
 
+  int getArgCnt() const { return argCnt_; }
+  void incrementArgCnt(int offset) { argCnt_ += offset; }
+  
   void print(ostream& out, int indent=0) const; 
+
+  private:
+    int argCnt_;
 };  
 
 class UnknownKindEntry: public SymTabEntry {

@@ -141,6 +141,7 @@ class Type {
   };
 
   static bool isSubType(const Type *type1, const Type *type2);
+  static int getTypeSize(const Type *type);
   void print(ostream &os, int indent=0) const;
 };
 

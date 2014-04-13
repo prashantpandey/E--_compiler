@@ -24,6 +24,8 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 	VariableEntry *varEntry = *it;
 	varEntry->varKind(v);
 	varEntry->type(type);
+	varEntry->offSet(currentScope->getCnt());
+	currentScope->incrementCnt(Type::getTypeSize(type));
 	insertSymbolErrCheck(varEntry);
     }
 }
@@ -71,13 +73,13 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 %token TOK_BITAND TOK_BITOR TOK_BITNOT TOK_BITXOR TOK_SHL TOK_SHR 
 %token TOK_GT TOK_LT TOK_GE TOK_LE TOK_EQ  TOK_NE TOK_AND TOK_OR TOK_NOT 
 %token TOK_COMMA TOK_ASSIGN TOK_SEMICOLON TOK_COLON TOK_ARROW
-%token TOK_LBRACE TOK_RBRACE TOK_LPAREN TOK_RPAREN
+%token TOK_LBRACE TOK_RBRACE TOK_LPAREN TOK_RPAREN TOK_RBRACK TOK_QMARK
 
 /* Key words */
 
-%token TOK_IF TOK_ELSE TOK_CLASS TOK_RETURN TOK_EVENT TOK_ANY TOK_PRINT 
+%token TOK_IF TOK_WHILE TOK_BREAK TOK_ELSE TOK_CLASS TOK_RETURN TOK_EVENT TOK_ANY TOK_PRINT 
 %token TOK_UINTNUM TOK_DOUBLENUM TOK_VOID TOK_STRING TOK_STRCONST 
-%token TOK_INT TOK_UNSIGNED TOK_BOOL TOK_BYTE TOK_DOUBLE TOK_SHORT
+%token TOK_INT TOK_UNSIGNED TOK_BOOL TOK_BYTE TOK_DOUBLE TOK_SHORT TOK_LONG TOK_BIT TOK_ENUM
 %token TOK_TRUE TOK_FALSE TOK_IDENT
 
 /******************************** Type Info ********************************/
@@ -432,11 +434,35 @@ formal_param_list 	: formal_param
 
 formal_param		: type_star TOK_IDENT { 
 			    $$ = new VariableEntry($2,VariableEntry::VarKind::PARAM_VAR,$1, NULL, yylinenum);
+			    SymTabEntry *ste = stm.currentScope();
+			    if(ste != NULL && (ste->kind() == SymTabEntry::Kind::FUNCTION_KIND 
+							|| ste->kind() == SymTabEntry::Kind::EVENT_KIND)) {
+				if(ste->kind() == SymTabEntry::Kind::FUNCTION_KIND) {
+				    $$->offSet(((FunctionEntry*)ste)->getArgCnt());
+				    ((FunctionEntry*)ste)->incrementArgCnt(Type::getTypeSize($1));
+				}
+				else {
+				    $$->offSet(((EventEntry*)ste)->getArgCnt());
+				    ((EventEntry*)ste)->incrementArgCnt(Type::getTypeSize($1));
+				}
+			    }
 			    insertSymbolErrCheck($$);
 			}
 			| type_star error { 
 			    yyerror("Syntax error in formal parameter declaration");
 			    $$ = new VariableEntry(NULL,VariableEntry::VarKind::PARAM_VAR,$1, NULL, yylinenum);
+			    SymTabEntry *ste = stm.currentScope();
+			    if(ste != NULL && (ste->kind() == SymTabEntry::Kind::FUNCTION_KIND 
+							|| ste->kind() == SymTabEntry::Kind::EVENT_KIND)) {
+				if(ste->kind() == SymTabEntry::Kind::FUNCTION_KIND) {
+				    $$->offSet(((FunctionEntry*)ste)->getArgCnt());
+				    ((FunctionEntry*)ste)->incrementArgCnt(Type::getTypeSize($1));
+				}
+				else {
+				    $$->offSet(((EventEntry*)ste)->getArgCnt());
+				    ((EventEntry*)ste)->incrementArgCnt(Type::getTypeSize($1));
+				}
+			    }
 			    insertSymbolErrCheck($$);
 			}
 ;
