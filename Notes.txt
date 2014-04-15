@@ -1,4 +1,3 @@
-
 	> While loops / break
 	> Error Handling
 	> Type Checking
@@ -96,6 +95,8 @@
 		> Maintain a counter to manage the offset for variables in a scope:
 			> Maintain a counter for SymTabEntry for variables scope: for Global/Static variables
 			> Maintain a separate counter for the param variables for functions and events.
+			> Offseting starts from left to right
+
 
 	Conersion of expression:
 		> convert the expressions into Three-Address code. 
@@ -106,5 +107,9 @@
 						> t1 = minus c
 						> t2 = t1 + b
 						> a = t2
-		> 
-
+		> Expresion evaluation is left to right.
+		
+	Function Implementation:
+		> Parameter Argument evaluation is left to right
+		> Parameter offsets are intialized from left to right
+	
