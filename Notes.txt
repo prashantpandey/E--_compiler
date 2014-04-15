@@ -112,4 +112,22 @@
 	Function Implementation:
 		> Parameter Argument evaluation is left to right
 		> Parameter offsets are intialized from left to right
+
+		> Local variable are evaluated and pushed on the stach on first come first basis.
+		
+		> During function invocations we will support “Call By value” parameter passing mode. 
+			The activation records formed during the function invocation need to 
+			follow a set of predefined rules. 
+			Thus we define a protocol which would be followed by the caller 
+			and callee while pushing contents on to the stack.
+		
+		> Activation Record:
+		   Caller:
+				> Push the argument values for the callee function (from right to left order)
+				> Push the return address
+			Callee:
+			 	> Push the current base pointer (bp register). This acts as the control link
+				> Copy the stack pointer (sp register) into the base pointer (bp register)
+				> Push the local variables onto the stack
+       
 	
