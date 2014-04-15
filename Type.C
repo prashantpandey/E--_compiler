@@ -208,3 +208,7 @@ int Type::getTypeSize(const Type *type) {
 	    return 0;
     }
 }
+
+int Type::getAddressSize() {
+    return 8;
+}
