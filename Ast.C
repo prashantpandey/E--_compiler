@@ -420,6 +420,8 @@ void PatNode::print(ostream& os, int indent) const
 
 /* Added by KA */
 
+// TODO: Add const to the param var
+// copy the type from the param vars from the event declaration
 const Type* PatNode::typeCheck() const{
 
 

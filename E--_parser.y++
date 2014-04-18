@@ -351,15 +351,17 @@ var_list		: TOK_IDENT {
 			}
 			| var_assign {
 			    $$ = new vector<VariableEntry*>();
-			    if($1 != NULL)
+			    if($1 != NULL) {
 			        $$->push_back($1);
+			    }
 			}
 			| var_list TOK_COMMA TOK_IDENT { 
 			    $$->push_back(new VariableEntry($3,VariableEntry::VarKind::LOCAL_VAR, NULL, NULL, yylinenum)); 
 			}
 			| var_list TOK_COMMA var_assign {
-			    if($1 != NULL)			    
-				$$->push_back($3); 
+			    if($1 != NULL) {
+				$$->push_back($3);
+			    }
 			}
 			| var_list error { // If error then don't add to the vector list
 			    yyerror("Error in variable declaration: Maybe a missing \",\" or identifier");
@@ -375,9 +377,12 @@ var_assign		: TOK_IDENT TOK_ASSIGN expr_star { $$ = new VariableEntry($1,Variabl
 
 ref_expr		: TOK_IDENT {
 			    SymTabEntry *ste = stm.lookUp($1);  
-			    if(!ste)
+			    if(!ste) {
 			        ste = new VariableEntry($1, VariableEntry::VarKind::UNDEFINED, &Type::unkT, NULL, yylinenum);
-			    $$ = new RefExprNode($1, ste, yylinenum); 
+			    }
+			    else {
+				$$ = new RefExprNode($1, ste, yylinenum);
+			    }
 			}
 ;
 
@@ -525,24 +530,10 @@ evn_param_list_star 	: evn_param_list { $$ = $1; }
 
 evn_param_list		: TOK_IDENT { 
 			    $$ = new vector<VariableEntry*>();
-			    SymTabEntry *ste = stm.lookUp($1);
-			    if(ste != NULL && ste->kind() == SymTabEntry::Kind::VARIABLE_KIND) {
-				//TODO: Call clone on this
-				VariableEntry *ve = (VariableEntry*) ste;
-				ve->setConst(true);
-				$$->push_back(ve);
-			    }
-			    else {
-				$$->push_back(new VariableEntry($1, VariableEntry::VarKind::PARAM_VAR, &Type::unkT, NULL, yylinenum));
-			    }
+			    $$->push_back(new VariableEntry($1, VariableEntry::VarKind::PARAM_VAR, &Type::unkT, NULL, yylinenum));
 			}      	
 			| evn_param_list TOK_COMMA TOK_IDENT {
-			    SymTabEntry *ste = stm.lookUp($3);
-			    if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND) {
-				VariableEntry *ve = (VariableEntry*) ste;
-				ve->setConst(true);
-				$$->push_back(ve);
-			    }
+			    $$->push_back(new VariableEntry($3, VariableEntry::VarKind::PARAM_VAR, &Type::unkT, NULL, yylinenum));
 			}
 ;
 
