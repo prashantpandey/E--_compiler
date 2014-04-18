@@ -184,6 +184,8 @@ PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* param
 // copy the type from the param vars from the event declaration
 const Type* PrimitivePatNode::typeCheck() const {
 
+    int event_error_flag = 0; 
+    int cond_error_flag = 0;
     const EventEntry *ee = event();
 
     if(ee != NULL && ee->kind() == SymTabEntry::Kind::UNKNOWN_KIND) {
@@ -225,9 +227,20 @@ const Type* PrimitivePatNode::typeCheck() const {
 	    return &Type::errorType;
 	}
 	else {
-	    return ((EventEntry*)ee)->type();
+	    event_error_flag = 1;
 	}
+    
     }
+
+    const ExprNode *exp = cond();
+    if (exp!= NULL && exp->exprNodeType() == ExprNode::ExprNodeType::OP_NODE)
+    {
+        if(exp->typeCheck() != &Type::errorType)
+	    cond_error_flag = 1;
+    }
+    if( event_error_flag && cond_error_flag)
+	return &Type::voidType;
+
     return &Type::errorType;
 }
 
@@ -428,12 +441,17 @@ const Type* PatNode::typeCheck() const{
     const BasePatNode *p1 = pat1();
     const BasePatNode *p2 = pat2();
     
+    int p1_type_check = 0;
+    int p2_type_check = 0;
     if(p1 == NULL)
     {	
 	errMsg(" Atleast one event pattern operand expected ", this);
+	return &Type::errorType;
     }
     else if(p1 != NULL)	    /* Atleast PAT1 should not be NULL  */
     {
+	if (p1->typeCheck() != &Type::errorType)
+	    p1_type_check = 1;
 	switch(kind())
 	{
 	    case BasePatNode::PatNodeKind::PRIMITIVE:
@@ -461,6 +479,7 @@ const Type* PatNode::typeCheck() const{
 				    errMsg(" Event pattern operand is not negatable ", this);
 				    return &Type::errorType;
 				}
+
 			    	break;
 	    
 	    case BasePatNode::PatNodeKind::SEQ:
@@ -469,6 +488,9 @@ const Type* PatNode::typeCheck() const{
 				    errMsg(" Event pattern operand expected ", this);
 				    return &Type::errorType;
 				}
+
+				if (p2->typeCheck() != &Type::errorType)
+				    p2_type_check = 1;
 				break;
 	    
 	    case BasePatNode::PatNodeKind::OR:
@@ -477,6 +499,9 @@ const Type* PatNode::typeCheck() const{
 				    errMsg(" Event pattern operand expected ", this);
 				    return &Type::errorType;
 				}
+
+				if (p2->typeCheck() != &Type::errorType)
+				    p2_type_check = 1;
 				break;
 
 	    case BasePatNode::PatNodeKind::STAR:
@@ -485,6 +510,7 @@ const Type* PatNode::typeCheck() const{
 				    errMsg(" Only one event pattern operand expected ", this);
 				    return &Type::errorType;
 				}
+
 				break;
 
 	    case BasePatNode::PatNodeKind::UNDEFINED:
@@ -493,19 +519,17 @@ const Type* PatNode::typeCheck() const{
 				    errMsg(" Only one event pattern operand expected ", this);
 				    return &Type::errorType;
 				}
+
 				break;
 	    default :		
 				errMsg(" No such event pattern operand kind ", this);
-				    return &Type::errorType;
+				return &Type::errorType;
         } 
-	ExprNode *exp = ((PrimitivePatNode *)p1)->cond();
-	cout << line() << endl;
-	if (exp!= NULL && exp->exprNodeType() == ExprNode::ExprNodeType::OP_NODE)
-	{
-	    return exp->typeCheck();
-	}
     }
-	return &Type::unkType;
+    if(p1_type_check && p2_type_check)
+        return &Type::voidType;
+
+    return &Type::errorType;
 }
 
 /* Check if PrimitivePatNode is of NegationKind */
