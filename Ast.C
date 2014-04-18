@@ -309,7 +309,7 @@ const Type* InvocationNode::typeCheck() const {
             for (i=1; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
                 VariableEntry *ve = (VariableEntry*) (*it);
                 if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
-                    if (ve->type()->tag() != (*ic)->type()->tag()) {
+                    if (ve->type()->tag() != (*ic)->typeCheck()->tag()) {
                         errMsg("Type mismatch for argument " + to_string(i) + " of " + ste->name(), this);
                         return &Type::errorType;
                     }
