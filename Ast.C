@@ -180,6 +180,8 @@ PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* param
 
 }
 
+// TODO: Add const to the param var
+// copy the type from the param vars from the event declaration
 const Type* PrimitivePatNode::typeCheck() const {
 
     const EventEntry *ee = event();
@@ -420,8 +422,6 @@ void PatNode::print(ostream& os, int indent) const
 
 /* Added by KA */
 
-// TODO: Add const to the param var
-// copy the type from the param vars from the event declaration
 const Type* PatNode::typeCheck() const{
 
 
@@ -464,9 +464,9 @@ const Type* PatNode::typeCheck() const{
 			    	break;
 	    
 	    case BasePatNode::PatNodeKind::SEQ:
-				if(p2 != NULL)
+				if(p2 == NULL)
 				{
-				    errMsg(" Only one event pattern operand expected ", this);
+				    errMsg(" Event pattern operand expected ", this);
 				    return &Type::errorType;
 				}
 				break;
