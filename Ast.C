@@ -497,9 +497,9 @@ const Type* PatNode::typeCheck() const{
 	    default :		
 				errMsg(" No such event pattern operand kind ", this);
 				    return &Type::errorType;
-        }
-    
+        } 
 	ExprNode *exp = ((PrimitivePatNode *)p1)->cond();
+	cout << line() << endl;
 	if (exp!= NULL && exp->exprNodeType() == ExprNode::ExprNodeType::OP_NODE)
 	{
 	    return exp->typeCheck();

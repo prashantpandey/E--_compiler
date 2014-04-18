@@ -377,12 +377,10 @@ var_assign		: TOK_IDENT TOK_ASSIGN expr_star { $$ = new VariableEntry($1,Variabl
 
 ref_expr		: TOK_IDENT {
 			    SymTabEntry *ste = stm.lookUp($1);  
-			    if(!ste) {
+			    if(ste == NULL) {
 			        ste = new VariableEntry($1, VariableEntry::VarKind::UNDEFINED, &Type::unkT, NULL, yylinenum);
 			    }
-			    else {
-				$$ = new RefExprNode($1, ste, yylinenum);
-			    }
+			    $$ = new RefExprNode($1, ste, yylinenum);
 			}
 ;
 
