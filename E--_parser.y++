@@ -470,10 +470,7 @@ evn_pat_star		: evn_pat {$$ = $1;}
 ;
 
 evn_pat 		: primitive_pat_star { 
-			    if ($1->event() == NULL) 
-			        $$ = new PatNode(BasePatNode::PatNodeKind::UNDEFINED, $1, NULL, yylinenum);
-			    else
-			        $$ = new PatNode(BasePatNode::PatNodeKind::PRIMITIVE, $1, NULL, yylinenum);
+			    $$ = new PatNode(BasePatNode::PatNodeKind::PRIMITIVE, $1, NULL, yylinenum);
 			}
 			| TOK_NOT evn_pat 	{ $$ = new PatNode(BasePatNode::PatNodeKind::NEG, $2, NULL, yylinenum);}
 			| evn_pat TOK_PAT_STAR { $$ = new PatNode(BasePatNode::PatNodeKind::STAR, $1, NULL, yylinenum); }
