@@ -1,0 +1,355 @@
+
+\documentclass{sigchi}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% Use this command to override the default ACM copyright statement (e.g. for preprints). 
+% Consult the conference website for the camera-ready copyright statement.
+
+% Arabic page numbers for submission. 
+% Remove this line to eliminate page numbers for the camera ready copy
+%\pagenumbering{arabic}
+%+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+% Load basic packages
+\usepackage{balance}  % to better equalize the last page
+\usepackage{graphics} % for EPS, load graphicx instead
+\usepackage{times}    % comment if you want LaTeX's default font
+\usepackage{url}      % llt: nicely formatted URLs
+
+% llt: Define a global style for URLs, rather that the default one
+\makeatletter
+\def\url@leostyle{%
+  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\bf\ttfamily}}}
+\makeatother
+\urlstyle{leo}
+
+
+% To make various LaTeX processors do the right thing with page size.
+\def\pprw{8.5in}
+\def\pprh{11in}
+\special{papersize=\pprw,\pprh}
+\setlength{\paperwidth}{\pprw}
+\setlength{\paperheight}{\pprh}
+\setlength{\pdfpagewidth}{\pprw}
+\setlength{\pdfpageheight}{\pprh}
+
+
+
+% Make sure hyperref comes last of your loaded packages, 
+% to give it a fighting chance of not being over-written, 
+% since its job is to redefine many LaTeX commands.
+\usepackage[pdftex]{hyperref}
+\hypersetup{
+pdftitle={SIGCHI Conference Proceedings Format},
+pdfauthor={LaTeX},
+pdfkeywords={SIGCHI, proceedings, archival format},
+bookmarksnumbered,
+pdfstartview={FitH},
+colorlinks,
+citecolor=black,
+filecolor=black,
+linkcolor=black,
+urlcolor=black,
+breaklinks=true,
+}
+
+% create a shortcut to typeset table headings
+\newcommand\tabhead[1]{\small\textbf{#1}}
+\makeatletter
+\def\@copyrightspace{\relax}
+\makeatother
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color
+  basicstyle=\footnotesize,        % size of fonts used for the code
+  breaklines=true,                 % automatic line breaking only at whitespace
+  showspaces=false,
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  keywordstyle=\color{blue},       % keyword style
+  stringstyle=\color{mymauve},     % string literal style
+  xleftmargin=.09\textwidth,
+}
+
+% End of preamble. Here it comes the document.
+\begin{document}
+
+\title{Compiler for E-{}-}
+\subtitle{Intermediate Project Report}
+
+\numberofauthors{3}
+\author{
+  \alignauthor Kavita Agarwal\\
+   \email{kaagarwal@cs.stonybrook.edu}\\
+  \alignauthor Ankur Mittal\\
+    \email{anmittal@cs.stonybrook.edu}\\
+  \alignauthor Prashant Pandey\\
+    \email{ppandey@cs.stonybrook.edu}\\
+}
+
+\maketitle
+
+
+\section{Overview}
+
+
+In this course project we will work on first 5 phases of compilation. The project aims at building a compiler for E-- which is an event based language.  We have completed the first two phases during the assignment 1 to 3. In the main project we will use the Abstract Syntax Tree (AST) that we generated during the assignment 3 for further phases of the compilation.
+All three team members will have role to play in every stage. Following are three major parts of the project:
+\begin{enumerate}
+
+\item {\bf Type checking} : It is done in a separate pass over the AST. Following are different kinds of checking which we plan to implement in our code: 
+	\begin{itemize}
+    \item Type check on “FUNCTION/EVENT” declaration and invocation
+		\begin{itemize}
+    		\item Mismatch in number of arguments
+			\item Mismatch in order of arguments
+			\item Mismatch in type of arguments (consider sub-types)
+			\item Function return type mismatch (conside sub-types and void)
+        \end{itemize}
+        
+	\item Expression evaluation type check
+    	\begin{itemize}
+			\item Variable initialization type check
+			\item Type mismatch between LHS and RHS of expression (consider sub-types)
+			\item Implicit type conversion (coercion) during expression evaluation
+		\end{itemize}
+	\item Type check for conditional expression (“IF/WHILE”)
+    	\begin{itemize}
+			\item Type of conditional expression should be boolean
+         \end{itemize}
+	\item Operator type checking in expressions
+		\begin{itemize}
+            \item Type mismatch in the operands for an operator
+			\item Assignment sub-type error. (e.g. Assigning a double value to an integer value)
+			\item Number of operands for a given operator
+         \end{itemize}
+	\item Event pattern type checking
+    	\begin{itemize}
+			\item Check if an event pattern is negatable or not. Event patterns containing sequence operator i.e “:” and “**” are not negatable
+			\item Verify the number of event pattern operands for a given operator
+            \item Event parameters are const by default, so they should not be modified in the rule body.
+		\end{itemize}
+    \end{itemize}
+
+
+\item {\bf Memory Allocation} : In this phase we will allocate required memory for the various constructs of the language. The memory allocation is divided into three phases:
+	\begin{itemize}
+    	\item Static/Global memory allocation
+        	\begin{itemize}
+				\item Un-initialized data (bss section)
+				\item Initialized data [writable] (data section)
+				\item Initialized data [const] (const section) (Not supported in E-{}-)
+			\end{itemize}
+         \item Dynamic memory allocation
+			\begin{itemize}
+          		\item Stack allocation
+				\item Heap allocation (not supported in E-{}-)
+            \end{itemize}
+		\item Temporary allocation
+			\begin{itemize}
+            	\item Assigning a set of variables to registers
+				\item More than  one variable can be assigned to one register
+				\item But accessing the variables not present in register will require RAM access. Thus compiler optimization through liveness analysis can be performed. Please refer to the set of compiler optimizations for more details.
+			\end{itemize}
+    \end{itemize}
+    As we have no ‘new’ keyword we would not be handling heap allocation. All allocations on stack can be referenced using offsets from the frame pointer. These offsets can be computed from the symbol table. The different aspects taken into consideration while computing offsets for local variable are whether the local variable is in the stack frame or in lexically enclosing stack frame. But since we are not handling the case of nested procedures therefore we need not deal with lexically enclosing stack frame.
+
+\item {\bf Intermediate Code Generation} :-
+The aim here is to convert the AST to generate abstract (machine independent) code which is closer to a target language. Certain key points which should be kept in mind while deciding the semantics of code generation are :-
+	\begin{itemize}
+ 		\item \textbf{Register assignment} :- Computations using registers are faster but at the same time for large expressions we have to be careful that the number of temporary variables does not exceed the register count.
+		\item \textbf{Intermediate Code Representation} : We will use 3 address code ( quadruples) and will follow postfix notation for expression evaluation. For example:-
+		
+		 
+Expression:
+
+\hspace{1 in}$a := b * -c + b * -c$\\
+Intermediate Code:
+
+\hspace{1 in}$t1 := - c$
+
+\hspace{1 in}$t2 := b * t1$
+
+\hspace{1 in}$t3 := - c$
+
+\hspace{1 in}$t4 := b * t3$
+
+\hspace{1 in}$t5 := t2 + t4$
+
+\hspace{1 in}$a  := t5$
+
+        
+        \begin{table}[ht]
+		
+			% title of Table
+		\centering
+        \caption{}
+           \begin{tabular}{lllllll}
+           \hline \hline 
+          \#  & Op     & Arg1 & Arg2 & Res \\
+          (0) & uminus & c    &      & t1  \\
+          (1) & *      & b    & t1   & t2  \\
+          (2) & uminus & c    &      & t3  \\
+          (3) & *      & b    & t3   & t4  \\
+          (4) & +      & t2   & t4   & t5  \\
+          (5) & =      & t5   &      & a  
+          \end{tabular}
+          \caption*{Implementation of Three-Address Statements: Quads}
+          
+          \label{table:nonlin}
+		\end{table}
+		\item \textbf{Temporary variables}:- Break complex expressions into autonomous subexpressions, and store their results in a named object. If multiple intermediary results have to be stored sequentially we will reuse the same object. For example:-
+
+given\ expression:
+
+\hspace{1 in}$int\ s=s1+s2+s3;$\\
+evaluated as:\\
+
+\hspace{1 in}$int\ temp\ =\ s1+s2;$
+
+\hspace{1 in}$temp=temp+s3;$
+
+\hspace{1 in}$int\ s=temp;$\\
+
+
+		\item \textbf{Handling If-then-else/Switch/While constructs }:-
+We will be supporting short circuit operators in conditional constructs like if then else/ switch and while statements. These can be implemented by using labels and jump statements.
+		\item \textbf{Function Implementation}:- During function invocations we will support “Call By value” parameter passing mode. The activation records formed during the function invocation need to follow a set of predefined rules. Thus we define a protocol which would be followed by the caller and callee while pushing contents on to the stack. The layout for the protocol is as follows:-
+        \begin{itemize}
+        	\item {\bf Caller}
+            \begin{itemize}
+			\item Push the argument values for the callee function (from right to left)
+			\item Push the return address
+            \end{itemize}
+			\item {\bf Callee}
+            \begin{itemize}
+			\item Push the current base pointer (bp register). This acts as the control link
+			\item Copy the stack pointer (sp register) into the base pointer (bp register)
+			\item Push the local variables onto the stack
+            \end{itemize}
+        	
+    	\end{itemize}
+
+    \end{itemize}
+\end{enumerate}
+\section {Runtime Environment}
+	The memory layout consists of a stack which contains activation record for various function invocations.
+    The given base architecture consists of 1000 registers out of which we predefine 4 special purpose registers as follows:-
+        \begin{itemize}
+        \item Stack Pointer (sp)
+        \item Base Pointer (bp or frame pointer)
+        \item Global Section Base Address- This register contains the base address of the memory from where global variables start. Other global variables can be accessed using respective offsets from this address.
+        \item Return Value- The callee uses this register to store the return value which can be accessed by the caller.
+        \end{itemize}
+
+\section {Event Pattern Matching}
+We will use direct DFA construction techniques for event matching. As far as event parameters are concerned we still have certain doubts regarding the same.
+We have asked them on the discussion forum and are looking forward for an answer.
+We will try to implement the translation algorithm depending upon understanding and time constraints.
+
+
+\section {Compiler Optimizations}
+\begin{enumerate}
+\item {\bf Temporary allocation} :-
+
+Through liveness analysis\footnote{Muth, Robert. "Register liveness analysis of executable code." Manuscript, Dept. of Computer Science, The University of Arizona, Dec (1998).}, compilers can determine which sets of variables are live at the same time, as well as variables which are involved in move instructions. Using this information, the compiler can construct a graph such that every vertex represents a unique variable in the program. Interference edges connect pairs of vertices which are live at the same time, and preference edges connect pairs of vertices which are involved in move instructions. Register allocation can then be reduced to the problem of K-coloring the resulting graph, where K is the number of registers available on the target architecture. No two vertices sharing an interference edge may be assigned the same color, and vertices sharing a preference edge should be assigned the same color if possible. Some of the vertices may be precolored to begin with, representing variables which must be kept in certain registers due to calling conventions or communication between modules. 
+As graph coloring in general is NP-complete, so is register allocation. However, good algorithms exist which balance performance with quality of compiled code.    The graph coloring technique is so effective because it takes into account not only a variable being considered for register allocation, but also all the variables which are live at the same time. The logic is that if all the neighboring live variables of variable V can be assigned registers, then so can V plus all the neighbors. So it is a recursive case of removing a variable from the set of live variables at a point, called the graph, and then examining the resulting "graph" minus one variable. The loop continues until the reduced graph can be allocated, and all the other variables are spilled to memory.
+
+\item {\bf Return Value} :-
+We will not store the return value on the stack while function calls. We will follow a convention, that the callee will store the return value in some predefined register before returning the control. For eg under normal conventions the return value is saved in rax register. The called function will read the value from that register and assign it as per the code. This way we can avoid unnecessary memory access while reading and writing return value on the stack.
+
+
+\item {\bf Address Optimization} :-
+Referencing the global variable by constant address requires two instructions while accessing the same variable through pointer offset requires only one instruction. The number of global scalar variables in many programs is relatively small, and often can fit in a global variable pool. For such programs, all of the global scalar variables (and small global arrays) can be accessed via one pointer and an offset, thus avoiding more expensive load and store sequences and reducing code size.
+We can store the value of the global pool in one specified register that we can use for faster access.
+
+\item {\bf Dead Code Elimination} :-
+    The compiler will identify the dead code that will not affect the overall execution of the program. This set of code will not contribute to the assembly code generated by the compiler and thereby make the execution of the program faster.
+For example:
+variable declared but not used, 
+variable getting assigned multiple values before being used.
+\balance
+
+\item {\bf Static Optimization} :-
+    If  a counter variable (i.e a variable, that is used as a counter in loop) is declared static then during each iteration of the loop, the value of the counter variable will be read through a address lookup. Otherwise if we can change the storage class of the counter variable from static to register then we can execute the loop very efficiently.
+
+\item {\bf Function Inlining} :-
+	The overhead associated with calling and returning from a function can be eliminated by expanding the body of the function inline and further optimization may be performed as well.
+\begin{lstlisting}[language=C++]
+		 
+int add (int x, int y)
+{
+  return x + y;
+}
+
+int sub (int x, int y)
+{
+  return add (x, -y);
+}
+
+\end{lstlisting}
+Expanding add() at the call site in sub() yields:
+
+\begin{lstlisting}[language=C++]
+		 
+int sub (int x, int y)
+{
+  return x + -y;
+}
+
+\end{lstlisting}
+    
+\end{enumerate}
+
+\section{RoadMap}
+
+  \begin{enumerate}
+    \item {\textit{Type checking:}} This feature has been fully implemented
+     \begin{itemize}
+       	\item Type check on “FUNCTION/EVENT”
+		\item Type check on expression evaluation
+        	\item Type check on expression of “IF/WHILE”
+        	\item Type check on operators in expressions
+        	\item Type checking on event patterns
+    \end{itemize}
+    \item {\textit{Analyzing ICode and the assembly code that needs to be generated:}} The code was fully analyzed to understand the intricacies of final assembly code
+		\begin{itemize}
+        	\item Analzing ICode gave us an idea about the type of assembly  that \textbf{erun} expects and the instructions  allowed in the assembly to be generated
+        \end{itemize}
+    \item {\textit{Intermediate Code Generation:}}
+		\begin{itemize}
+        	\item The AST generated in assignment 3 will be used for intermediate code generation using \textit{Three-Address Code} approach
+        \end{itemize}
+    \item {\textit{Designing algorithm and strategies for optimizations:}}
+		\begin{itemize}
+        	\item The algorithms for the optimization techniques discussed in above section will be designed in this phase
+        \end{itemize}
+    \item {\textit{Code Generation(with memory allocation):}}
+		\begin{itemize}
+        	\item Algorithms and intermediate code generated in previous step will be used for final code generation which in turn will be used as an input to \textbf{erun} to generate the executable file
+        \end{itemize}
+	\item {\textit{Testing phase:}}
+		\begin{itemize}
+        	\item We will perform unit testing after every phase of the roadmap
+            \item Integrate all phases and perform integration testing to check the compiler for larger and complex inputs
+           \end{itemize}
+
+  \end{enumerate}
+
+
+
+
+
+% If you want to use smaller typesetting for the reference list,
+% uncomment the following line:
+% \small
+
+
+\end{document}
