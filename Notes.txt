@@ -113,7 +113,7 @@
 		> Parameter Argument evaluation is left to right
 		> Parameter offsets are intialized from left to right
 
-		> Local variable are evaluated and pushed on the stach on first come first basis.
+		> Local variable are evaluated and pushed on the stack on first come first basis.
 		
 		> During function invocations we will support “Call By value” parameter passing mode. 
 			The activation records formed during the function invocation need to 
@@ -123,7 +123,7 @@
 		
 		> Activation Record:
 		   Caller:
-				> Push the argument values for the callee function (from right to left order)
+				> Push the argument values for the callee function (from left to right order)
 				> Push the return address
 			Callee:
 			 	> Push the current base pointer (bp register). This acts as the control link

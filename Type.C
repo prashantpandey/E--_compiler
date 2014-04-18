@@ -183,6 +183,7 @@ bool Type::isSubType(const Type *type1, const Type *type2) {
     return false;
 }
 
+// Modifying the code for passing constant size for all types
 int Type::getTypeSize(const Type *type) {
     switch(type->tag()) 
     {
@@ -191,19 +192,19 @@ int Type::getTypeSize(const Type *type) {
 	case TypeTag::BYTE:
 	    return 1;
 	case TypeTag::UINT:
-	    return 4;
+	    return 1;
 	case TypeTag::INT:
-	    return 4;
+	    return 1;
 	case TypeTag::DOUBLE:
-	    return 8;
+	    return 1;
 	case TypeTag::STRING:
-	    return 8;
+	    return 1;
 	case TypeTag::CLASS:
-	    return 8;
+	    return 1;
 	case TypeTag::EVENT:
-	    return 8;
+	    return 1;
 	case TypeTag::FUNCTION:
-	    return 8;
+	    return 1;
 	default:
 	    return 0;
     }
