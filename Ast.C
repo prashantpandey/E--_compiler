@@ -366,7 +366,7 @@ const Type* ReturnStmtNode::typeCheck() const {
 
 const Type* ExprStmtNode::typeCheck() const {
     const ExprNode *expr = exprNode();
-    if(expr->type()->tag() != Type::TypeTag::ERROR) {
+    if(expr != NULL && expr->typeCheck()->tag() != Type::TypeTag::ERROR) {
 	return &Type::unkType;
     }
     return &Type::errorType;
