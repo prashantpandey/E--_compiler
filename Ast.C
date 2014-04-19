@@ -254,6 +254,8 @@ PatNode::PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2, int line, int 
 
 void ValueNode::print(ostream& os, int indent) const
 {
+    if(Value::printType && coercedType())
+	os << "(" << Type::name(coercedType()->tag()) << ")";
     value()->print(os, indent);
 }
 
@@ -263,7 +265,13 @@ const Type* ValueNode::typeCheck() const {
 
 void RefExprNode::print(ostream& os, int indent) const
 {
-    os << ext();
+    if(!Value::printType)
+	os << ext();
+    else {
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
+	os << Type::name(typeCheck()->tag());
+    }
 }
 
 InvocationNode::InvocationNode(const SymTabEntry *ste, vector<ExprNode*>* param,
