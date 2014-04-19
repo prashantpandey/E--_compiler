@@ -351,12 +351,12 @@ const Type* InvocationNode::typeCheck() const {
                 }
             }
             if (((FunctionEntry*)ste)->getArgCnt() != callParamsSize) {
-                errMsg(ste->name() +  ": mismatch in the number of arguments", this);
+                errMsg(((FunctionEntry*)ste)->getArgCnt() + " arguments expected for " + ste->name(), this);
                 return &Type::errorType;
             }
         }
         else if (callParamsSize > 0) {
-            errMsg(ste->name() +  ": mismatch in the number of arguments", this);
+                errMsg(((FunctionEntry*)ste)->getArgCnt() + " arguments expected for " + ste->name(), this);
             return &Type::errorType;
         }
         else {
