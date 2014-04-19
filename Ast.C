@@ -210,12 +210,12 @@ const Type* PrimitivePatNode::typeCheck() const {
 		VariableEntry *ve = (VariableEntry*) (*it);
 
 		if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
-		    if (ve->type()->tag() != (*ic)->type()->tag()) {
+		  if (ve->type()->tag() != (*ic)->type()->tag()) {
 			errMsg("Type mismatch for argument " + to_string(i) + " of " + ee->name(), this);
 			return &Type::errorType;
-		    }
-		    i++;
+		   }
 		}
+		    i++;
 	    }
 	    if (i != callParamsSize) {
 		errMsg(ee->name() +  ": mismatch in the number of arguments", this);
@@ -238,7 +238,7 @@ const Type* PrimitivePatNode::typeCheck() const {
         if(exp->typeCheck() != &Type::errorType)
 	    cond_error_flag = 1;
     }
-    if( event_error_flag && cond_error_flag)
+    if(event_error_flag && cond_error_flag)
 	return &Type::voidType;
 
     return &Type::errorType;
