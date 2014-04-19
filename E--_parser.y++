@@ -253,7 +253,10 @@ com_stmt_star		: com_stmt { $$ = $1; }	%prec "reduce"
 ;
 
 
-com_stmt		: TOK_LBRACE stmt_list TOK_RBRACE { $$ = new CompoundStmtNode($2, yylinenum); }
+com_stmt		: TOK_LBRACE stmt_list TOK_RBRACE { 
+			    $$ = new CompoundStmtNode($2, yylinenum);
+
+			}
 			| com_stmt TOK_SEMICOLON { $$ = $1; }
 ;
 
@@ -276,13 +279,14 @@ statement 		: empty_stmt {$$ = NULL;}
 			| if_then_stmt { $$ = $1; }			%prec "then"
 			| if_then_else_stmt { $$ = $1; }
 			| while_stmt { $$ = $1; }
+			| break_stmt TOK_SEMICOLON { $$ = $1; }
 			| error TOK_SEMICOLON { 
 			    yyerror("Syntax error while parsing a statemnt");
 			    $$ = NULL;		// return NULL statement
 			}
 ;
 
-if_then_else_stmt	: if_then_stmt TOK_ELSE statement_star { 
+if_then_else_stmt	: if_then_stmt TOK_ELSE statement_star {
 			    IfNode *ifn = (IfNode *) $1;
 			    $$ = new IfNode(ifn->cond(), ifn->thenStmt(), $3, yylinenum); 
 			}
@@ -291,10 +295,34 @@ if_then_else_stmt	: if_then_stmt TOK_ELSE statement_star {
 if_then_stmt		: TOK_IF expr_star statement_star { $$ = new IfNode($2, $3, NULL, yylinenum); }
 ;
 
-while_stmt		: TOK_WHILE exp_star statement_star {
-			    $$ = new WhileNode($2, $3, yylinenum); 
+while_hdr		: TOK_WHILE {
+			    // TODO: write a namespace specific to while statements
+			    BlockEntry *blockEntry = new BlockEntry("while", yylinenum);
+			    insertSymbolErrCheck(blockEntry);
+			    enterScopeErrCheck(blockEntry);
 			}
 
+while_stmt		: while_hdr expr_star statement_star {
+			    $$ = new WhileNode($2, $3, yylinenum);
+			    stm.leaveScope();
+			}
+
+break_stmt		: TOK_BREAK {
+			    SymTabEntry *ste = stm.currentScope();
+			    if(ste == NULL || (ste != NULL && ste->kind() != SymTabEntry::Kind::BLOCK_KIND))
+			    {
+				ste = new BlockEntry("unknown", yylinenum);
+			    }
+			    $$ = new BreakStmtNode(0, (BlockEntry*)ste, yylinenum);
+			}
+			| TOK_BREAK TOK_UINTNUM {
+			    SymTabEntry *ste = stm.currentScope();
+			    if(ste == NULL || (ste != NULL && ste->kind() != SymTabEntry::Kind::BLOCK_KIND))
+			    {
+				ste = new BlockEntry("unknown", yylinenum);
+			    }
+			    $$ = new BreakStmtNode($2, (BlockEntry*)ste, yylinenum);
+			}
 
 ret_stmt		: TOK_RETURN expr_star {
 			    SymTabEntry *ste = stm.currentScope();
