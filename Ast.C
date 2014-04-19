@@ -206,16 +206,11 @@ const Type* PrimitivePatNode::typeCheck() const {
 	    int i = 0;
 	    vector<const VariableEntry*>::const_iterator ic = callParams->begin();
 	    SymTab::const_iterator it = st->begin();
-	    for (i=1; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
+	    for (i=0; it != (st->end()); ++it)  {
 		VariableEntry *ve = (VariableEntry*) (*it);
-
 		if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
-		  if (ve->type()->tag() != (*ic)->type()->tag()) {
-			errMsg("Type mismatch for argument " + to_string(i) + " of " + ee->name(), this);
-			return &Type::errorType;
-		   }
-		}
 		    i++;
+		}
 	    }
 	    if (i != callParamsSize) {
 		errMsg(ee->name() +  ": mismatch in the number of arguments", this);
