@@ -57,9 +57,10 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
   list<StmtNode*>*   stmtList;
   vector<VariableEntry*>* varEntryList;
   IfNode*            ifVal;
+  WhileNode*	     whileVal;
   CompoundStmtNode*  compoundStmtVal;
   RuleNode*          ruleNode;
-
+  
   vector<RuleNode*>* transList;
   
   vector<Type*>*     formalTypeVal;
@@ -97,13 +98,14 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 %type <refexpVal> ref_expr
 %type <exprVal> expr  assign_expr expr_star func_invoc
 %type <cVal> TOK_STRCONST
-%type <stmtVal> ret_stmt statement statement_star func_invoc_stmt if_then_else_stmt if_then_stmt
+%type <stmtVal> ret_stmt statement statement_star func_invoc_stmt if_then_else_stmt if_then_stmt while_stmt break_stmt
 %type <compoundStmtVal> com_stmt_star com_stmt
 %type <stmtList> stmt_list
 %type <exprList> expr_list expr_list_plus
 %type <primPatVal> normal_event primitive_pat primitive_pat_star any_event
 %type <patVal> evn_pat_star evn_pat rule_hdr
 %type <ruleNode> rule
+
 /* Uncomment types below as you start adding rules.
    They are commented right now to prevent compile errors.
 %type <typeList> formal_param_list formal_param_plus 
@@ -273,6 +275,7 @@ statement 		: empty_stmt {$$ = NULL;}
 			| ret_stmt TOK_SEMICOLON { $$ = $1; }
 			| if_then_stmt { $$ = $1; }			%prec "then"
 			| if_then_else_stmt { $$ = $1; }
+			| while_stmt { $$ = $1; }
 			| error TOK_SEMICOLON { 
 			    yyerror("Syntax error while parsing a statemnt");
 			    $$ = NULL;		// return NULL statement
@@ -288,6 +291,11 @@ if_then_else_stmt	: if_then_stmt TOK_ELSE statement_star {
 if_then_stmt		: TOK_IF expr_star statement_star { $$ = new IfNode($2, $3, NULL, yylinenum); }
 ;
 
+while_stmt		: TOK_WHILE exp_star statement_star {
+			    $$ = new WhileNode($2, $3, yylinenum); 
+			}
+
+
 ret_stmt		: TOK_RETURN expr_star {
 			    SymTabEntry *ste = stm.currentScope();
 			    if(ste->kind() == SymTabEntry::Kind::FUNCTION_KIND)
@@ -296,6 +304,7 @@ ret_stmt		: TOK_RETURN expr_star {
 				$$ = new ReturnStmtNode($2, NULL, yylinenum);
 			}
 
+			
 empty_stmt		: /*empty statement*/ TOK_SEMICOLON
 ;
 
