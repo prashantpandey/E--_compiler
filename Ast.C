@@ -224,7 +224,7 @@ const Type* PrimitivePatNode::typeCheck() const {
 	    }
 	    */
 	    if (ee->getArgCnt() != callParamsSize) {
-		errMsg(ee->name() +  ": mismatch in the number of arguments", this);
+		errMsg("Event " + ee->name() +  "requires " + to_string(ee->getArgCnt()) + " arguments ", this);
 		return &Type::errorType;
 	    }
 	}
