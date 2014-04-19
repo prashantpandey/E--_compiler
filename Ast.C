@@ -402,8 +402,8 @@ const Type* ReturnStmtNode::typeCheck() const {
 }
 
 const Type* BreakStmtNode::typeCheck() const {
-    BlockEntry *blockEntry = blockEntry();
-    if(BlockEntry->name().compare("unknown") == 0) {
+    const BlockEntry *be = blockEntry();
+    if(be->name().compare("unknown") == 0) {
 	errMsg("break statement is not declared inside a while loop", this);
 	return &Type::errorType;
     }
