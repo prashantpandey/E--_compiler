@@ -513,7 +513,7 @@ const Type* PatNode::typeCheck() const{
 				else 
 				if(!p1->isNegatable())
 				{
-				    errMsg(" Event pattern operand is not negatable ", this);
+				    errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
 				    return &Type::errorType;
 				}
 
@@ -792,7 +792,7 @@ bool argTypeCheck(const Type::TypeTag argType[], unsigned arity, const Type** ar
     for (unsigned i=0; i < arity; i++) {
         const Type *type = argTypes[i];
         if (!(checkType(argType[i], type))) {
-	    errMsg("Argument " + to_string(i+1) + " should be " + Type::name(argType[i]), opNode);
+	    errMsg("Incompatible type for argument " + to_string(i+1) + " for operator `"+ opInfo[static_cast<int>(opNode->opCode())].name_ +"'", opNode);
             return false;
         }
     }
