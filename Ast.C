@@ -206,7 +206,14 @@ const Type* PrimitivePatNode::typeCheck() const {
 	errMsg(ee->name() + " was not declared in the current scope", this);
 	return &Type::errorType;
     }
-
+    else if(ee->name().compare("any") == 0){
+	if(isNegatable())
+	{
+    errMsg("Only simple patterns without `.', `*', and `!' operatorscan be negated",this);
+	    return &Type::errorType;
+	}
+	return &Type::voidType;
+    }
     else {
 	const vector<const VariableEntry*>* callParams = params();
 	int callParamsSize = callParams->size();
@@ -223,8 +230,8 @@ const Type* PrimitivePatNode::typeCheck() const {
 		}
 	    }
 	    */
-	    if (ee->getArgCnt() != callParamsSize) {
-		errMsg("Event " + ee->name() +  "requires " + to_string(ee->getArgCnt()) + " arguments ", this);
+	    if (ee->getArgCnt() < callParamsSize) {
+		errMsg("Event " + ee->name() +  " requires " + to_string(ee->getArgCnt()) + " arguments ", this);
 		return &Type::errorType;
 	    }
 	}
@@ -559,6 +566,7 @@ const Type* PatNode::typeCheck() const{
 				}
 
 				break;
+
 	    default :		
 				errMsg(" No such event pattern operand kind ", this);
 				return &Type::errorType;
