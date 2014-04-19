@@ -500,17 +500,18 @@ normal_event		: TOK_IDENT TOK_LPAREN evn_param_list_star TOK_RPAREN {
 			    else if (ste != NULL && ste->kind() == SymTabEntry::Kind::EVENT_KIND) {
 				ee = (EventEntry *) ste;
 			    }
-			    /*
-				const SymTab *st = ee->symTab();
-				if($3 != NULL && st != NULL) {
-				    vector<string>::const_iterator si = $3->begin();
-				    SymTab::const_iterator sti = st->begin();
-				    for(;sti != st->end() && si != $3->end(); ++sti, ++si) {
-					    VariableEntry *ve = (VariableEntry *) (*sti);
-					    varList->push_back(new VariableEntry(*si, ve->varKind(), ve->type()));
-				    }
+			    
+			    const SymTab *st = ee->symTab();
+			    if($3 != NULL && st != NULL) {
+				vector<VariableEntry* >::iterator si = $3->begin();
+				SymTab::const_iterator sti = st->begin();
+				for(;sti != st->end() && si != $3->end(); ++sti, ++si) {
+				    VariableEntry *ve = (VariableEntry *) (*sti);
+				    (*si)->type(ve->type());
+				    (*si)->setConst(true);
 				}
-			    */
+			    }
+			    
 			    $$ = new PrimitivePatNode(ee, $3, NULL, yylinenum);
 
 			}
