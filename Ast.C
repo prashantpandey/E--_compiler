@@ -206,14 +206,6 @@ const Type* PrimitivePatNode::typeCheck() const {
 	errMsg(ee->name() + " was not declared in the current scope", this);
 	return &Type::errorType;
     }
-    else if(ee->name().compare("any") == 0){
-	if(isNegatable())
-	{
-    errMsg("Only simple patterns without `.', `*', and `!' operatorscan be negated",this);
-	    return &Type::errorType;
-	}
-	return &Type::voidType;
-    }
     else {
 	const vector<const VariableEntry*>* callParams = params();
 	int callParamsSize = callParams->size();
@@ -506,7 +498,7 @@ const Type* PatNode::typeCheck() const{
 	switch(kind())
 	{
 	    case BasePatNode::PatNodeKind::PRIMITIVE:
-
+				
 				if(p2 != NULL)
 				{
 				    errMsg(" Only one event pattern operand expected ", this);
@@ -524,8 +516,7 @@ const Type* PatNode::typeCheck() const{
 				    errMsg(" Only one event pattern operand expected ", this);
 				    return &Type::errorType;
 				}
-				else 
-				if(!p1->isNegatable())
+				else if(!p1->isNegatable())
 				{
 				    errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
 				    return &Type::errorType;
@@ -539,7 +530,12 @@ const Type* PatNode::typeCheck() const{
 				    errMsg(" Event pattern operand expected ", this);
 				    return &Type::errorType;
 				}
-
+				/*
+				if(p1->hasAnyOrOther() || p2->hasAnyOrOther()) {
+				    errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
+				    return &Type::errorType;
+				}
+				*/
 				if (p2->typeCheck() != &Type::errorType)
 				    p2_type_check = 1;
 				break;
@@ -550,7 +546,12 @@ const Type* PatNode::typeCheck() const{
 				    errMsg(" Event pattern operand expected ", this);
 				    return &Type::errorType;
 				}
-
+				/*  
+				if(p1->hasAnyOrOther() || p2->hasAnyOrOther()) {
+				    errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
+				    return &Type::errorType;
+				}
+				*/
 				if (p2->typeCheck() != &Type::errorType)
 				    p2_type_check = 1;
 				break;
@@ -561,7 +562,12 @@ const Type* PatNode::typeCheck() const{
 				    errMsg(" Only one event pattern operand expected ", this);
 				    return &Type::errorType;
 				}
-
+				/*
+				if(p1->hasAnyOrOther()) {
+				    errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
+				    return &Type::errorType;
+				}
+				*/
 				break;
 
 	    case BasePatNode::PatNodeKind::UNDEFINED:
@@ -596,7 +602,7 @@ bool PrimitivePatNode::hasNeg() const
 /* Check if PrimitivePatNode is of NegationKind */
 bool PrimitivePatNode::hasSeqOps() const
 {
-    if(kind() == BasePatNode::PatNodeKind::SEQ)
+    if(kind() == BasePatNode::PatNodeKind::SEQ || kind() == BasePatNode::PatNodeKind::STAR)
 	return true;
     return false;
 }
@@ -605,9 +611,16 @@ bool PrimitivePatNode::hasSeqOps() const
 /* Check if PrimitivePatNode is of NegationKind */
 bool PrimitivePatNode::hasAnyOrOther() const
 {
+    /*
     if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
 	return true;
     return false;
+    */
+   if(event()->name().compare("any") == 0 || kind() == BasePatNode::PatNodeKind::UNDEFINED) {
+	return true;
+   }
+   else 
+	return false;
 }
 
 /* */
@@ -621,15 +634,30 @@ bool PatNode::hasNeg() const
 bool PatNode::hasSeqOps() const
 {
 
-    if(kind() == BasePatNode::PatNodeKind::SEQ)
+    if(kind() == BasePatNode::PatNodeKind::SEQ || kind() == BasePatNode::PatNodeKind::STAR)
 	return true;
     return false;
 }
 
 bool PatNode::hasAnyOrOther() const
 {
-    if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
+    /*  
+   if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
 	return true;
+    return false;
+    */
+    bool flag1 = true;
+    bool flag2 = true;
+    if(pat1() != NULL) {
+	flag1 = pat1()->hasAnyOrOther();
+    }
+    if(pat2() != NULL) {
+	flag2 = pat2()->hasAnyOrOther();
+    }
+
+    if(flag1 || flag2) {
+	return true;
+    }
     return false;
 }
 
