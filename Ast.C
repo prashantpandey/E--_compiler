@@ -161,7 +161,8 @@ const Type* IfNode::typeCheck() const
     if (cond_type->tag() != Type::TypeTag::BOOL)
     {
 	flag = false;
-	errMsg("Boolean argument expected", this);
+	if(cond_type->tag() != Type::TypeTag::ERROR)
+	    errMsg("Boolean argument expected", this);
     }
     if(elseStmt() != NULL && elseStmt()->typeCheck()->tag() != Type::TypeTag::VOID) {
 	flag = false;
@@ -386,11 +387,11 @@ const Type* ReturnStmtNode::typeCheck() const {
 		return funRetType;
 	    }
 	    if(funRetType->tag() == Type::TypeTag::VOID) {
-		errMsg(funEnt->name() + ": No return value expected for a void function", this);
+		errMsg(" " + funEnt->name() + ": No return value expected for a void function", this);
 		return &Type::errorType;	
 	    }
 	    else {
-		errMsg(funEnt->name() + ": Return value incompatible with current function's type", this);
+		errMsg(" " + funEnt->name() + ": Return value incompatible with current function's type", this);
 		return &Type::errorType;
 	    }
 	}
