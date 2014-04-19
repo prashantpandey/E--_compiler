@@ -514,7 +514,7 @@ const Type* PatNode::typeCheck() const{
 				else 
 				if(!p1->isNegatable())
 				{
-				    errMsg(" Event pattern operand is not negatable ", this);
+				    errMsg("Only simple patterns without `.', `*', and `!' operatorscan be negated", this);
 				    return &Type::errorType;
 				}
 
