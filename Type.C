@@ -174,7 +174,12 @@ const Type* Type::getCoercedType(const Type::TypeTag tag, const Type* type) {
 
 bool Type::isSubType(const Type *type1, const Type *type2) {
     const Type::TypeTag curTag = type1->tag();
-    if(isNumeric(curTag)) {
+    if(type1->tag() == Type::TypeTag::CLASS) {
+	if(type1->fullName().compare(type2->fullName()) == 0) {
+	    return true;
+	}
+    }
+    else if(isNumeric(curTag)) {
 	if(curTag < type2->tag()) {
 	    return true;
 	}
