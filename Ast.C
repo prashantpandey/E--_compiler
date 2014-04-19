@@ -340,7 +340,7 @@ const Type* InvocationNode::typeCheck() const {
                 if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
                     if (ve->type()->tag() != (*ic)->typeCheck()->tag()) {
 			if(!Type::isSubType((*ic)->typeCheck(), ve->type())) {
-			    errMsg("Type mismatch for argument " + to_string(i + 1) + " of " + ste->name(), this);
+			    errMsg("Type mismatch for argument " + to_string(i) + " to " + ste->name(), this);
 			    flag = false;
 			}
 			else {
@@ -857,8 +857,8 @@ const Type* OpNode::typeCheck() const {
 	    returnType = oprType;
         break;
 	}
-    case '0':
-        returnType = Type::type[opInfo[iopcode].outType_];
+    case 'O':
+        returnType = new Type(opInfo[iopcode].outType_);
         break;
     case 's':
         if (Type::isSubType(argTypes[1], argTypes[0]))
