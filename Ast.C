@@ -341,7 +341,13 @@ const Type* InvocationNode::typeCheck() const {
             for (;it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
                 VariableEntry *ve = (VariableEntry*) (*it);
                 if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
-                    if (ve->type()->tag() != (*ic)->typeCheck()->tag()) {
+		    if(ve->type()->tag()  == Type::TypeTag::CLASS || (*ic)->typeCheck()->tag() == Type::TypeTag::CLASS) {
+			if(ve->type()->fullName().compare((*ic)->typeCheck()->fullName()) != 0) {
+			    errMsg("Type mismatch for argument " + to_string(i) + " to " + ste->name(), this);
+			    flag = false;
+			}
+		    }
+		    else if (ve->type()->tag() != (*ic)->typeCheck()->tag()) {
 			if(!Type::isSubType((*ic)->typeCheck(), ve->type())) {
 			    errMsg("Type mismatch for argument " + to_string(i) + " to " + ste->name(), this);
 			    flag = false;
