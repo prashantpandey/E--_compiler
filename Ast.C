@@ -265,7 +265,7 @@ void RefExprNode::print(ostream& os, int indent) const
     else {
 	if(coercedType())
 	    os << "(" << Type::name(coercedType()->tag()) << ")";
-	os << Type::name(typeCheck()->tag());
+	os << typeCheck()->fullName();
     }
 }
 
