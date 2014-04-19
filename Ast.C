@@ -324,7 +324,7 @@ const Type* InvocationNode::typeCheck() const {
             int i = 0;
             vector<ExprNode*>::const_iterator ic = callParams->begin();
             SymTab::const_iterator it = st->begin();
-            for (i=1; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
+            for (i=0; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
                 VariableEntry *ve = (VariableEntry*) (*it);
                 if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
                     if (ve->type()->tag() != (*ic)->typeCheck()->tag()) {
