@@ -61,7 +61,10 @@ void VariableEntry::checkType() const
 		errMsg("Cannot change read only variables.", this);
 	}
 	else if (rhsT->tag() != Type::TypeTag::ERROR) {
-	    if(rhsT->tag() !=  type()->tag() && !Type::isSubType(rhsT, type())) {
+	    if(rhsT->tag() == Type::TypeTag::CLASS && !Type::isSubType(rhsT, type())) {
+		errMsg("Assignment between incompatible types", this);
+	    }
+	    else if(rhsT->tag() !=  type()->tag() || !Type::isSubType(rhsT, type())) {
 		errMsg("Assignment between incompatible types", this);
 	    }
 	}

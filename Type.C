@@ -180,7 +180,7 @@ bool Type::isSubType(const Type *type1, const Type *type2) {
 	}
     }
     else if(isNumeric(curTag)) {
-	if(curTag < type2->tag()) {
+	if(curTag <= type2->tag()) {
 	    return true;
 	}
 	return false;
