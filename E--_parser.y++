@@ -174,16 +174,14 @@ rule_star		: rule
 ;
 
 rule 			: rule_hdr statement_star  {
-				$$ = new RuleNode((RuleBlockEntry *)(stm.currentScope()),$1,$2, yylinenum);
-				stm.leaveScope();
-				GlobalEntry *ge = (GlobalEntry *)(stm.currentScope());
-				ge->addRule($$);
+			    $$ = new RuleNode((RuleBlockEntry *)(stm.currentScope()),$1,$2, yylinenum);
+			    stm.leaveScope();
+			    GlobalEntry *ge = (GlobalEntry *)(stm.currentScope());
+			    ge->addRule($$);
 		        }						    
 ;
 
 rule_hdr		: evn_pat_star TOK_ARROW {
-			    RuleBlockEntry *rbe = new RuleBlockEntry(yylinenum);
-			    enterScopeErrCheck(rbe);
 			    $$ = $1;
 			}
 
@@ -531,6 +529,7 @@ primitive_pat 		: normal_event { $$ = $1; }
 ;
 
 normal_event		: TOK_IDENT TOK_LPAREN evn_param_list_star TOK_RPAREN { 
+			    
 			    SymTabEntry *ste = stm.lookUp($1); 
 			    EventEntry *ee = NULL;
 			    // vector<VariableEntry*> *varList = new vector<VariableEntry*>();
@@ -541,6 +540,10 @@ normal_event		: TOK_IDENT TOK_LPAREN evn_param_list_star TOK_RPAREN {
 				ee = (EventEntry *) ste;
 			    }
 			    
+			    if(stm.currentScope()->kind() != SymTabEntry::Kind::RULE_BLOCK_KIND) {
+				RuleBlockEntry *rbe = new RuleBlockEntry(yylinenum);
+				enterScopeErrCheck(rbe);
+			    }
 			    const SymTab *st = ee->symTab();
 			    if($3 != NULL && st != NULL) {
 				vector<VariableEntry* >::iterator si = $3->begin();
@@ -549,16 +552,23 @@ normal_event		: TOK_IDENT TOK_LPAREN evn_param_list_star TOK_RPAREN {
 				    VariableEntry *ve = (VariableEntry *) (*sti);
 				    (*si)->type(ve->type());
 				    (*si)->setConst(true);
+				    insertSymbolErrCheck((*si));
 				}
-			    }
-			    
+			    } 
 			    $$ = new PrimitivePatNode(ee, $3, NULL, yylinenum);
 
 			}
 ;
 
 
-any_event		: TOK_ANY { $$ = new PrimitivePatNode(new EventEntry("any", yylinenum), new vector<VariableEntry*>(), NULL, yylinenum); }
+any_event		: TOK_ANY { 
+			    if(stm.currentScope()->kind() != SymTabEntry::Kind::RULE_BLOCK_KIND) {
+				RuleBlockEntry *rbe = new RuleBlockEntry(yylinenum);
+				enterScopeErrCheck(rbe);
+			    }
+			    
+			    $$ = new PrimitivePatNode(new EventEntry("any", yylinenum), new vector<VariableEntry*>(), NULL, yylinenum); 
+			}
 ;
 
 evn_param_list_star 	: evn_param_list { $$ = $1; }
