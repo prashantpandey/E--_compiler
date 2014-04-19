@@ -816,33 +816,33 @@ const Type* OpNode::typeCheck() const {
     bool error = false;
     switch (opInfo[iopcode].typeConstraints_[0])
     {
-    case 'N':
-        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
-            error = true;
-	}
-        break;
-    case 'S':
-        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
-            error = true;
+	case 'N':
+	    if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
+		error = true;
+	    }
 	    break;
-	}
-	if(argTypes[1]->tag() == argTypes[0]->tag())
+	case 'S':
+	    if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
+		error = true;
+		break;
+	    }
+	    if(argTypes[1]->tag() == argTypes[0]->tag())
+		break;
+	    if(opInfo[iopcode].typeConstraints_[1] != 'O') {
+		if (Type::isSubType(argTypes[1], argTypes[0]))
+		    arg_[1]->coercedType(argTypes[0]);
+		else if(Type::isSubType(argTypes[0], argTypes[1]))
+		    arg_[0]->coercedType(argTypes[1]);
+	    }
 	    break;
-        if (Type::isSubType(argTypes[1], argTypes[0]))
-            arg_[1]->coercedType(argTypes[0]);
-        else if(Type::isSubType(argTypes[0], argTypes[1]))
-            arg_[0]->coercedType(argTypes[1]);
-	else
-	    errMsg("Incompatiable operands.", this);
-        break;
-    case 'A':
-        if (argTypes[1]->tag() != argTypes[0]->tag() && !Type::isSubType(argTypes[1], argTypes[0])) {
-            errMsg("Assigned expression must be a subtype of target", this);
-            error = true;
-        }
-        if (argTypes[1]->tag() != argTypes[0]->tag() && Type::isSubType(argTypes[1], argTypes[0]))
-            arg_[1]->coercedType(argTypes[0]);
-        break;
+	case 'A':
+	    if (argTypes[1]->tag() != argTypes[0]->tag() && !Type::isSubType(argTypes[1], argTypes[0])) {
+		errMsg("Assigned expression must be a subtype of target", this);
+		error = true;
+	    }
+	    if (argTypes[1]->tag() != argTypes[0]->tag() && Type::isSubType(argTypes[1], argTypes[0]))
+		arg_[1]->coercedType(argTypes[0]);
+	    break;
     }
 
     if (error) {
