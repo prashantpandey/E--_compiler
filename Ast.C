@@ -161,7 +161,8 @@ const Type* IfNode::typeCheck() const
     if (cond_type->tag() != Type::TypeTag::BOOL)
     {
 	flag = false;
-	errMsg("Boolean argument expected", this);
+	if(cond_type->tag() != Type::TypeTag::ERROR)
+	    errMsg("Boolean argument expected", this);
     }
     if(elseStmt() != NULL && elseStmt()->typeCheck()->tag() != Type::TypeTag::VOID) {
 	flag = false;

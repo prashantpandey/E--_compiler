@@ -93,7 +93,7 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 %type <classEntry> class_dec
 %type <functionEntry> func_decl_hdr
 %type <valVal> literal
-%type <uVal> TOK_UINTNUM 
+%type <uVal> TOK_UINTNUM if_hdr while_hdr
 %type <dVal> TOK_DOUBLENUM 
 %type <refexpVal> ref_expr
 %type <exprVal> expr  assign_expr expr_star func_invoc
@@ -288,14 +288,17 @@ statement 		: empty_stmt {$$ = NULL;}
 
 if_then_else_stmt	: if_then_stmt TOK_ELSE statement_star {
 			    IfNode *ifn = (IfNode *) $1;
-			    $$ = new IfNode(ifn->cond(), ifn->thenStmt(), $3, yylinenum); 
+			    $$ = new IfNode(ifn->cond(), ifn->thenStmt(), $3, ifn->line()); 
 			}
 ;
 
-if_then_stmt		: TOK_IF expr_star statement_star { $$ = new IfNode($2, $3, NULL, yylinenum); }
+if_hdr			: TOK_IF { $$ = yylinenum; }
+
+if_then_stmt		: if_hdr expr_star statement_star { $$ = new IfNode($2, $3, NULL, $1); }
 ;
 
 while_hdr		: TOK_WHILE {
+			    $$ = yylinenum;
 			    // TODO: write a namespace specific to while statements
 			    BlockEntry *blockEntry = new BlockEntry("while", yylinenum);
 			    insertSymbolErrCheck(blockEntry);
@@ -303,7 +306,7 @@ while_hdr		: TOK_WHILE {
 			}
 
 while_stmt		: while_hdr expr_star statement_star {
-			    $$ = new WhileNode($2, $3, yylinenum);
+			    $$ = new WhileNode($2, $3, $1);
 			    stm.leaveScope();
 			}
 
