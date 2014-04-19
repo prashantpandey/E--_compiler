@@ -117,6 +117,8 @@ class FunctionEntry: public SymTabEntry {
 	};
   ~FunctionEntry() {};
 
+  void checkType() const;
+
   const CompoundStmtNode* body() const { return body_;};
   CompoundStmtNode* body() {return body_;};
   void body(CompoundStmtNode* n) { body_ = n;};

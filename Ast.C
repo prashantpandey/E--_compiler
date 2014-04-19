@@ -120,7 +120,7 @@ const Type* WhileNode::typeCheck() const {
 	return &Type::unkType;
     }
     else if (cond_type->tag() != Type::TypeTag::ERROR) {
-	errMsg("return type of expression is not bool", this);
+	errMsg("Boolean argument expected", this);
 	return &Type::errorType;
     }
     return &Type::errorType; 
@@ -161,7 +161,7 @@ const Type* IfNode::typeCheck() const
     if (cond_type->tag() != Type::TypeTag::BOOL)
     {
 	flag = false;
-	errMsg("return type of expression is not bool", this);
+	errMsg("Boolean argument expected", this);
     }
     if(elseStmt() != NULL && elseStmt()->typeCheck()->tag() != Type::TypeTag::VOID) {
 	flag = false;
@@ -301,6 +301,8 @@ void InvocationNode::print(ostream& os, int indent) const
     }
     else {
         FunctionEntry *fe = (FunctionEntry *) ste;
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
         os << fe -> name() << "(";
         if (params() != nullptr) {
             bool prtComma = false;
@@ -351,7 +353,7 @@ const Type* InvocationNode::typeCheck() const {
                 }
             }
             if (((FunctionEntry*)ste)->getArgCnt() != callParamsSize) {
-                errMsg(((FunctionEntry*)ste)->getArgCnt() + " arguments expected for " + ste->name(), this);
+                errMsg(to_string(((FunctionEntry*)ste)->getArgCnt()) + " arguments expected for " + ste->name(), this);
                 return &Type::errorType;
             }
         }
@@ -379,12 +381,16 @@ const Type* ReturnStmtNode::typeCheck() const {
 	    if(retType->tag() == funRetType->tag()) {
 		return retType;
 	    }
-	    else if(funRetType->tag() == Type::TypeTag::VOID) {
-		errMsg(funEnt->name() + ": doesn't have a return type", this);
+	    if (Type::isSubType(retType, funRetType)) {
+		expr_->coercedType(funRetType);
+		return funRetType;
+	    }
+	    if(funRetType->tag() == Type::TypeTag::VOID) {
+		errMsg(funEnt->name() + ": No return value expected for a void function", this);
 		return &Type::errorType;	
 	    }
 	    else {
-		errMsg(funEnt->name() + ": mismatch in the return type of the argument", this);
+		errMsg(funEnt->name() + ": Return value incompatible with current function's type", this);
 		return &Type::errorType;
 	    }
 	}
@@ -822,9 +828,11 @@ const Type* OpNode::typeCheck() const {
         break;
     case 'A':
         if (argTypes[1]->tag() != argTypes[0]->tag() && !Type::isSubType(argTypes[1], argTypes[0])) {
-            errMsg("First operand should be supertype of second operand.", this);
+            errMsg("Assigned expression must be a subtype of target", this);
             error = true;
         }
+        if (argTypes[1]->tag() != argTypes[0]->tag() && Type::isSubType(argTypes[1], argTypes[0]))
+            arg_[1]->coercedType(argTypes[0]);
         break;
     }
 
@@ -925,7 +933,9 @@ OpNode::print(ostream& os, int indent) const {
         }
     }
     else if ((opInfo[iopcode].prtType_ == OpNode::OpPrintType::INFIX) && (arity_ == 2)) {
-        if (opInfo[iopcode].needParen_)
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
+	if (opInfo[iopcode].needParen_)
             os << "(";
         if (arg_[0])
             arg_[0]->print(os, indent);
