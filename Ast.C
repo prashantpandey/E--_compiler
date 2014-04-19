@@ -925,7 +925,11 @@ void
 OpNode::print(ostream& os, int indent) const {
     int iopcode = static_cast<int>(opCode_);
     if (opInfo[iopcode].prtType_ == OpNode::OpPrintType::PREFIX) {
+	
         os << opInfo[iopcode].name_;
+
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
         if (arity_ > 0) {
             if (opInfo[iopcode].needParen_)
                 os << '(';
