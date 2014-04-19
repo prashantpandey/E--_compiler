@@ -45,7 +45,7 @@ RefExprNode::RefExprNode(const RefExprNode& re) : ExprNode(re)
 const Type* RefExprNode::typeCheck() const
 {
     const SymTabEntry *ste = symTabEntry();
-    if (ste != nullptr && ste->kind()!= SymTabEntry::Kind::VARIABLE_KIND)
+    if (ste != nullptr && ste->kind() != SymTabEntry::Kind::VARIABLE_KIND)
     {
         errMsg(ext() + " Not of variable kind", this);
 	return &Type::errorType;
@@ -81,7 +81,7 @@ const Type*  RuleNode::typeCheck() const {
     if(pat()->typeCheck()->tag() == Type::TypeTag::ERROR) {
 	flag = true;
     }
-    else if(reaction()->typeCheck()->tag() == Type::TypeTag::ERROR) {
+    if(reaction()->typeCheck()->tag() == Type::TypeTag::ERROR) {
 	flag = true;
     }
 
@@ -156,14 +156,22 @@ void IfNode::print(ostream& os, int indent) const
 /* Added by KA */
 const Type* IfNode::typeCheck() const
 {
+    bool flag = true;
     const Type *cond_type = cond()->typeCheck();
-    if (cond_type->tag() == Type::TypeTag::BOOL)
+    if (cond_type->tag() != Type::TypeTag::BOOL)
     {
-	return &Type::unkType;
-    }
-    else if (cond_type->tag() != Type::TypeTag::ERROR) {
+	flag = false;
 	errMsg("return type of expression is not bool", this);
-	return &Type::errorType;
+    }
+    if(elseStmt() != NULL && elseStmt()->typeCheck()->tag() != Type::TypeTag::VOID) {
+	flag = false;
+    }
+    if(thenStmt() != NULL && thenStmt()->typeCheck()->tag() != Type::TypeTag::VOID) {
+	flag = false;
+    }
+    
+    if(flag) {
+	return &Type::voidType;
     }
     return &Type::errorType;
 }
@@ -203,6 +211,7 @@ const Type* PrimitivePatNode::typeCheck() const {
 	int callParamsSize = callParams->size();
 	const SymTab *st = ee->symTab();
 	if (st != NULL) {
+	    /*  
 	    int i = 0;
 	    vector<const VariableEntry*>::const_iterator ic = callParams->begin();
 	    SymTab::const_iterator it = st->begin();
@@ -212,7 +221,8 @@ const Type* PrimitivePatNode::typeCheck() const {
 		    i++;
 		}
 	    }
-	    if (i != callParamsSize) {
+	    */
+	    if (ee->getArgCnt() != callParamsSize) {
 		errMsg(ee->name() +  ": mismatch in the number of arguments", this);
 		return &Type::errorType;
 	    }
@@ -307,6 +317,7 @@ void InvocationNode::print(ostream& os, int indent) const
 }
 
 const Type* InvocationNode::typeCheck() const {
+    bool flag = true;
     const SymTabEntry *ste = symTabEntry();
     if(ste != nullptr && ste->kind() == SymTabEntry::Kind::UNKNOWN_KIND) {	
         errMsg("undefined reference to " + ste->name(), this);
@@ -321,20 +332,25 @@ const Type* InvocationNode::typeCheck() const {
         int callParamsSize = callParams->size();
         const SymTab *st = ste->symTab();
         if (st != NULL) {
-            int i = 0;
+	    int i = 1;
             vector<ExprNode*>::const_iterator ic = callParams->begin();
             SymTab::const_iterator it = st->begin();
-            for (i=0; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
+            for (;it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
                 VariableEntry *ve = (VariableEntry*) (*it);
                 if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
                     if (ve->type()->tag() != (*ic)->typeCheck()->tag()) {
-                        errMsg("Type mismatch for argument " + to_string(i) + " of " + ste->name(), this);
-                        return &Type::errorType;
+			if(!Type::isSubType((*ic)->typeCheck(), ve->type())) {
+			    errMsg("Type mismatch for argument " + to_string(i + 1) + " of " + ste->name(), this);
+			    flag = false;
+			}
+			else {
+			    (*ic)->coercedType((ve->type()));
+			}
                     }
-                    i++;
+		    i++;
                 }
             }
-            if (i != callParamsSize) {
+            if (((FunctionEntry*)ste)->getArgCnt() != callParamsSize) {
                 errMsg(ste->name() +  ": mismatch in the number of arguments", this);
                 return &Type::errorType;
             }
@@ -346,6 +362,9 @@ const Type* InvocationNode::typeCheck() const {
         else {
             return ((FunctionEntry*)ste)->type();
         }
+    }
+    if(flag) {
+	return ((FunctionEntry*)ste)->type();
     }
     return &Type::errorType;
 }
