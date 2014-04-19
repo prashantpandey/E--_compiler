@@ -517,7 +517,7 @@ normal_event		: TOK_IDENT TOK_LPAREN evn_param_list_star TOK_RPAREN {
 ;
 
 
-any_event		: TOK_ANY { $$ = new PrimitivePatNode(new EventEntry("any", yylinenum), NULL, NULL, yylinenum); }
+any_event		: TOK_ANY { $$ = new PrimitivePatNode(new EventEntry("any", yylinenum), new vector<VariableEntry*>(), NULL, yylinenum); }
 ;
 
 evn_param_list_star 	: evn_param_list { $$ = $1; }
