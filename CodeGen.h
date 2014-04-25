@@ -16,6 +16,8 @@
  * =====================================================================================
  */
 
+#ifndef CODEGEN_H
+#define CODEGEN_H
 
 class Instruction;
 
@@ -82,3 +84,4 @@ class Instruction {
 	string label_;
 };
 
+#endif
