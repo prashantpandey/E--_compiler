@@ -21,15 +21,15 @@
 
 class Instruction;
 
-class FinalCode {
+class CodeModule {
    
    public:
-	FinalCode(string progName) {
+	CodeModule(string progName) {
 	    progName_ = progName;
 	    instructions_ = new vector<Instruction*>;
 	}
     
-	~FinalCode() {};
+	~CodeModule() {};
 
 	void insertInstruction(Instruction *instr) {
 	    instructions_->push_back(instr);

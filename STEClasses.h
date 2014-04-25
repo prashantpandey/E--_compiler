@@ -40,7 +40,7 @@ class GlobalEntry: public SymTabEntry {
 
  private:
   vector<RuleNode*> rules_;
-  FinalCode *finalCode_;
+  vector<ModuleCode*> finalCode_;
 };
 
 class BlockEntry: public SymTabEntry {
