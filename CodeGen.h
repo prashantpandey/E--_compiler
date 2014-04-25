@@ -35,6 +35,8 @@ class CodeModule {
 	    instructions_->push_back(instr);
 	}
 
+    static Instruction* incrSP() const;
+
     private:
 	string progName_;
 	vector<Instruction*> *instructions_;

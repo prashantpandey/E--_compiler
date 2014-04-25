@@ -59,7 +59,6 @@ class RuleBlockEntry: public BlockEntry {
   ~RuleBlockEntry() {};
 };
 
-
 class WhileBlockEntry: public BlockEntry {
  public:
   WhileBlockEntry(vector<int> wl, int line=0, int column=0, string file=""):
@@ -97,11 +96,13 @@ class VariableEntry: public SymTabEntry {
 
   VarKind varKind() const { return vkind_;};
   void varKind(VarKind v) { vkind_ = v;};
-
+  
   int offSet() const { return offSet_;} ;
   void offSet(int o) {offSet_ = o;};
 
   void checkType() const;
+ 
+  Instruction codeGen() const;  
 
   const ExprNode* initVal() const { return initVal_;}
   ExprNode* initVal() { return initVal_;};
