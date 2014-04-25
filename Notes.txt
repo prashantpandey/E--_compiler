@@ -130,4 +130,12 @@
 				> Copy the stack pointer (sp register) into the base pointer (bp register)
 				> Push the local variables onto the stack
        
-	
+	Code Generation:
+		> CodeGen.h contains the new Classes.
+		> driveparser will call genFinalCode in GlobalEntry 
+		> Special Purpose Register
+			> SP - R999
+			> BP - R998
+			> Global Section - R000
+			> Return - R997
+			> 
