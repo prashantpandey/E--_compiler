@@ -48,7 +48,7 @@ class SymTabEntry: public ProgramElem {
   void incrementCnt(int offset) { cnt_ += offset; }
 
   int getWhileCnt() const { return whileCnt_; }
-  void incrementWhileCnt(int offset) { whileCnt_ += offset; }
+  void incrementWhileCnt() { whileCnt_ += 1; }
   
   const SymTab* symTab() const { return st_; };
 

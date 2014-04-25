@@ -298,9 +298,31 @@ if_then_stmt		: if_hdr expr_star statement_star { $$ = new IfNode($2, $3, NULL, 
 while_hdr		: TOK_WHILE {
 			    $$ = yylinenum;
 			    // TODO: write a namespace specific to while statements
-			    BlockEntry *blockEntry = new BlockEntry("while", yylinenum);
-			    insertSymbolErrCheck(blockEntry);
-			    enterScopeErrCheck(blockEntry);
+			    vector<int> wl;
+			    WhileBlockEntry *whileBlockEntry;
+			    SymTabEntry *ste = stm.currentScope();
+
+			    if(ste != NULL){
+				
+				if(ste->kind() == SymTabEntry::Kind::WHILE_BLOCK_KIND) {
+				    vector<int> newWl = ((WhileBlockEntry*)ste)->copyWhileLabel();
+				    whileBlockEntry = new WhileBlockEntry(newWl, yylinenum);
+				}
+			        else 
+				    whileBlockEntry = new WhileBlockEntry(wl, yylinenum);
+			    
+			    ste->incrementWhileCnt();
+			    whileBlockEntry->insertWhileLabel(ste->getWhileCnt());
+			    insertSymbolErrCheck(whileBlockEntry);
+			    enterScopeErrCheck(whileBlockEntry);
+			    }
+
+			    else{
+			    BlockEntry *be = new BlockEntry("unknown", yylinenum);
+			    insertSymbolErrCheck(be);
+			    enterScopeErrCheck(be);
+			    }
+			    
 			}
 
 while_stmt		: while_hdr expr_star statement_star {
