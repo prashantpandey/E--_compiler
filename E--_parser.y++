@@ -314,7 +314,7 @@ break_stmt		: TOK_BREAK {
 			    {
 				ste = new BlockEntry("unknown", yylinenum);
 			    }
-			    $$ = new BreakStmtNode(0, (BlockEntry*)ste, yylinenum);
+			    $$ = new BreakStmtNode(1, (BlockEntry*)ste, yylinenum);
 			}
 			| TOK_BREAK TOK_UINTNUM {
 			    SymTabEntry *ste = stm.currentScope();

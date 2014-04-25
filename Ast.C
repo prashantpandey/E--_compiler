@@ -114,16 +114,22 @@ void WhileNode::print(ostream& os, int indent) const {
 }
 
 const Type* WhileNode::typeCheck() const {
-    const Type *cond_type = cond()->type();
-    if (cond_type->tag() == Type::TypeTag::BOOL)
+    bool flag = true;
+    const Type *cond_type = cond()->typeCheck();
+    if (cond_type->tag() != Type::TypeTag::BOOL)
     {
-	return &Type::unkType;
+	flag = false;
+	if(cond_type->tag() != Type::TypeTag::ERROR)
+	    errMsg("Boolean argument expected", this);
     }
-    else if (cond_type->tag() != Type::TypeTag::ERROR) {
-	errMsg("Boolean argument expected", this);
-	return &Type::errorType;
+    if (compStmt() != NULL && compStmt()->typeCheck()->tag() != Type::TypeTag::VOID) {
+	flag = false;
     }
-    return &Type::errorType; 
+
+    if(flag) {
+	return &Type::voidType;
+    }
+    return &Type::errorType;
 }
 
 IfNode::IfNode(ExprNode* cond, StmtNode* thenStmt,
@@ -419,7 +425,14 @@ const Type* BreakStmtNode::typeCheck() const {
 	errMsg("break statement is not declared inside a while loop", this);
 	return &Type::errorType;
     }
-    return &Type::voidType;
+    else if(be->num() == blockEntry()->getWhileCnt()) {
+        return &Type::voidType;
+    }
+    else {
+	errMsg("break statemet doesn't have the correct number argument", this);
+	return &Type::errorType;
+    }
+    return &Type::errorType;
 }
 
 const Type* ExprStmtNode::typeCheck() const {
