@@ -47,6 +47,9 @@ class SymTabEntry: public ProgramElem {
   int getCnt() const { return cnt_; }
   void incrementCnt(int offset) { cnt_ += offset; }
 
+  int getWhileCnt() const { return whileCnt_; }
+  void incrementWhileCnt(int offset) { whileCnt_ += offset; }
+  
   const SymTab* symTab() const { return st_; };
 
   const SymTabEntry* prev() const { return prev_ ;};
@@ -81,6 +84,7 @@ class SymTabEntry: public ProgramElem {
   Kind kind_;
   SymTab* st_;
   int cnt_;
+  int whileCnt_;
 
  private: 
   // These two fields are used to link the STEs so that their order

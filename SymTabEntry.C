@@ -30,6 +30,7 @@ SymTabEntry::SymTabEntry(string name, SymTabEntry::Kind k,
   st_ = NULL;
   next_ = prev_ = NULL;
   cnt_ = 0;
+  whileCnt_ = 0;
 }
 
 bool 
