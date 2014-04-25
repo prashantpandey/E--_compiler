@@ -4,6 +4,7 @@
 #include "SymTab.h"
 #include "SymTabEntry.h"
 #include "Ast.h"
+#include "CodeGen.h"
 
 class StmtNode;
 class RuleNode;
@@ -24,7 +25,11 @@ class GlobalEntry: public SymTabEntry {
   GlobalEntry(string name, int line=0, int column=0, string file=""):
     SymTabEntry(name, SymTabEntry::Kind::GLOBAL_KIND, line, column,file), rules_() {};
   ~GlobalEntry() {};
+
   void checkType() const;
+  void genFinalCode(string progName);
+  void serializeFinalCode() const;
+
   const vector<RuleNode*> rules() const { return rules_;};
   vector<RuleNode*> rules() { return rules_;};
   const RuleNode* rule(int i) const { return rules_[i];}
@@ -35,6 +40,7 @@ class GlobalEntry: public SymTabEntry {
 
  private:
   vector<RuleNode*> rules_;
+  FinalCode *finalCode_;
 };
 
 class BlockEntry: public SymTabEntry {
