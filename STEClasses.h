@@ -43,6 +43,7 @@ class BlockEntry: public SymTabEntry {
     SymTabEntry(name, SymTabEntry::Kind::BLOCK_KIND, line, column, file, (Type*)&Type::voidType) {};
   ~BlockEntry() {};
   void print(ostream& out, int indent=0) const; 
+ 
 };
 
 class RuleBlockEntry: public BlockEntry {
@@ -50,6 +51,22 @@ class RuleBlockEntry: public BlockEntry {
   RuleBlockEntry(int line=0, int column=0, string file=""):
     BlockEntry(newName("rule"), line,column, file) { kind(SymTabEntry::Kind::RULE_BLOCK_KIND);};
   ~RuleBlockEntry() {};
+};
+
+
+class WhileBlockEntry: public BlockEntry {
+ public:
+  WhileBlockEntry(vector<int> wl, int line=0, int column=0, string file=""):
+    BlockEntry("while", line,column, file) { kind(SymTabEntry::Kind::WHILE_BLOCK_KIND); whileLabel_ = wl;};
+  ~WhileBlockEntry() {};
+  void print(ostream& out, int indent=0) const; 
+
+  void insertWhileLabel(int wl) { whileLabel_.push_back(wl);};
+  void setWhileLabel(vector<int> wl) { whileLabel_ = wl; };
+  vector<int> copyWhileLabel() { vector<int> copiedWhileLabel(whileLabel_); return copiedWhileLabel; };
+
+ private:
+  vector<int> whileLabel_;
 };
 
 /****************************************************************

@@ -96,6 +96,14 @@ void BlockEntry::print(ostream& out, int indent) const
 
 }
 
+void WhileBlockEntry::print(ostream& out, int indent) const
+{
+    out << " {";
+    printST(out, indent, '\0', ';', true);
+    out << "}";
+
+}
+
 void FunctionEntry::print(ostream& out, int indent) const
 {
     out <<  type()->fullName() << " " << name() << "(";

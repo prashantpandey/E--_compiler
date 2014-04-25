@@ -483,7 +483,7 @@ class CompoundStmtNode: public StmtNode{
   list<StmtNode*>* stmts() { return stmts_;}
   void add(StmtNode *s) 
     { if(stmts_ != NULL) stmts_->push_back(s); };
-  
+ 
   void  printWithoutBraces(ostream& os, int indent) const;
   void  print(ostream& os, int indent) const;
 

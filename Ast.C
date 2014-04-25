@@ -425,7 +425,7 @@ const Type* BreakStmtNode::typeCheck() const {
 	errMsg("break statement is not declared inside a while loop", this);
 	return &Type::errorType;
     }
-    else if(be->num() == blockEntry()->getWhileCnt()) {
+    else if(num() == blockEntry()->getWhileCnt()) {
         return &Type::voidType;
     }
     else {
