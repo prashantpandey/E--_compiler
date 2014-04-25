@@ -303,7 +303,6 @@ while_hdr		: TOK_WHILE {
 			    SymTabEntry *ste = stm.currentScope();
 
 			    if(ste != NULL){
-				
 				if(ste->kind() == SymTabEntry::Kind::WHILE_BLOCK_KIND) {
 				    vector<int> newWl = ((WhileBlockEntry*)ste)->copyWhileLabel();
 				    whileBlockEntry = new WhileBlockEntry(newWl, yylinenum);
@@ -311,16 +310,16 @@ while_hdr		: TOK_WHILE {
 			        else 
 				    whileBlockEntry = new WhileBlockEntry(wl, yylinenum);
 			    
-			    ste->incrementWhileCnt();
-			    whileBlockEntry->insertWhileLabel(ste->getWhileCnt());
-			    insertSymbolErrCheck(whileBlockEntry);
-			    enterScopeErrCheck(whileBlockEntry);
+				ste->incrementWhileCnt();
+				whileBlockEntry->insertWhileLabel(ste->getWhileCnt());
+				insertSymbolErrCheck(whileBlockEntry);
+				enterScopeErrCheck(whileBlockEntry);
 			    }
 
 			    else{
-			    BlockEntry *be = new BlockEntry("unknown", yylinenum);
-			    insertSymbolErrCheck(be);
-			    enterScopeErrCheck(be);
+				BlockEntry *be = new BlockEntry("unknown", yylinenum);
+				insertSymbolErrCheck(be);
+				enterScopeErrCheck(be);
 			    }
 			    
 			}
@@ -332,15 +331,15 @@ while_stmt		: while_hdr expr_star statement_star {
 
 break_stmt		: TOK_BREAK {
 			    SymTabEntry *ste = stm.currentScope();
-			    if(ste == NULL || (ste != NULL && ste->kind() != SymTabEntry::Kind::BLOCK_KIND))
+			    if(ste == NULL || (ste != NULL && ste->kind() != SymTabEntry::Kind::WHILE_BLOCK_KIND))
 			    {
 				ste = new BlockEntry("unknown", yylinenum);
 			    }
-			    $$ = new BreakStmtNode(1, (BlockEntry*)ste, yylinenum);
+			    $$ = new BreakStmtNode(0, (BlockEntry*)ste, yylinenum);
 			}
 			| TOK_BREAK TOK_UINTNUM {
 			    SymTabEntry *ste = stm.currentScope();
-			    if(ste == NULL || (ste != NULL && ste->kind() != SymTabEntry::Kind::BLOCK_KIND))
+			    if(ste == NULL || (ste != NULL && ste->kind() != SymTabEntry::Kind::WHILE_BLOCK_KIND))
 			    {
 				ste = new BlockEntry("unknown", yylinenum);
 			    }
