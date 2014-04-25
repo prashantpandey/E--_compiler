@@ -133,4 +133,9 @@
 	Code Generation:
 		> CodeGen.h contains the new Classes.
 		> driveparser will call genFinalCode in GlobalEntry 
-		> 
+		> Special Purpose Register
+			> SP - R999
+			> BP - R998
+			> Global Section - R000
+			> Return - R997
+			> 
