@@ -90,7 +90,7 @@ public:
 
     string returnStringLabel() {
         string label;
-        int i = 0;
+        unsigned int i = 0;
         for(i = 0; i <= whileLabel_.size(); i++) {
             label.append( to_string(whileLabel_[i]));
         }
