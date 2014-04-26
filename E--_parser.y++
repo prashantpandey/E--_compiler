@@ -26,24 +26,24 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 	varEntry->varKind(v);
 	varEntry->type(type);
 	if(Type::isFloat(type->tag()) && v == VariableEntry::VarKind::GLOBAL_VAR) {
-	    if(currentScope->getCntF() < RegMgr::GLOBAL_MAX_REG_COUNT) {
+	    if(currentScope->getCntF() < GLOBAL_MAX_REG_COUNT) {
 		currentScope->incrCntF();
 		varEntry->offSet(currentScope->getCnt());
 	    }
 	    else {
 		currentScope->setMem();
-		varEntry->offSet(currentScope->getCnt() - RegMgr::GLOBAL_MAX_REG_COUNT);
+		varEntry->offSet(currentScope->getCnt() - GLOBAL_MAX_REG_COUNT);
 		currentScope->incrementCnt(Type::getTypeSize(type));
 	    }
 	}
 	else if(v == VariableEntry::VarKind::GLOBAL_VAR) {
-	    if(currentScope->getCntI() < RegMgr::GLOBAL_MAX_REG_COUNT) {
+	    if(currentScope->getCntI() < GLOBAL_MAX_REG_COUNT) {
 		currentScope->incrCntI();
 		varEntry->offSet(currentScope->getCnt());
 	    }
 	    else {
 		currentScope->setMem();
-		varEntry->offSet(currentScope->getCnt() - RegMgr::GLOBAL_MAX_REG_COUNT);
+		varEntry->offSet(currentScope->getCnt() - GLOBAL_MAX_REG_COUNT);
 		currentScope->incrementCnt(Type::getTypeSize(type));
 	    }
 	}
