@@ -131,6 +131,8 @@ public:
         vkind_ = v;
         initVal(init);
         const_ = false;
+	inMem = false;
+	regName_ = "";
     };
 
     VariableEntry(const VariableEntry &v);
@@ -173,6 +175,12 @@ public:
         initVal_ = init;
     };
 
+    void setMem() { inMem_ = true; };
+    bool isMem() { return inMem_; };
+
+    void setReg(string regName) { regName_ = regName; };
+    string getReg() { return regName_; };
+
     void print(ostream& os, int indent=0) const;
 
 private:
@@ -180,6 +188,8 @@ private:
     int offSet_;
     bool const_;
     ExprNode* initVal_;
+    bool inMem_;
+    string regName_;
 };
 
 class ClassEntry: public SymTabEntry {
