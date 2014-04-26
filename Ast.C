@@ -425,11 +425,11 @@ const Type* BreakStmtNode::typeCheck() const {
 	errMsg("break statement is not declared inside a while loop", this);
 	return &Type::errorType;
     }
-    else if(num() == blockEntry()->getWhileCnt()) {
+    else if(num() <= ((WhileBlockEntry*)blockEntry())->nestedWhileCount()) {
         return &Type::voidType;
     }
     else {
-	errMsg("break statemet doesn't have the correct number argument", this);
+	errMsg("break statement doesn't have the correct number argument", this);
 	return &Type::errorType;
     }
     return &Type::errorType;

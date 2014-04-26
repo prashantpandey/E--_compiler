@@ -301,14 +301,20 @@ while_hdr		: TOK_WHILE {
 			    vector<int> wl;
 			    WhileBlockEntry *whileBlockEntry;
 			    SymTabEntry *ste = stm.currentScope();
+			    //string label;
+
 
 			    if(ste != NULL){
 				if(ste->kind() == SymTabEntry::Kind::WHILE_BLOCK_KIND) {
+				    //label = (((whileBlockEntry*)ste)->returnStringLabel()).append(to_string(ste->getWhileCnt()+1));
 				    vector<int> newWl = ((WhileBlockEntry*)ste)->copyWhileLabel();
 				    whileBlockEntry = new WhileBlockEntry(newWl, yylinenum);
 				}
-			        else 
+			        else {
+
+				    //label = to_string(ste->getWhileCnt()+1);
 				    whileBlockEntry = new WhileBlockEntry(wl, yylinenum);
+				}
 			    
 				ste->incrementWhileCnt();
 				whileBlockEntry->insertWhileLabel(ste->getWhileCnt());
