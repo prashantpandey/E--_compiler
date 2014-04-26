@@ -3,6 +3,7 @@
 #include "Ast.h"
 #include "ParserUtil.h"
 #include "Error.h"
+#include "RegMgr.h"
 
 using namespace std;
 
@@ -24,8 +25,28 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 	VariableEntry *varEntry = *it;
 	varEntry->varKind(v);
 	varEntry->type(type);
-	varEntry->offSet(currentScope->getCnt());
-	currentScope->incrementCnt(Type::getTypeSize(type));
+	if(Type::isFloat(type->tag()) && v == VariableEntry::VarKind::GLOBAL_VAR) {
+	    if(currentScope->getCntF() < GLOBAL_MAX_REG_COUNT) {
+		currentScope->incrCntF();
+		varEntry->offSet(currentScope->getCnt());
+	    }
+	    else {
+		currentScope->setMem();
+		varEntry->offSet(currentScope->getCnt() - GLOBAL_MAX_REG_COUNT);
+		currentScope->incrementCnt(Type::getTypeSize(type));
+	    }
+	}
+	else if(v == VariableEntry::VarKind::GLOBAL_VAR) {
+	    if(currentScope->getCntI() < GLOBAL_MAX_REG_COUNT) {
+		currentScope->incrCntI();
+		varEntry->offSet(currentScope->getCnt());
+	    }
+	    else {
+		currentScope->setMem();
+		varEntry->offSet(currentScope->getCnt() - GLOBAL_MAX_REG_COUNT);
+		currentScope->incrementCnt(Type::getTypeSize(type));
+	    }
+	}
 	insertSymbolErrCheck(varEntry);
     }
 }

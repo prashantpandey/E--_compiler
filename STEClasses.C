@@ -39,19 +39,21 @@ void GlobalEntry::genFinalCode(string progName) {
     const SymTab *st = NULL;
     progCode_ = new ProgCode(progName);
     
-    // initialize the global var in global/static section
+    // initialize the global vars in global/static section
     if ((st = symTab()) != nullptr) {
         SymTab::const_iterator it = st->begin();
+	CodeModule* codeMod = NULL;
         for (; it != (st->end()); ++it) {
             SymTabEntry *ste = (SymTabEntry *)(*it);
             if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
-                // not responsible for the bug.. feeling too sleepy
-		CodeModule* codeMod = new CodeModule("GlobalSec");
+		codeMod = new CodeModule("GlobalSec");
                 codeMod->insertInstructionSet(((VariableEntry*)ste)->codeGen());
             }
         }
+	progCode_->insertModule(codeMod);
     }
-
+    
+    // TODO: Add code for function and rule modules
 }
 
 void EventEntry::print(ostream& out, int indent) const

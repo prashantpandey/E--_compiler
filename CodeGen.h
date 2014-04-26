@@ -36,6 +36,10 @@ public:
     
     ~ProgCode() {};
 
+    void insertModule(CodeModule* codeMod) {
+	modules_->push_back(codeMod);	
+    }
+
 private:
     string progName_;
     vector<CodeModule*> *modules_;
@@ -52,8 +56,12 @@ public:
 	delete instructions_;
     };
 
-    void insertInstruction(Instruction *instr) {
+    void insertInstructionSet(Instruction *instr) {
         instructions_->push_back(instr);
+    }
+
+    void insertInstructionSet(vector<Instruction *> *instrVector) {
+        instructions_->insert(instructions_->end(), instrVector->begin(), instrVector->end());
     }
 
 private:

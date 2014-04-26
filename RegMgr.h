@@ -3,16 +3,15 @@
  *
  *       Filename:  RegMgr.h
  *
- *    Description:  : Manages register allocation and keeps bookmarking of free registers.
-
+ *    Description:  Manages register allocation and keeps bookmarking of free registers.
  *
  *        Version:  1.0
  *        Created:  04/25/2014 12:49:33 PM
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  YOUR NAME (),
- *   Organization:
+ *         Author:  Ankur, Prashant, Kavita
+ *   Organization:  Stony Brook University
  *
  * =====================================================================================
  */
@@ -35,6 +34,8 @@ using namespace std;
 #define RETF_REG "F000"
 #define GLOBALI_REG "R003"
 #define GLOBALF_REG "F001"
+
+#define GLOBAL_MAX_REG_COUNT 100
 
 #define TOTAL_REG 1000
 #define INT_REG_AVAIL 996
