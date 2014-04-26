@@ -25,6 +25,7 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <stack>
 
 using namespace std;
 

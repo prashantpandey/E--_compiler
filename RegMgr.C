@@ -77,7 +77,8 @@ void RegMgr::purgeReg(string regName) {
     tmp++;
     int reg = atoi(tmp);
 
-    switch(regName[0]) {
+    switch(regName[0])
+    {
     case 'R' :
         iCountStart_ = reg - ( TOTAL_REG - INT_REG_AVAIL);
         iReg_[iCountStart_] = true;
