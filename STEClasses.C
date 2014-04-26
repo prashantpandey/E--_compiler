@@ -42,10 +42,11 @@ void GlobalEntry::genFinalCode(string progName) {
     // initialize the global vars in global/static section
     if ((st = symTab()) != nullptr) {
         SymTab::const_iterator it = st->begin();
+	CodeModule* codeMod = NULL;
         for (; it != (st->end()); ++it) {
             SymTabEntry *ste = (SymTabEntry *)(*it);
             if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
-		CodeModule* codeMod = new CodeModule("GlobalSec");
+		codeMod = new CodeModule("GlobalSec");
                 codeMod->insertInstructionSet(((VariableEntry*)ste)->codeGen());
             }
         }
