@@ -152,7 +152,7 @@ public:
 
     void checkType() const;
 
-    CodeModule* codeGen() const;
+    vector<Instruction*>* codeGen() const;
 
     const ExprNode* initVal() const {
         return initVal_;
