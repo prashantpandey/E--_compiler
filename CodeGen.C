@@ -41,7 +41,7 @@
 //
 
 Instruction* Instruction::incrSP()  {
-    Instruction *instr = new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG);
+    Instruction *instr = new Instruction(Instruction::InstructionSet::SUB, SP_REG, "1", SP_REG);
     return instr;
 }
 

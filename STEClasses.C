@@ -90,9 +90,52 @@ void VariableEntry::checkType() const
 }
 
 vector<Instruction*>* VariableEntry::codeGen() const {
-     
+    
+    string regName;
+    vector<Instruction*> inst_vec;
     switch(varKind()){
-	case VariableEntry::VarKind::GLOBAL_VAR :  if(inMem)
+	case VariableEntry::VarKind::GLOBAL_VAR :  
+	
+
+						    regName = RegMgr->fetchNextAvailReg(!isFloat(type->tag()));
+						    regName_ = regName;
+
+						    // initVal type is ExprNode*, check how does this work
+						    if(isInt(type->tag()))
+						    {
+		         				inst_vec.push_back(Instruction(Instruction::InstructionSet::MOVI, initVal(), regName));
+
+							/* If is mem is set then storing the corresponding
+							 * global variable register to the global section,
+							 * updating the stack pointer and purging the register*/
+							
+							if(isMem_){
+							    inst_vec.push_back(Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
+							    inst_vec.push_back(decrSP());
+							    purgeReg(regName);
+							}
+						    
+						    }
+
+						    else if(isString(type->tag())){
+							inst_vec.push_back(Instruction(Instruction::InstructionSet::MOVS, initVal(), regName));
+							if(isMem_){
+							    inst_vec.push_back(Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
+							    inst_vec.push_back(decrSP());
+							    purgeReg(regName);
+							}
+						    
+						    }
+
+						    else if(isFloat(type->tag())){
+							inst_vec.push_back(Instruction(Instruction::InstructionSet::MOVF, initVal(), regName));
+							if(isMem_){
+							    inst_vec.push_back(Instruction(Instruction::InstructionSet::STF, regName, GLOBALF_REG));
+							    inst_vec.push_back(decrSP());
+							    purgeReg(regName);
+							}
+						    
+						    }
 						    
 						    break;
 	case VariableEntry::VarKind::LOCAL_VAR :

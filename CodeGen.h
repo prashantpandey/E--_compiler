@@ -106,7 +106,7 @@ public:
         return label_;
     };
     
-    static Instruction* incrSP();
+    static Instruction* decrSP();
 
 private:
     InstructionSet instr_;
