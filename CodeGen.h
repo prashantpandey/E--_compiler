@@ -36,6 +36,10 @@ public:
     
     ~ProgCode() {};
 
+    void insertModule(CodeModule* codeMod) {
+	modules_->push_back(codeMod);	
+    }
+
 private:
     string progName_;
     vector<CodeModule*> *modules_;
