@@ -62,12 +62,23 @@ class RuleBlockEntry: public BlockEntry {
 class WhileBlockEntry: public BlockEntry {
  public:
   WhileBlockEntry(vector<int> wl, int line=0, int column=0, string file=""):
-    BlockEntry("while", line,column, file) { kind(SymTabEntry::Kind::WHILE_BLOCK_KIND); whileLabel_ = wl;};
+    BlockEntry(newName("while"), line,column, file) { kind(SymTabEntry::Kind::WHILE_BLOCK_KIND); whileLabel_ = wl;};
   ~WhileBlockEntry() {};
   void print(ostream& out, int indent=0) const; 
 
   void insertWhileLabel(int wl) { whileLabel_.push_back(wl);};
   void setWhileLabel(vector<int> wl) { whileLabel_ = wl; };
+
+  string returnStringLabel() {
+	string label;
+	int i = 0;
+	for(i = 0; i <= whileLabel_.size(); i++) {
+	    label.append( to_string(whileLabel_[i])); 
+	    }
+	return label;
+   }
+
+  int nestedWhileCount() { return whileLabel_.size(); };
   vector<int> copyWhileLabel() { vector<int> copiedWhileLabel(whileLabel_); return copiedWhileLabel; };
 
  private:
