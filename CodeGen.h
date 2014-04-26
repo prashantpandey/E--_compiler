@@ -25,12 +25,27 @@
 
 using namespace std;
 class Instruction;
+class CodeModule;
+
+class ProgCode {
+public:
+    ProgCode(string progName) {
+	progName_ = progName;
+	modules_ = new vector<CodeModule*>;
+    }
+    
+    ~ProgCode() {};
+
+private:
+    string progName_;
+    vector<CodeModule*> *modules_;
+
+};
 
 class CodeModule {
-
 public:
-    CodeModule(string progName) {
-        progName_ = progName;
+    CodeModule(string moduleName) {
+        moduleName_ = moduleName;
         instructions_ = new vector<Instruction*>;
     }
 
@@ -40,15 +55,13 @@ public:
         instructions_->push_back(instr);
     }
 
-    static CodeModule* incrSP();
 
 private:
-    string progName_;
+    string moduleName_;
     vector<Instruction*> *instructions_;
 };
 
 class Instruction {
-
 public:
     enum InstructionSet {
         ADD, SUB, DIV, MUL, MOD, FADD, FSUB, FDIV, FMUL,
@@ -92,6 +105,8 @@ public:
     string getLabel() {
         return label_;
     };
+    
+    static Instruction* incrSP();
 
 private:
     InstructionSet instr_;
