@@ -35,6 +35,20 @@ void GlobalEntry::checkType() const
     }
 }
 
+void GlobalEntry::genFinalCode(string progName) {
+    const SymTab *st = NULL;
+    if ((st = symTab()) != nullptr) {
+	SymTab::const_iterator it = st->begin();
+	for (; it != (st->end()); ++it) {
+	    SymTabEntry *ste = (SymTabEntry *)(*it);
+	    if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
+		// not responsible for the bug.. feeling too sleepy
+		finalCode_.push_back(((VariableEntry*)ste)->codeGen());
+		finalCode_.push_back(CodeModule::incrSP());
+	    }
+	}
+    }
+}
 
 void EventEntry::print(ostream& out, int indent) const
 {
@@ -58,7 +72,7 @@ void VariableEntry::checkType() const
     if (initVal()) {
 	const Type *rhsT = initVal()->typeCheck();
 	if (isConst()) {
-		errMsg("Cannot change read only variables.", this);
+	    errMsg("Cannot change read only variables.", this);
 	}
 	else if (rhsT->tag() != Type::TypeTag::ERROR) {
 	    if (rhsT->tag() == Type::TypeTag::CLASS && !Type::isSubType(rhsT, type())) {
@@ -71,6 +85,9 @@ void VariableEntry::checkType() const
     }	
 }
 
+CodeModule* VariableEntry::codeGen() const {
+
+}
 
 void FunctionEntry::checkType() const
 {
@@ -110,18 +127,18 @@ void FunctionEntry::print(ostream& out, int indent) const
     const SymTab *st = NULL;
     int i = 0;
     if ((st = symTab()) != nullptr) {
-        SymTab::const_iterator it = st->begin();
-        for (i=0; it != (st->end()); i++, ++it)  {
-            SymTabEntry *ste = (SymTabEntry *)(*it);
-            if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
-                VariableEntry *ve = (VariableEntry *) ste;
-                if (ve->varKind() != VariableEntry::VarKind::PARAM_VAR) {
-		   break;
-                }
-            } else {
-                break;
-            }
-        }
+	SymTab::const_iterator it = st->begin();
+	for (i=0; it != (st->end()); i++, ++it)  {
+	    SymTabEntry *ste = (SymTabEntry *)(*it);
+	    if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
+		VariableEntry *ve = (VariableEntry *) ste;
+		if (ve->varKind() != VariableEntry::VarKind::PARAM_VAR) {
+		    break;
+		}
+	    } else {
+		break;
+	    }
+	}
 	if (i != 0) {
 	    printST(out, indent, '\0', '\0', false, 0, i);
 	}

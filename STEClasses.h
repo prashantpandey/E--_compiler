@@ -40,7 +40,7 @@ class GlobalEntry: public SymTabEntry {
 
  private:
   vector<RuleNode*> rules_;
-  FinalCode *finalCode_;
+  vector<CodeModule*> finalCode_;
 };
 
 class BlockEntry: public SymTabEntry {
@@ -58,7 +58,6 @@ class RuleBlockEntry: public BlockEntry {
     BlockEntry(newName("rule"), line,column, file) { kind(SymTabEntry::Kind::RULE_BLOCK_KIND);};
   ~RuleBlockEntry() {};
 };
-
 
 class WhileBlockEntry: public BlockEntry {
  public:
@@ -108,11 +107,13 @@ class VariableEntry: public SymTabEntry {
 
   VarKind varKind() const { return vkind_;};
   void varKind(VarKind v) { vkind_ = v;};
-
+  
   int offSet() const { return offSet_;} ;
   void offSet(int o) {offSet_ = o;};
 
   void checkType() const;
+ 
+  CodeModule* codeGen() const;  
 
   const ExprNode* initVal() const { return initVal_;}
   ExprNode* initVal() { return initVal_;};
