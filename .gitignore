@@ -7,4 +7,9 @@ outputs
 parser
 demo
 *.o
-
+cscope.out
+core
+.*.swp
+.*.swo
+.*.swm
+out

@@ -48,7 +48,9 @@ public:
         instructions_ = new vector<Instruction*>;
     }
 
-    ~CodeModule() {};
+    ~CodeModule() {
+	delete instructions_;
+    };
 
     void insertInstruction(Instruction *instr) {
         instructions_->push_back(instr);
