@@ -40,8 +40,8 @@
 //  Code Gen:
 //
 
-CodeModule* CodeModule::incrSP()  {
-    // Instruction *instr = new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG);
-    //return instr;
+Instruction* Instruction::incrSP()  {
+    Instruction *instr = new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG);
+    return instr;
 }
 
