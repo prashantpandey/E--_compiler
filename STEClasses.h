@@ -84,11 +84,14 @@ public:
     void insertWhileLabel(int wl) {
         whileLabel_.push_back(wl);
     };
+    
+    /*
     void setWhileLabel(vector<int> wl) {
         whileLabel_ = wl;
     };
+    */
 
-    string returnStringLabel() {
+    string returnStringLabel() const {
         string label;
         unsigned int i = 0;
         for(i = 0; i <= whileLabel_.size(); i++) {
@@ -97,10 +100,11 @@ public:
         return label;
     }
 
-    int nestedWhileCount() {
+    int nestedWhileCount() const {
         return whileLabel_.size();
     };
-    vector<int> copyWhileLabel() {
+    
+    vector<int> copyWhileLabel() const {
         vector<int> copiedWhileLabel(whileLabel_);
         return copiedWhileLabel;
     };
