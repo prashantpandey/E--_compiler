@@ -23,7 +23,7 @@ extern string newName(const string&);
 class GlobalEntry: public SymTabEntry {
 public:
     GlobalEntry(string name, int line=0, int column=0, string file=""):
-        SymTabEntry(name, SymTabEntry::Kind::GLOBAL_KIND, line, column,file), rules_() {};
+        SymTabEntry(name, SymTabEntry::Kind::GLOBAL_KIND, line, column,file), rules_() { globalCntI_ = 0; globalCntF_ = 0; };
     ~GlobalEntry() {};
 
     void checkType() const;
@@ -49,8 +49,10 @@ public:
     void print(ostream&, int indent=0) const;
 
 private:
+    int globalCntI_;
+    int globalCntF_;
     vector<RuleNode*> rules_;
-    vector<CodeModule*> finalCode_;
+    ProgCode* progCode_;
 };
 
 class BlockEntry: public SymTabEntry {
