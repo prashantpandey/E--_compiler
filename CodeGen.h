@@ -39,7 +39,6 @@ public:
 private:
     string progName_;
     vector<CodeModule*> *modules_;
-
 };
 
 class CodeModule {
@@ -56,7 +55,6 @@ public:
     void insertInstruction(Instruction *instr) {
         instructions_->push_back(instr);
     }
-
 
 private:
     string moduleName_;

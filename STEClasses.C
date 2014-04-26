@@ -37,17 +37,21 @@ void GlobalEntry::checkType() const
 
 void GlobalEntry::genFinalCode(string progName) {
     const SymTab *st = NULL;
+    progCode_ = new ProgCode(progName);
+    
+    // initialize the global var in global/static section
     if ((st = symTab()) != nullptr) {
         SymTab::const_iterator it = st->begin();
         for (; it != (st->end()); ++it) {
             SymTabEntry *ste = (SymTabEntry *)(*it);
             if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
                 // not responsible for the bug.. feeling too sleepy
-                finalCode_.push_back(((VariableEntry*)ste)->codeGen());
-                finalCode_.push_back(CodeModule::incrSP());
+		CodeModule* codeMod = new CodeModule("GlobalSec");
+                codeMod->insertInstructionSet(((VariableEntry*)ste)->codeGen());
             }
         }
     }
+
 }
 
 void EventEntry::print(ostream& out, int indent) const
