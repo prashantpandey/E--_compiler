@@ -11,43 +11,60 @@
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  YOUR NAME (), 
- *   Organization:  
+ *         Author:  YOUR NAME (),
+ *   Organization:
  *
  * =====================================================================================
  */
 
 
-#ifndef CODEGEN_H
-#define CODEGEN_H
+#ifndef REGMGR_H
+#define REGMGR_H
 
-#define SP_REG "R999"
-#define BP_REG "R998"
-#define RETI_REG "R997"
-#define RETF_REG "F997"
-#define GLOBALI_REG "R996"
-#define GLOBALF_REG "F996"
+#include <sstream>
+#include <string>
+#include <iostream>
+#include <iomanip>
 
-#define INT_REG_AVAIL 
+using namespace std;
+
+#define SP_REG "R000"
+#define BP_REG "R001"
+#define RETI_REG "R002"
+#define RETF_REG "F000"
+#define GLOBALI_REG "R003"
+#define GLOBALF_REG "F001"
+
+#define TOTAL_REG 1000
+#define INT_REG_AVAIL 996
+#define FLOAT_REG_AVAIL 998
 
 class RegMgr {
 
-    private:
+private:
 
-	static bool *iReg, *fReg;
-	RegMgr();
+    bool *iReg_, *fReg_;
+    int iCountStart_, fCountStart_;
 
-    public:
-	static RegMgr& getInstance() {
-	    static RegMgr instance; // Guaranteed to be destroyed.
-	    return instance;
-	}
+    RegMgr();
 
-	string fetchNextAvailReg(bool isInt);
-	void purgeReg(string regName);
+public:
+    static RegMgr& getInstance() {
+        static RegMgr instance; // Guaranteed to be destroyed.
+        return instance;
+    }
+
+    string fetchNextAvailReg(bool isInt);
+    void purgeReg(string regName);
+    
+
+    ~RegMgr() {
+	delete iReg_;
+	delete fReg_;
+    }
 
 };
 
-RegMgr *regMgr = &RegMgr::getInstance();
+
 
 #endif

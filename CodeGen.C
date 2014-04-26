@@ -3,21 +3,20 @@
  *
  *       Filename:  CodeGen.C
  *
- *    Description:  
+ *    Description:
  *
  *        Version:  1.0
  *        Created:  04/25/2014 04:05:40 AM
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  , 
- *   Organization:  
+ *         Author:  ,
+ *   Organization:
  *
  * =====================================================================================
  */
 
-#include <CodeGen.h>
-#include <RegMgr.h>
+#include "CodeGen.h"
 
 //  Add  book keeping for the special puspose registers
 //  Stack pointer: R999
@@ -41,8 +40,8 @@
 //  Code Gen:
 //
 
-Instruction* CodeModule::incrSP() const {
-	Instruction *instr = new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG);
-	return instr;	
+CodeModule* CodeModule::incrSP()  {
+   // Instruction *instr = new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG);
+    //return instr;
 }
-	
+

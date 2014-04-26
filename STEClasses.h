@@ -102,7 +102,7 @@ class VariableEntry: public SymTabEntry {
 
   void checkType() const;
  
-  Instruction codeGen() const;  
+  CodeModule* codeGen() const;  
 
   const ExprNode* initVal() const { return initVal_;}
   ExprNode* initVal() { return initVal_;};
