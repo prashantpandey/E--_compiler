@@ -45,7 +45,7 @@ string RegMgr::fetchNextAvailReg(bool isInt) {
         countStart = fCountStart_;
         os << "F";
     } else {
-        os << "I";
+        os << "R";
     }
     int tmp = countStart;
 
@@ -79,10 +79,10 @@ void RegMgr::purgeReg(string regName) {
 
     switch(regName[0]) {
     case 'R' :
-        iCountStart_ = reg;
+        iCountStart_ = reg - ( TOTAL_REG - INT_REG_AVAIL);
         iReg_[iCountStart_] = true;
     case 'F' :
-        fCountStart_ = reg;
+        fCountStart_ = reg - (TOTAL_REG - FLOAT_REG_AVAIL);
         fReg_[fCountStart_] = true;
     }
 }
