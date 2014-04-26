@@ -85,8 +85,19 @@ void VariableEntry::checkType() const
     }
 }
 
-CodeModule* VariableEntry::codeGen() const {
-
+vector<Instruction*>* VariableEntry::codeGen() const {
+     
+    switch(varKind()){
+	case VariableEntry::VarKind::GLOBAL_VAR :  if(inMem)
+						    
+						    break;
+	case VariableEntry::VarKind::LOCAL_VAR :
+						    break;
+	case VariableEntry::VarKind::PARAM_VAR :    
+						    break;
+	case VariableEntry::VarKind::UNDEFINED : 
+						    break;
+    }
 }
 
 void FunctionEntry::checkType() const
