@@ -14,7 +14,7 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <sys/wait.h> 
+#include <sys/wait.h>
 
 #include <set>
 #include <map>
@@ -29,25 +29,27 @@
 
 using namespace std;
 
-#define step " "; 
+#define step " ";
 const int STEP_INDENT = 2;
 
 
 inline void prtSpace(ostream& os, int n) {
-  for (int i = 0; i < n; i++)
-    os << step;
+    for (int i = 0; i < n; i++)
+        os << step;
 }
 
 inline void prtTab(ostream& os, int n) {
-  for (int i=0; i < n ; i++)
-    os << "\t";
+    for (int i=0; i < n ; i++)
+        os << "\t";
 }
 
 inline void prtln(ostream& os, int n) {
-  os << endl; prtSpace(os, n);
+    os << endl;
+    prtSpace(os, n);
 }
 
 inline void endln(ostream& os, int n) {
-  os << ';'; prtln(os, n);
+    os << ';';
+    prtln(os, n);
 }
 #endif

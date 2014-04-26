@@ -18,7 +18,8 @@ class ProgramElem;
 
 void errMsg(const string&, int=0, int=0, const char* file="");
 void inline errMsg(const char* s, int ln=0, int col=0, const char* file="") {
-  errMsg(string(s), ln, col, file);}
+    errMsg(string(s), ln, col, file);
+}
 void errMsg(const string&, const ProgramElem*);
 void warnMsg(const string&, int=0,int=0, const char* file="");
 void warnMsg(const string&, const ProgramElem*);

@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
- #include <sys/types.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -33,14 +33,14 @@ extern YYSTYPE yylval;
 ofstream outs;
 
 void errMsg(const char* s) {
-  cerr << yyfilename << ":" << yylinenum << ":" << s << endl;
+    cerr << yyfilename << ":" << yylinenum << ":" << s << endl;
 };
 
 int errs;
 void yyerror(const char *s)
 {
-  errMsg(s);
-  errs++;
+    errMsg(s);
+    errs++;
 }
 
 //SymTabMgr stm;
@@ -54,82 +54,83 @@ extern FILE* yyin;
 
 void
 printUsage(const char* cmd) {
-   cerr << "Usage: " << cmd << "<input file>\n" <<
-	"Environment variable CPP can be used to override the default command\n"
-    "for running cpp program. This variable can include the program name\n"
-    "as well as command-line arguments to the command. Similarly, the\n"
-    "environment variable CC can specify the command to be run for compiling\n"
-    "C code produced by this compiler, but the options to the compiler can\n"
-    "specified independently using the environment variable CFLAGS.\n";
+    cerr << "Usage: " << cmd << "<input file>\n" <<
+         "Environment variable CPP can be used to override the default command\n"
+         "for running cpp program. This variable can include the program name\n"
+         "as well as command-line arguments to the command. Similarly, the\n"
+         "environment variable CC can specify the command to be run for compiling\n"
+         "C code produced by this compiler, but the options to the compiler can\n"
+         "specified independently using the environment variable CFLAGS.\n";
 }
 
-int 
+int
 parseOptions(int argc, char* argv[]) {
 
-  size_t pos;
-  cppShellCmd = DEFAULT_CPP_PROG_NAME;
-  cppShellCmd += " ";
+    size_t pos;
+    cppShellCmd = DEFAULT_CPP_PROG_NAME;
+    cppShellCmd += " ";
 
-  ccShellCmd = DEFAULT_CC_PROG_NAME;
-  ccShellCmd += " ";
+    ccShellCmd = DEFAULT_CC_PROG_NAME;
+    ccShellCmd += " ";
 
-  if ((argc > 2) || (argc < 2)) {
-     cerr << "Please specify only a single input file\n";
-     return -1;
-  }
-  else {
-     inputFile = argv[1];
-  }
+    if ((argc > 2) || (argc < 2)) {
+        cerr << "Please specify only a single input file\n";
+        return -1;
+    }
+    else {
+        inputFile = argv[1];
+    }
 
-  if (*inputFile == '\0') 
-    return -1;
+    if (*inputFile == '\0')
+        return -1;
 
-  of = inputFile;
-  if ((pos = of.rfind('.')) == of.npos) {
-     cerr << "Input files must have a `.i' suffix\n";
-     exit(1);
-  }
-  of.erase(pos, of.size());
-  outputFile = of + ".c";
+    of = inputFile;
+    if ((pos = of.rfind('.')) == of.npos) {
+        cerr << "Input files must have a `.i' suffix\n";
+        exit(1);
+    }
+    of.erase(pos, of.size());
+    outputFile = of + ".c";
 
-  return 0;
+    return 0;
 }
 
-int 
+int
 main(int argc, char *argv[], char *envp[]) {
 
-  string ccCmd; int ofd;
-  int optionsOK = parseOptions(argc, argv);
-  if (optionsOK < 0)
-	return -1;
+    string ccCmd;
+    int ofd;
+    int optionsOK = parseOptions(argc, argv);
+    if (optionsOK < 0)
+        return -1;
 
-  cppShellCmd += inputFile;
-  cppShellCmd += " ";
+    cppShellCmd += inputFile;
+    cppShellCmd += " ";
 
-  outs.open(outputFile.c_str());
+    outs.open(outputFile.c_str());
 
-  /*
-  if (((ofd = open(outputFile.c_str(), O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR)) < 0) ||
-      (dup2(ofd, 1) < 0)) {
-     cerr << "Unable to open file " << outputFile << " for writing; exiting\n";
-     perror("");
-     exit(1);
-  }
-  */
+    /*
+    if (((ofd = open(outputFile.c_str(), O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR)) < 0) ||
+        (dup2(ofd, 1) < 0)) {
+       cerr << "Unable to open file " << outputFile << " for writing; exiting\n";
+       perror("");
+       exit(1);
+    }
+    */
 
-  if ((yyin = popen(cppShellCmd.c_str(), "r")) == NULL) {
-    cerr << "Unexpected error in reading input file\n";
-    return 1;
-  }
+    if ((yyin = popen(cppShellCmd.c_str(), "r")) == NULL) {
+        cerr << "Unexpected error in reading input file\n";
+        return 1;
+    }
 
-  yyparse();
-  if (errs > 0)
-     return errs;
+    yyparse();
+    if (errs > 0)
+        return errs;
 
-  outs.close();
-  ccCmd = ccShellCmd + " -o " + of + " " + outputFile;
+    outs.close();
+    ccCmd = ccShellCmd + " -o " + of + " " + outputFile;
 
-  cerr << ccCmd << endl;
-  const char* s = ccCmd.c_str();
-  return system(s);
+    cerr << ccCmd << endl;
+    const char* s = ccCmd.c_str();
+    return system(s);
 }

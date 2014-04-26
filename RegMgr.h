@@ -56,11 +56,11 @@ public:
 
     string fetchNextAvailReg(bool isInt);
     void purgeReg(string regName);
-    
+
 
     ~RegMgr() {
-	delete iReg_;
-	delete fReg_;
+        delete iReg_;
+        delete fReg_;
     }
 
 };
