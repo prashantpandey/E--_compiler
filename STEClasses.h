@@ -46,6 +46,12 @@ public:
         rules_.push_back(re);
     };
 
+    int getCntI() { return globalCntI_; };
+    int getCntF() { return globalCntF_; };
+
+    void incrCntI() { globalCntI_++; };
+    void incrCntF() { globalCntF_++; };
+
     void print(ostream&, int indent=0) const;
 
 private:
