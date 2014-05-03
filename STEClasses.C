@@ -103,8 +103,6 @@ vector<Instruction*>* VariableEntry::codeGen() {
     case VariableEntry::VarKind::PARAM_VAR :
 
     case VariableEntry::VarKind::GLOBAL_VAR :
-
-
         regName = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
         regName_ = regName;
 	if(initVal() == NULL){
