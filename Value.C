@@ -38,8 +38,7 @@ Value::Value(const Value& v) {
 // **** Invariant for all constructors: type_ is non-null and correctly set,
 // **** and appropriate union field is properly initialized.
 
-void
-Value::print(ostream& os, int indent) const {
+void Value::print(ostream& os, int indent) const {
 
     Type::TypeTag t;
     if(!printType) {
@@ -71,27 +70,56 @@ Value::print(ostream& os, int indent) const {
     }
 }
 
+
+string Value::toString() const {
+
+    Type::TypeTag t;
+    ostringstream os;
+    switch (t = type_->tag()) {
+	case Type::ERROR:
+	    os << "ErrorValue ";
+	    break;
+	case Type::VOID:
+	    os << "VoidValue";
+	    break;
+	case Type::BOOL:
+	    os << ((bVal_ == false) ? "0" : "1");
+	    break;
+	default:
+	    if (Type::isString(type_->tag()))
+		if (sVal_ == NULL)
+		    os << "0";
+	    else if (Type::isInt(t))
+		if (Type::isSigned(t))
+		    os << iVal_;
+		else os << (unsigned int)iVal_;
+	    else if (Type::isFloat(t))
+		os << dVal_;
+    }
+    os.str();
+}
+}
 string
 Value::sval() const {
     if ((Type::isString(type_->tag())) && (sVal_ != NULL))
-        return *sVal_;
+	return *sVal_;
     else {
-        internalErr("Value::sval: Incorrect Type ");
-        return string();
+	internalErr("Value::sval: Incorrect Type ");
+	return string();
     }
 }
 
 bool
 Value::bval() const {
     if (type_->tag() != Type::BOOL)
-        internalErr("Value::bval: stored type is not bool");
+	internalErr("Value::bval: stored type is not bool");
     return bVal_;
 }
 
 int
 Value::ival() const {  // for bit, byte, unsigned/signed short/int, long
     if (Type::isInt(type_->tag()))
-        return iVal_;
+	return iVal_;
     internalErr("Value::ival: Incorrect Type ");
     return 0;
 }
@@ -99,19 +127,19 @@ Value::ival() const {  // for bit, byte, unsigned/signed short/int, long
 double
 Value::dval() const {
     if (Type::isFloat(type_->tag()))
-        return dVal_;
+	return dVal_;
     else {
-        internalErr("Value::dval: Incorrect Type ");
-        return 0.0;
+	internalErr("Value::dval: Incorrect Type ");
+	return 0.0;
     }
 }
 
 void
 Value::sval(string s) {
     if (Type::isString(type_->tag())) {
-        //if  (sVal_ != NULL)
-        //  delete sVal_;
-        sVal_ = new string(s);
+	//if  (sVal_ != NULL)
+	//  delete sVal_;
+	sVal_ = new string(s);
     }
     else internalErr("Value::sval: Incorrect Type ");
 }
@@ -119,14 +147,14 @@ Value::sval(string s) {
 void
 Value::ival(int i) {
     if (Type::isInt(type_->tag()))
-        iVal_ = i;
+	iVal_ = i;
     else internalErr("Value::ival: Incorrect Type ");
 }
 
 void
 Value::dval(double d) {
     if (Type::isFloat(type_->tag()))
-        dVal_ = d;
+	dVal_ = d;
     else internalErr("Value::dval: Incorrect Type ");
 }
 
