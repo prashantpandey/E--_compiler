@@ -160,7 +160,7 @@ public:
 
     void checkType() const;
 
-    vector<Instruction*>* codeGen() const;
+    vector<Instruction*>* codeGen();
 
     const ExprNode* initVal() const {
         return initVal_;
