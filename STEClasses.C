@@ -105,7 +105,7 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 						    regName_ = regName;
 
 						    // initVal type is ExprNode*, check how does this work
-						    if(isInt(type->tag()))
+						    if(Type::isInt(type->tag()))
 						    {
 		         				inst_vec.push_back(new Instruction(Instruction::InstructionSet::MOVI, initVal(), regName));
 
@@ -115,27 +115,27 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 							
 							if(isMem()){
 							    inst_vec.push_back(new Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
-							    inst_vec.push_back(CodeGen::decrSP());
+							    inst_vec.push_back(Instruction::decrSP());
 							    regMgr->purgeReg(regName);
 							}
 						    
 						    }
 
-						    else if(isString(type->tag())){
+						    else if(Type::isString(type->tag())){
 							inst_vec.push_back(new Instruction(Instruction::InstructionSet::MOVS, initVal(), regName));
 							if(isMem()){
 							    inst_vec.push_back(new Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
-							    inst_vec.push_back(CodeGen::decrSP());
+							    inst_vec.push_back(Instruction::decrSP());
 							    regMgr->purgeReg(regName);
 							}
 						    
 						    }
 
-						    else if(isFloat(type->tag())){
+						    else if(Type::isFloat(type->tag())){
 							inst_vec.push_back(new Instruction(Instruction::InstructionSet::MOVF, initVal(), regName));
 							if(isMem()){
 							    inst_vec.push_back(new Instruction(Instruction::InstructionSet::STF, regName, GLOBALF_REG));
-							    inst_vec.push_back(CodeGen::decrSP());
+							    inst_vec.push_back(Instruction::decrSP());
 							    regMgr->purgeReg(regName);
 							}
 						    
