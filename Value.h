@@ -2,6 +2,7 @@
 #define VALUE_H
 
 #include "Type.h"
+#include <sstream>
 
 class Value;
 class ProgramElem;

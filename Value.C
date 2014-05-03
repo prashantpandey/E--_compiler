@@ -74,7 +74,7 @@ void Value::print(ostream& os, int indent) const {
 string Value::toString() const {
 
     Type::TypeTag t;
-    ostringstream os;
+    std::ostringstream os;
     switch (t = type_->tag()) {
 	case Type::ERROR:
 	    os << "ErrorValue ";
@@ -86,17 +86,21 @@ string Value::toString() const {
 	    os << ((bVal_ == false) ? "0" : "1");
 	    break;
 	default:
-	    if (Type::isString(type_->tag()))
+	    if (Type::isString(type_->tag())) {
 		if (sVal_ == NULL)
 		    os << "0";
-	    else if (Type::isInt(t))
+		else
+		    os << sVal_;
+	    }
+	    else if (Type::isInt(t)) {
 		if (Type::isSigned(t))
 		    os << iVal_;
 		else os << (unsigned int)iVal_;
+	    }
 	    else if (Type::isFloat(t))
 		os << dVal_;
     }
-    os.str();
+    return os.str();
 }
 
 string
