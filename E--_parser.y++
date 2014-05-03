@@ -26,23 +26,23 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 	varEntry->varKind(v);
 	varEntry->type(type);
 	if(Type::isFloat(type->tag()) && v == VariableEntry::VarKind::GLOBAL_VAR) {
-	    if(currentScope->getCntF() < GLOBAL_MAX_REG_COUNT) {
-		currentScope->incrCntF();
-		varEntry->offSet(currentScope->getCnt());
+	    if(((GlobalEntry*)currentScope)->getCntF() < GLOBAL_MAX_REG_COUNT) {
+		((GlobalEntry*)currentScope)->incrCntF();
+		varEntry->offSet(((GlobalEntry*)currentScope)->getCnt());
 	    }
 	    else {
-		currentScope->setMem();
-		varEntry->offSet(currentScope->getCnt() - GLOBAL_MAX_REG_COUNT);
-		currentScope->incrementCnt(Type::getTypeSize(type));
+		((VariableEntry*)currentScope)->setMem();
+		varEntry->offSet(((GlobalEntry*)currentScope)->getCnt() - GLOBAL_MAX_REG_COUNT);
+		((GlobalEntry*)currentScope)->incrementCnt(Type::getTypeSize(type));
 	    }
 	}
 	else if(v == VariableEntry::VarKind::GLOBAL_VAR) {
-	    if(currentScope->getCntI() < GLOBAL_MAX_REG_COUNT) {
-		currentScope->incrCntI();
+	    if(((GlobalEntry*)currentScope)->getCntI() < GLOBAL_MAX_REG_COUNT) {
+		((GlobalEntry*)currentScope)->incrCntI();
 		varEntry->offSet(currentScope->getCnt());
 	    }
 	    else {
-		currentScope->setMem();
+		((VariableEntry*)currentScope)->setMem();
 		varEntry->offSet(currentScope->getCnt() - GLOBAL_MAX_REG_COUNT);
 		currentScope->incrementCnt(Type::getTypeSize(type));
 	    }

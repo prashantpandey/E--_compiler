@@ -111,7 +111,7 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 							 * global variable register to the global section,
 							 * updating the stack pointer and purging the register*/
 							
-							if(isMem_){
+							if(isMem()){
 							    inst_vec.push_back(Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
 							    inst_vec.push_back(decrSP());
 							    purgeReg(regName);
@@ -121,7 +121,7 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 
 						    else if(isString(type->tag())){
 							inst_vec.push_back(Instruction(Instruction::InstructionSet::MOVS, initVal(), regName));
-							if(isMem_){
+							if(isMem()){
 							    inst_vec.push_back(Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
 							    inst_vec.push_back(decrSP());
 							    purgeReg(regName);
@@ -131,7 +131,7 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 
 						    else if(isFloat(type->tag())){
 							inst_vec.push_back(Instruction(Instruction::InstructionSet::MOVF, initVal(), regName));
-							if(isMem_){
+							if(isMem()){
 							    inst_vec.push_back(Instruction(Instruction::InstructionSet::STF, regName, GLOBALF_REG));
 							    inst_vec.push_back(decrSP());
 							    purgeReg(regName);
