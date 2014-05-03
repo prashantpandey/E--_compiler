@@ -40,21 +40,21 @@ void GlobalEntry::checkType() const
 void GlobalEntry::genFinalCode(string progName) {
     const SymTab *st = NULL;
     progCode_ = new ProgCode(progName);
-    
+
     // initialize the global vars in global/static section
     if ((st = symTab()) != nullptr) {
         SymTab::const_iterator it = st->begin();
-	CodeModule* codeMod = NULL;
+        CodeModule* codeMod = NULL;
         for (; it != (st->end()); ++it) {
             SymTabEntry *ste = (SymTabEntry *)(*it);
-            if(ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
-		codeMod = new CodeModule("GlobalSec");
+            if (ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
+                codeMod = new CodeModule("GlobalSec");
                 codeMod->insertInstructionSet(((VariableEntry*)ste)->codeGen());
             }
         }
-	progCode_->insertModule(codeMod);
+        progCode_->insertModule(codeMod);
     }
-    
+
     // TODO: Add code for function and rule modules
 }
 
@@ -94,60 +94,60 @@ void VariableEntry::checkType() const
 }
 
 vector<Instruction*>* VariableEntry::codeGen() {
-    
+
     string regName, val;
     vector<Instruction*> *inst_vec = nullptr;
-    switch(varKind()){
-	case VariableEntry::VarKind::LOCAL_VAR :
-	
-	case VariableEntry::VarKind::PARAM_VAR :    
-	
-	case VariableEntry::VarKind::GLOBAL_VAR :  
-	
+    switch(varKind()) {
+    case VariableEntry::VarKind::LOCAL_VAR :
 
-						    regName = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
-						    regName_ = regName;
-						    val = initVal()->value()->toString();
-						    // initVal type is ExprNode*, check how does this work
-						    if(Type::isInt(type()->tag()))
-						    {
-		         				inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, val, regName));
+    case VariableEntry::VarKind::PARAM_VAR :
 
-							/* If is mem is set then storing the corresponding
-							 * global variable register to the global section,
-							 * updating the stack pointer and purging the register*/
-							
-							if(isMem()){
-							    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
-							    inst_vec->push_back(Instruction::decrSP());
-							    regMgr->purgeReg(regName);
-							}
-						    
-						    }
+    case VariableEntry::VarKind::GLOBAL_VAR :
 
-						    else if(Type::isString(type()->tag())){
-							inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVS, val, regName));
-							if(isMem()){
-							    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
-							    inst_vec->push_back(Instruction::decrSP());
-							    regMgr->purgeReg(regName);
-							}
-						    
-						    }
 
-						    else if(Type::isFloat(type()->tag())){
-							inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVF, val, regName));
-							if(isMem()){
-							    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STF, regName, SP_REG));
-							    inst_vec->push_back(Instruction::decrSP());
-							    regMgr->purgeReg(regName);
-							}
-						    
-						    }
-						    
-						    break;
-	case VariableEntry::VarKind::UNDEFINED : 
-						    break;
+        regName = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
+        regName_ = regName;
+        val = initVal()->value()->toString();
+        // initVal type is ExprNode*, check how does this work
+        if (Type::isInt(type()->tag()))
+        {
+            inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, val, regName));
+
+            /* If is mem is set then storing the corresponding
+             * global variable register to the global section,
+             * updating the stack pointer and purging the register*/
+
+            if (isMem()) {
+                inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
+                inst_vec->push_back(Instruction::decrSP());
+                regMgr->purgeReg(regName);
+            }
+
+        }
+
+        else if (Type::isString(type()->tag())) {
+            inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVS, val, regName));
+            if (isMem()) {
+                inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
+                inst_vec->push_back(Instruction::decrSP());
+                regMgr->purgeReg(regName);
+            }
+
+        }
+
+        else if (Type::isFloat(type()->tag())) {
+            inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVF, val, regName));
+            if (isMem()) {
+                inst_vec->push_back(new Instruction(Instruction::InstructionSet::STF, regName, SP_REG));
+                inst_vec->push_back(Instruction::decrSP());
+                regMgr->purgeReg(regName);
+            }
+
+        }
+
+        break;
+    case VariableEntry::VarKind::UNDEFINED :
+        break;
     }
     return inst_vec;
 }
