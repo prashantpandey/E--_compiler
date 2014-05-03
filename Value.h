@@ -63,6 +63,8 @@ public:
 
     void print(ostream& os, int indent) const;
 
+    string toString() const;
+
 private:
     const Type* type_;       // Shallow-copied from caller of constructor
     union {            // All components of this union shd be deep-copied
