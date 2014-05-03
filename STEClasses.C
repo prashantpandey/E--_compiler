@@ -101,11 +101,11 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 	case VariableEntry::VarKind::GLOBAL_VAR :  
 	
 
-						    regName = regMgr->fetchNextAvailReg(!isFloat(type->tag()));
+						    regName = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
 						    regName_ = regName;
 
 						    // initVal type is ExprNode*, check how does this work
-						    if(Type::isInt(type->tag()))
+						    if(Type::isInt(type()->tag()))
 						    {
 		         				inst_vec.push_back(new Instruction(Instruction::InstructionSet::MOVI, initVal(), regName));
 
@@ -121,7 +121,7 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 						    
 						    }
 
-						    else if(Type::isString(type->tag())){
+						    else if(Type::isString(type()->tag())){
 							inst_vec.push_back(new Instruction(Instruction::InstructionSet::MOVS, initVal(), regName));
 							if(isMem()){
 							    inst_vec.push_back(new Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
@@ -131,7 +131,7 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 						    
 						    }
 
-						    else if(Type::isFloat(type->tag())){
+						    else if(Type::isFloat(type()->tag())){
 							inst_vec.push_back(new Instruction(Instruction::InstructionSet::MOVF, initVal(), regName));
 							if(isMem()){
 							    inst_vec.push_back(new Instruction(Instruction::InstructionSet::STF, regName, GLOBALF_REG));
