@@ -98,7 +98,7 @@ string Value::toString() const {
     }
     os.str();
 }
-}
+
 string
 Value::sval() const {
     if ((Type::isString(type_->tag())) && (sVal_ != NULL))
