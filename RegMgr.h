@@ -32,14 +32,13 @@ using namespace std;
 #define BP_REG "R001"
 #define RETI_REG "R002"
 #define RETF_REG "F000"
-#define GLOBALI_REG "R003"
-#define GLOBALF_REG "F001"
+#define GLOBAL_REG "R003"
 
 #define GLOBAL_MAX_REG_COUNT 100
 
 #define TOTAL_REG 1000
 #define INT_REG_AVAIL 996
-#define FLOAT_REG_AVAIL 998
+#define FLOAT_REG_AVAIL 999
 
 class RegMgr {
 
