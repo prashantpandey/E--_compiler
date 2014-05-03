@@ -107,7 +107,16 @@ vector<Instruction*>* VariableEntry::codeGen() {
 
         regName = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
         regName_ = regName;
-        val = initVal()->value()->toString();
+	if(initVal() == NULL){
+	    val = "0";
+	}
+	else
+	if(initVal()->value() == NULL){
+
+	        val = "0";
+	}
+	else
+		val = initVal()->value()->toString();
         // initVal type is ExprNode*, check how does this work
         if (Type::isInt(type()->tag()))
         {
