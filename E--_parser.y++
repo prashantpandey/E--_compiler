@@ -33,19 +33,24 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 	    else {
 		((VariableEntry*)currentScope)->setMem();
 		varEntry->offSet(((GlobalEntry*)currentScope)->getCnt() - GLOBAL_MAX_REG_COUNT);
-		((GlobalEntry*)currentScope)->incrementCnt(Type::getTypeSize(type));
 	    }
+	    ((GlobalEntry*)currentScope)->incrementCnt(Type::getTypeSize(type));
 	}
 	else if(v == VariableEntry::VarKind::GLOBAL_VAR) {
 	    if(((GlobalEntry*)currentScope)->getCntI() < GLOBAL_MAX_REG_COUNT) {
 		((GlobalEntry*)currentScope)->incrCntI();
-		varEntry->offSet(currentScope->getCnt());
+		varEntry->offSet(((GlobalEntry*)currentScope)->getCnt());
 	    }
 	    else {
 		((VariableEntry*)currentScope)->setMem();
 		varEntry->offSet(currentScope->getCnt() - GLOBAL_MAX_REG_COUNT);
-		currentScope->incrementCnt(Type::getTypeSize(type));
 	    }
+	    ((GlobalEntry*)currentScope)->incrementCnt(Type::getTypeSize(type));
+	}
+	else {
+	    ((VariableEntry*)currentScope)->setMem();
+	    varEntry->offSet(((FunctionEntry*)currentScope)->getCnt());
+	    ((FunctionEntry*)currentScope)->incrementCnt(Type::getTypeSize(type));
 	}
 	insertSymbolErrCheck(varEntry);
     }
@@ -524,10 +529,12 @@ formal_param		: type_star TOK_IDENT {
 							|| ste->kind() == SymTabEntry::Kind::EVENT_KIND)) {
 				if(ste->kind() == SymTabEntry::Kind::FUNCTION_KIND) {
 				    $$->offSet(((FunctionEntry*)ste)->getArgCnt());
+				    $$->setMem();
 				    ((FunctionEntry*)ste)->incrementArgCnt(Type::getTypeSize($1));
 				}
 				else {
 				    $$->offSet(((EventEntry*)ste)->getArgCnt());
+				    $$->setMem();
 				    ((EventEntry*)ste)->incrementArgCnt(Type::getTypeSize($1));
 				}
 			    }
@@ -541,10 +548,12 @@ formal_param		: type_star TOK_IDENT {
 							|| ste->kind() == SymTabEntry::Kind::EVENT_KIND)) {
 				if(ste->kind() == SymTabEntry::Kind::FUNCTION_KIND) {
 				    $$->offSet(((FunctionEntry*)ste)->getArgCnt());
+				    $$->setMem();
 				    ((FunctionEntry*)ste)->incrementArgCnt(Type::getTypeSize($1));
 				}
 				else {
 				    $$->offSet(((EventEntry*)ste)->getArgCnt());
+				    $$->setMem();
 				    ((EventEntry*)ste)->incrementArgCnt(Type::getTypeSize($1));
 				}
 			    }
