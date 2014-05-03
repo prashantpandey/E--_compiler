@@ -67,6 +67,6 @@ public:
 
 };
 
-
+extern RegMgr *regMgr;
 
 #endif
