@@ -96,7 +96,7 @@ void VariableEntry::checkType() const
 vector<Instruction*>* VariableEntry::codeGen() {
 
     string regName, val;
-    vector<Instruction*> *inst_vec = nullptr;
+    vector<Instruction*> *inst_vec = new vector<Instruction*>();
     switch(varKind()) {
     case VariableEntry::VarKind::LOCAL_VAR :
 

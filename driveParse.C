@@ -218,6 +218,7 @@ main(int argc, char *argv[], char *envp[]) {
         //cout << "Finished parsing, here is the AST\n";
         ge->checkType();
         ge->print(cout, 0);
+	ge->genFinalCode("test");
     }
 #endif
 }
