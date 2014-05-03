@@ -137,7 +137,7 @@ public:
         vkind_ = v;
         initVal(init);
         const_ = false;
-	inMem = false;
+	inMem_ = false;
 	regName_ = "";
     };
 
