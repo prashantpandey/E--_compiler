@@ -1,4 +1,6 @@
 #include "STEClasses.h"
+#include "RegMgr.h"
+#include "CodeGen.h"
 #include "Value.h"
 #include "ParserUtil.h"
 
@@ -99,42 +101,42 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 	case VariableEntry::VarKind::GLOBAL_VAR :  
 	
 
-						    regName = RegMgr->fetchNextAvailReg(!isFloat(type->tag()));
+						    regName = regMgr->fetchNextAvailReg(!isFloat(type->tag()));
 						    regName_ = regName;
 
 						    // initVal type is ExprNode*, check how does this work
 						    if(isInt(type->tag()))
 						    {
-		         				inst_vec.push_back(Instruction(Instruction::InstructionSet::MOVI, initVal(), regName));
+		         				inst_vec.push_back(new Instruction(Instruction::InstructionSet::MOVI, initVal(), regName));
 
 							/* If is mem is set then storing the corresponding
 							 * global variable register to the global section,
 							 * updating the stack pointer and purging the register*/
 							
 							if(isMem()){
-							    inst_vec.push_back(Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
-							    inst_vec.push_back(decrSP());
-							    purgeReg(regName);
+							    inst_vec.push_back(new Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
+							    inst_vec.push_back(CodeGen::decrSP());
+							    regMgr->purgeReg(regName);
 							}
 						    
 						    }
 
 						    else if(isString(type->tag())){
-							inst_vec.push_back(Instruction(Instruction::InstructionSet::MOVS, initVal(), regName));
+							inst_vec.push_back(new Instruction(Instruction::InstructionSet::MOVS, initVal(), regName));
 							if(isMem()){
-							    inst_vec.push_back(Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
-							    inst_vec.push_back(decrSP());
-							    purgeReg(regName);
+							    inst_vec.push_back(new Instruction(Instruction::InstructionSet::STI, regName, GLOBALI_REG));
+							    inst_vec.push_back(CodeGen::decrSP());
+							    regMgr->purgeReg(regName);
 							}
 						    
 						    }
 
 						    else if(isFloat(type->tag())){
-							inst_vec.push_back(Instruction(Instruction::InstructionSet::MOVF, initVal(), regName));
+							inst_vec.push_back(new Instruction(Instruction::InstructionSet::MOVF, initVal(), regName));
 							if(isMem()){
-							    inst_vec.push_back(Instruction(Instruction::InstructionSet::STF, regName, GLOBALF_REG));
-							    inst_vec.push_back(decrSP());
-							    purgeReg(regName);
+							    inst_vec.push_back(new Instruction(Instruction::InstructionSet::STF, regName, GLOBALF_REG));
+							    inst_vec.push_back(CodeGen::decrSP());
+							    regMgr->purgeReg(regName);
 							}
 						    
 						    }
@@ -147,6 +149,7 @@ vector<Instruction*>* VariableEntry::codeGen() const {
 	case VariableEntry::VarKind::UNDEFINED : 
 						    break;
     }
+    return inst_vec;
 }
 
 void FunctionEntry::checkType() const

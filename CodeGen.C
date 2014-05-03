@@ -40,7 +40,7 @@
 //  Code Gen:
 //
 
-Instruction* Instruction::incrSP()  {
+Instruction* Instruction::decrSP()  {
     Instruction *instr = new Instruction(Instruction::InstructionSet::SUB, SP_REG, "1", SP_REG);
     return instr;
 }
