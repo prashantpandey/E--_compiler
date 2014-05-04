@@ -12,7 +12,13 @@ class ExprNode;
 class PatNode;
 class VariableEntry;
 class OpNode;
+class CompoundStmtNode;
 class PrimitivePatNode;
+
+class ProgCode;
+class Instruction;
+class Quadruple;
+
 extern string newName(const string&);
 
 /****************************************************************

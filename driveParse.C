@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "all.h"
-#include "Ast.h"
+//#include "Ast.h"
 #include <stdio.h>
 #include <string.h>
 #include "SymTabMgr.h"

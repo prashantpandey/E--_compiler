@@ -21,6 +21,9 @@ class RulezNode;
 class SymTabEntry;
 class VariableEntry;
 
+class Instruction;
+class Quadruple;
+
 /*****************************************************************************
    Here is the class hierarchy:
                                                ProgramElem
