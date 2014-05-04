@@ -40,6 +40,10 @@ public:
     
     ~ProgCode() {};
 
+    vector <CodeModule*>* getModule(){
+	return modules_;
+    }
+
     void insertModule(CodeModule* codeMod) {
 	modules_->push_back(codeMod);	
     }
@@ -59,6 +63,10 @@ public:
     ~CodeModule() {
 	delete instructions_;
     };
+
+    vector <Instruction*>* getInstructions(){
+	return instructions_;
+    }
 
     void insertInstructionSet(Instruction *instr) {
 	if (instr != NULL)

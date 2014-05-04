@@ -1,7 +1,6 @@
 #include <libgen.h>
 #include <unistd.h>
 
-#include <iostream>
 #include "all.h"
 //#include "Ast.h"
 #include <stdio.h>
@@ -219,6 +218,9 @@ main(int argc, char *argv[], char *envp[]) {
         ge->checkType();
         ge->print(cout, 0);
 	ge->genFinalCode("test");
+	ofstream fos("test_.l");
+	ge->serializeAsm(fos);
+	fos.close();
     }
 #endif
 }

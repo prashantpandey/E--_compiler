@@ -35,6 +35,7 @@ public:
     void checkType() const;
     void genFinalCode(string progName);
     void serializeFinalCode() const;
+    void serializeAsm(ostream& fos) const;
 
     const vector<RuleNode*> rules() const {
         return rules_;
