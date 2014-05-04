@@ -165,6 +165,9 @@ public:
     const ExprNode* initVal() const {
         return initVal_;
     }
+    
+    string fetchExprRegValue();
+
     ExprNode* initVal() {
         return initVal_;
     };
@@ -218,6 +221,8 @@ public:
     ~FunctionEntry() {};
 
     void checkType() const;
+    
+    vector<Instruction*>* codeGen();
 
     const CompoundStmtNode* body() const {
         return body_;
