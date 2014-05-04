@@ -200,6 +200,7 @@ private:
     ExprNode* initVal_;
     bool inMem_;
     string regName_;
+    string tReg_;
     vector<Quadruple*>* iCodeTable_;
 };
 
