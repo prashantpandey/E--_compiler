@@ -204,6 +204,12 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 
     vector<Instruction*> *tmp = body()->codeGen();
     inst_vec->insert(inst_vec->end(), tmp->begin(), tmp->end());
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, BP_REG, SP_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::LDI, SP_REG, BP_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::LDI, SP_REG, RET_ADDR_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, to_string(getArgCnt()), SP_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPI, RET_ADDR_REG));
     return inst_vec;
 }
 
