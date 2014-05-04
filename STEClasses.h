@@ -185,6 +185,11 @@ public:
         initVal_ = init;
     };
 
+    void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
+	if (instrVector != NULL)
+	    iCodeTable_->insert(iCodeTable_->end(), instrVector->begin(), instrVector->end());
+    }
+
     void setMem() { inMem_ = true; };
     bool isMem() { return inMem_; };
 
@@ -205,85 +210,85 @@ private:
 };
 
 class ClassEntry: public SymTabEntry {
-public:
-    ClassEntry(string name, int line=0, int column=0, string file="")
-        : SymTabEntry(name, SymTabEntry::Kind::CLASS_KIND, line,column, file) {};
-    ~ClassEntry() {};
+    public:
+	ClassEntry(string name, int line=0, int column=0, string file="")
+	    : SymTabEntry(name, SymTabEntry::Kind::CLASS_KIND, line,column, file) {};
+	~ClassEntry() {};
 
-    void print(ostream& os, int indent) const;
+	void print(ostream& os, int indent) const;
 };
 
 class FunctionEntry: public SymTabEntry {
-public:
-    FunctionEntry(string name, Type* type=nullptr,
-                  int line=0, int column=0, string file=""):
-        SymTabEntry(name, SymTabEntry::Kind::FUNCTION_KIND, line,column, file, type) {
-        body_ = nullptr;
-        argCnt_ = 0;
-    };
-    ~FunctionEntry() {};
+    public:
+	FunctionEntry(string name, Type* type=nullptr,
+		int line=0, int column=0, string file=""):
+	    SymTabEntry(name, SymTabEntry::Kind::FUNCTION_KIND, line,column, file, type) {
+		body_ = nullptr;
+		argCnt_ = 0;
+	    };
+	~FunctionEntry() {};
 
-    void checkType() const;
-    
-    vector<Instruction*>* codeGen();
+	void checkType() const;
 
-    const CompoundStmtNode* body() const {
-        return body_;
-    };
-    CompoundStmtNode* body() {
-        return body_;
-    };
-    void body(CompoundStmtNode* n) {
-        body_ = n;
-    };
+	vector<Instruction*>* codeGen();
 
-    int getArgCnt() const {
-        return argCnt_;
-    }
-    void incrementArgCnt(int offset) {
-        argCnt_ += offset;
-    }
+	const CompoundStmtNode* body() const {
+	    return body_;
+	};
+	CompoundStmtNode* body() {
+	    return body_;
+	};
+	void body(CompoundStmtNode* n) {
+	    body_ = n;
+	};
 
-    void print(ostream& os, int indent) const;
+	int getArgCnt() const {
+	    return argCnt_;
+	}
+	void incrementArgCnt(int offset) {
+	    argCnt_ += offset;
+	}
 
-private:
-    CompoundStmtNode* body_;
-    int argCnt_;
+	void print(ostream& os, int indent) const;
+
+    private:
+	CompoundStmtNode* body_;
+	int argCnt_;
 };
 
 class EventEntry: public SymTabEntry {
-public:
-    EventEntry(string name, int line=0, int column=0, string file=""):
-        SymTabEntry(name, SymTabEntry::Kind::EVENT_KIND, line,column, file) {};
+    public:
+	EventEntry(string name, int line=0, int column=0, string file=""):
+	    SymTabEntry(name, SymTabEntry::Kind::EVENT_KIND, line,column, file) {};
 
-    EventEntry(string name, Kind kind, int line=0, int column=0, string file=""):
-        SymTabEntry(name, kind, line,column, file) {};
+	EventEntry(string name, Kind kind, int line=0, int column=0, string file=""):
+	    SymTabEntry(name, kind, line,column, file) {};
 
-    ~EventEntry() {};
+	~EventEntry() {};
 
-    int getArgCnt() const {
-        return argCnt_;
-    }
-    void incrementArgCnt(int offset) {
-        argCnt_ += offset;
-    }
+	int getArgCnt() const {
+	    return argCnt_;
+	}
+	void incrementArgCnt(int offset) {
+	    argCnt_ += offset;
+	}
 
-    void print(ostream& out, int indent=0) const;
+	void print(ostream& out, int indent=0) const;
 
-private:
-    int argCnt_;
+    private:
+	int argCnt_;
 };
 
 class UnknownKindEntry: public SymTabEntry {
-public:
-    UnknownKindEntry(string name, int line=0, int column=0, string file=""):
-        SymTabEntry(name, SymTabEntry::Kind::UNKNOWN_KIND, line,column, file) {};
+    public:
+	UnknownKindEntry(string name, int line=0, int column=0, string file=""):
+	    SymTabEntry(name, SymTabEntry::Kind::UNKNOWN_KIND, line,column, file) {};
 
-    UnknownKindEntry(string name, Kind kind, int line=0, int column=0, string file=""):
-        SymTabEntry(name, kind, line,column, file) {};
+	UnknownKindEntry(string name, Kind kind, int line=0, int column=0, string file=""):
+	    SymTabEntry(name, kind, line,column, file) {};
 
-    ~UnknownKindEntry() {};
+	~UnknownKindEntry() {};
 
-    void print(ostream& out, int indent=0) const;
+	void print(ostream& out, int indent=0) const;
 };
 #endif
