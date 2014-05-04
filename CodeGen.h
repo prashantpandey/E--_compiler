@@ -19,6 +19,7 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
+#include <sstream>
 #include <string>
 #include <vector>
 #include "RegMgr.h"
@@ -180,6 +181,8 @@ class Instruction {
 	    return label_;
 	};
 
+	string name(InstructionSet inst);
+	string toString();
 	static Instruction* decrSP();
 
     private:

@@ -40,8 +40,33 @@
 //  Code Gen:
 //
 
+const char* instrName[] = {
+    "ADD", "SUB", "DIV", "MUL", "MOD", "FADD", "FSUB", "FDIV", "FMUL",
+    "AND", "OR", "XOR", "NEG", "FNEG",
+    "UGT", "UGE", "GT", "GE", "EQ", "NE", "FGT", "FGE", "FEQ", "FNE",
+    "PRTS", "PRTI", "PRTF",
+    "JMP", "JMPC", "JMPI", "JMPCI",
+    "MOVL", "MOVS", "MOVI", "MOVF", "MOVIF", "MOVFI",
+    "STI", "STF", "LDI", "LDF",
+    "IN", "INI", "INF"
+};
+
+string Instruction::name(InstructionSet inst) {
+    return string(instrName[inst]);
+}
+
 Instruction* Instruction::decrSP()  {
     Instruction *instr = new Instruction(Instruction::InstructionSet::SUB, SP_REG, "1", SP_REG);
     return instr;
+}
+
+string Instruction::toString() {
+
+    ostringstream os;
+    if(label_ != "")
+	os << label_;
+    os << name(instr_) << " " << param1_ << " " << param2_ << " " << param3_ << " ";
+    return os.str();
+
 }
 
