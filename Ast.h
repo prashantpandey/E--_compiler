@@ -130,12 +130,18 @@ public:
         coercedType_ = type;
     }
 
+    string getTReg() { return tReg_; }
+    void setTReg(string reg) { tReg_ = reg; }
+    
+    vector<>
+
     void print(ostream& os, int indent=0) const=0;
 
 private:
     ExprNodeType exprType_;
     const Value *val_; // reference semantics for val_ and coercedType_
     const Type* coercedType_;
+    string tReg_;   
 };
 
 /****************************************************************/
@@ -490,6 +496,7 @@ public:
     StmtNode(StmtNodeKind skm, int line=0, int column=0, string file=""):
         AstNode(AstNode::NodeType::STMT_NODE, line,column,file) {
         skind_ = skm;
+	iCodeTable_ = new vector<Quadruple*>();
     };
     ~StmtNode() {};
     //AstNode* clone()
@@ -500,10 +507,13 @@ public:
     }
 
     virtual const Type* typeCheck() const = 0;
+    
+    void addQuadrupleEntry(Quadruple* quad) { icodeTable_->push_back(quad); }
 
     void print(ostream& os, int indent) const = 0;
 private:
     StmtNodeKind skind_;
+    vector<Quadruple*>* iCodeTable_;
 };
 
 /****************************************************************/
