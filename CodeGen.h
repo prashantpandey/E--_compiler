@@ -121,14 +121,11 @@ class Quadruple {
 	    if(quad->opr.compare(opr_) == 0) {
 		if(quad->opr1.compare(opr1_) == 0) {
 		    if(quad->opr2.compare(opr2_) ==0) {
-			goto T;
+			return true;
 		    }
 		}
 	    }
-	    goto F;
-
-	    goto T: return true;
-	    goto F: return false;
+	    return false;
 	}
     private:
 	string opr_;
