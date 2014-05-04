@@ -138,7 +138,7 @@ public:
     string getTReg() { return tReg_; }
     void setTReg(string reg) { tReg_ = reg; }
     
-    virtual vector<Quadruple*>* iCodeGen();
+    virtual vector<Quadruple*>* iCodeGen() = 0;
 
     void print(ostream& os, int indent=0) const=0;
 
@@ -175,6 +175,11 @@ public:
     void symTabEntry(const SymTabEntry *ste)  {
         sym_ = ste;
     };
+    
+    vector<Quadruple*>* iCodeGen() {
+	setTReg(ext_);
+	return new vector<Quadruple*>;
+    }
 
     void print(ostream& os, int indent=0) const;
 
@@ -189,6 +194,7 @@ private:
 
 class OpNode: public ExprNode {
 public:
+
     enum class OpCode {
         UMINUS, PLUS, MINUS, MULT, DIV, MOD,
         EQ, NE, GT, LT, GE, LE,
@@ -250,6 +256,8 @@ public:
     const Type* typeCheck() const;
     void print(ostream& os, int indent=0) const;
 
+    vector<Quadruple*>* iCodeGen();
+
 private:
     unsigned int arity_;
     OpCode   opCode_;
@@ -270,6 +278,11 @@ public:
     }
     const Type* typeCheck() const;
     ~ValueNode() {};
+    
+    vector<Quadruple*>* iCodeGen() {
+	setTReg(value()->toString());
+	return new vector<Quadruple*>();
+    }
 
     void print(ostream& os, int indent=0) const;
 
@@ -315,6 +328,10 @@ public:
     {
         if (params_ != NULL && i < params_->size()) (*params_)[i] = arg;
     };
+
+    vector<Quadruple*>* iCodeGen() {
+	return new vector<Quadruple*>();
+    }
 
     void print(ostream& os, int indent=0) const;
     const Type* typeCheck() const;
@@ -513,7 +530,8 @@ public:
 
     virtual const Type* typeCheck() const = 0;
     
-    virtual string fetchExprRegValue();
+    virtual string fetchExprRegValue() = 0;
+    
     void setReg(string regName) { tReg_ = regName; };
     string getReg() { return tReg_; };
 
@@ -600,6 +618,10 @@ public:
     BlockEntry* blockEntry() {
         return blockEntry_;
     }
+    
+    string fetchExprRegValue() {
+	return "";
+    }
 
     void print(ostream& os, int indent) const {
         os << "break " << num_;
@@ -672,6 +694,10 @@ public:
     {
         if(stmts_ != NULL) stmts_->push_back(s);
     };
+    
+    string fetchExprRegValue() {
+	return "";
+    }
 
     void  printWithoutBraces(ostream& os, int indent) const;
     void  print(ostream& os, int indent) const;

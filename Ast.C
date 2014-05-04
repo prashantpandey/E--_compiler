@@ -976,45 +976,76 @@ OpNode::OpNode(const OpNode &other):
     }
 }
 
+const char* opCodeStr_[] = {
+    "UMINUS", "PLUS", "MINUS", "MULT", "DIV", "MOD",
+    "EQ", "NE", "GT", "LT", "GE", "LE",
+    "AND", "OR", "NOT",
+    "BITNOT", "BITAND", "BITOR", "BITXOR", "SHL", "SHR",
+    "ASSIGN", "PRINT", "INVALID"
+};
+
+
+vector<Quadruple*>* OpNode::iCodeGen() {
+    vector<Quadruple*>* quad = new vector<Quadruple*>();
+    string* operands = new string[arity_];
+    for(int i = 0; i < (signed int)arity_; i++) {
+	vector<Quadruple*>* tempQuad = arg_[i]->iCodeGen();
+	quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
+	operands[i] = arg_[i]->getTReg();
+    }
+    switch(arity_) {
+	case 1: 
+	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0]));
+	    break;
+	case 2:
+	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1]));
+	    break;
+	case 3:
+	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], operands[2]));
+	    break;
+    }
+    return quad;
+}
+
 void
 OpNode::print(ostream& os, int indent) const {
     int iopcode = static_cast<int>(opCode_);
     if (opInfo[iopcode].prtType_ == OpNode::OpPrintType::PREFIX) {
 
-        os << opInfo[iopcode].name_;
+	os << opInfo[iopcode].name_;
 
-        if(coercedType())
-            os << "(" << Type::name(coercedType()->tag()) << ")";
-        if (arity_ > 0) {
-            if (opInfo[iopcode].needParen_)
-                os << '(';
-            for (unsigned i=0; i < arity_-1; i++) {
-                if (arg_[i])
-                    arg_[i]->print(os, indent);
-                else os << "NULL";
-                os << ", ";
-            }
-            if (arg_[arity_-1])
-                arg_[arity_-1]->print(os, indent);
-            else os << "NULL";
-            if (opInfo[iopcode].needParen_)
-                os << ") ";
-        }
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
+	if (arity_ > 0) {
+	    if (opInfo[iopcode].needParen_)
+		os << '(';
+	    for (unsigned i=0; i < arity_-1; i++) {
+		if (arg_[i])
+		    arg_[i]->print(os, indent);
+		else os << "NULL";
+		os << ", ";
+	    }
+	    if (arg_[arity_-1])
+		arg_[arity_-1]->print(os, indent);
+	    else os << "NULL";
+	    if (opInfo[iopcode].needParen_)
+		os << ") ";
+	}
     }
     else if ((opInfo[iopcode].prtType_ == OpNode::OpPrintType::INFIX) && (arity_ == 2)) {
-        if(coercedType())
-            os << "(" << Type::name(coercedType()->tag()) << ")";
-        if (opInfo[iopcode].needParen_)
-            os << "(";
-        if (arg_[0])
-            arg_[0]->print(os, indent);
-        else os << "NULL";
-        os << opInfo[iopcode].name_;
-        if (arg_[1])
-            arg_[1]->print(os, indent);
-        else os << "NULL";
-        if (opInfo[iopcode].needParen_)
-            os << ")";
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
+	if (opInfo[iopcode].needParen_)
+	    os << "(";
+	if (arg_[0])
+	    arg_[0]->print(os, indent);
+	else os << "NULL";
+	os << opInfo[iopcode].name_;
+	if (arg_[1])
+	    arg_[1]->print(os, indent);
+	else os << "NULL";
+	if (opInfo[iopcode].needParen_)
+	    os << ")";
     }
     else internalErr("Unhandled case in OpNode::print");
 }
