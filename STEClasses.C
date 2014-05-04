@@ -1,3 +1,4 @@
+
 #include "STEClasses.h"
 #include "RegMgr.h"
 #include "CodeGen.h"
@@ -62,6 +63,18 @@ void GlobalEntry::genFinalCode(string progName) {
     }
 
     // TODO: Add code for function and rule modules
+}
+
+void GlobalEntry::serializeAsm(ostream& os) const
+{
+    vector<CodeModule*> *modules = progCode_->getModule();
+    
+    for(vector<CodeModule*>::iterator it = modules->begin(); it != modules->end(); ++it){
+	for (vector<Instruction*>::iterator inst = ((*it)->getInstructions())->begin(); inst != ((*it)->getInstructions())->end(); ++inst){
+	    os << (*inst)->toString();
+	    os << "\n";
+	}
+    }
 }
 
 void EventEntry::print(ostream& out, int indent) const
@@ -171,7 +184,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
     }
 
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, name()));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, nullptr, name()));
     inst_vec->push_back(Instruction::decrSP());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, SP_REG, BP_REG));
 
