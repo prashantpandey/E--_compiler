@@ -118,9 +118,9 @@ class Quadruple {
 
 	bool isEqual(Quadruple *quad){
 
-	    if(quad->opr.compare(opr_) == 0) {
-		if(quad->opr1.compare(opr1_) == 0) {
-		    if(quad->opr2.compare(opr2_) ==0) {
+	    if(quad->opr_.compare(opr_) == 0) {
+		if(quad->opr1_.compare(opr1_) == 0) {
+		    if(quad->opr2_.compare(opr2_) ==0) {
 			return true;
 		    }
 		}

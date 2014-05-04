@@ -197,8 +197,8 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 
 string VariableEntry::fetchExprRegValue() {
     
-    iCodeTable_->insertQuadrupleSet(expr_->iCodeGen());
-    return expr_->getTReg();
+    insertQuadrupleSet(initVal_->iCodeGen());
+    return initVal_->getTReg();
 }
 
 void FunctionEntry::checkType() const
