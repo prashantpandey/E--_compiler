@@ -383,6 +383,26 @@ const Type* InvocationNode::typeCheck() const {
     return &Type::errorType;
 }
 
+vector<Instruction*>* InvocationNode::codeGen() {
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+
+    const vector<ExprNode*>* args = params();
+    for(vector<ExprNode*>::const_iterator it=args->begin(); it != args->end(); ++it) {
+	vector<Instruction*>* temp = (*it)->codeGen();
+	inst_vec->insert(inst_vec->end(), temp->begin(), temp->end());
+    }
+
+    string reg = regMgr->fetchNextAvailReg(true);
+    string label = regMgr->getNextLabel();
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVL, label, reg));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, reg, SP_REG));
+    inst_vec->push_back(Instruction::decrSP());
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, symTabEntry()->name()));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, nullptr, nullptr, label));
+
+    return inst_vec;
+}
+
 const Type* ReturnStmtNode::typeCheck() const {
     const ExprNode *expr = exprNode();
     const FunctionEntry* funEnt = funEntry();

@@ -89,13 +89,15 @@ public:
 
     string fetchNextAvailReg(bool isInt, VariableEntry *ve = NULL, int priority = 0);
     void purgeReg(string regName);
+    string getNextLabel();
 
 
     ~RegMgr() {
         delete iReg_;
         delete fReg_;
     }
-
+    
+    static int cnt_;
 };
 
 extern RegMgr *regMgr;

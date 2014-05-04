@@ -79,6 +79,7 @@ void RegMgr::purgeReg(string regName) {
 
     const char *tmp = regName.c_str();
     tmp++;
+    
     int reg = atoi(tmp);
 
     switch(regName[0])
@@ -95,5 +96,12 @@ void RegMgr::purgeReg(string regName) {
     }
 }
 
+int RegMgr::cnt_ = 0;
+
+string RegMgr::getNextLabel() {
+    ostringstream os;
+    os << "Label" << cnt_++;
+    return os.str();
+}
 
 RegMgr *regMgr = &RegMgr::getInstance();
