@@ -71,59 +71,126 @@ private:
     vector<Instruction*> *instructions_;
 };
 
+
+class Quadruple {
+    public: 
+
+	Quadruple(string opr, string opr1, string opr2 = "", string res = "") {
+	    opr_ = opr; 
+	    opr1_ = opr1;
+	    opr2_ = opr2;
+	    res_ = res;
+	};
+
+	~ Quadruple() {};
+
+	void setOpr(string opr){
+	    opr_ = opr;
+	};
+
+	void setOpr1(string opr1){
+	    opr1_ = opr1;
+	};
+
+	void setOpr2(string opr2){
+	    opr2_ = opr2;
+	};
+
+	void setRes(string res){
+	    res_ = res;
+	};
+
+	string getOpr() {
+	    return opr_;
+	};
+
+	string getOpr1() {
+	    return opr1_;
+	};
+
+	string getOpr2() {
+	    return opr2_;
+	};
+
+	string getRes() {
+	    return res_;
+	};
+
+	bool isEqual(Quadruple *quad){
+
+	    if(quad->opr.compare(opr_) == 0) {
+		if(quad->opr1.compare(opr1_) == 0) {
+		    if(quad->opr2.compare(opr2_) ==0) {
+			goto T;
+		    }
+		}
+	    }
+	    goto F;
+
+	    goto T: return true;
+	    goto F: return false;
+	}
+    private:
+	string opr_;
+	string opr1_;
+	string opr2_;
+	string res_;
+};
+
 class Instruction {
-public:
-    enum InstructionSet {
-        ADD, SUB, DIV, MUL, MOD, FADD, FSUB, FDIV, FMUL,
-        AND, OR, XOR, NEG, FNEG,
-        UGT, UGE, GT, GE, EQ, NE, FGT, FGE, FEQ, FNE,
-        PRTS, PRTI, PRTF,
-        JMP, JMPC, JMPI, JMPCI,
-        MOVL, MOVS, MOVI, MOVF, MOVIF, MOVFI,
-        STI, STF, LDI, LDF,
-        IN, INI, INF
-    };
+    public:
+	enum InstructionSet {
+	    ADD, SUB, DIV, MUL, MOD, FADD, FSUB, FDIV, FMUL,
+	    AND, OR, XOR, NEG, FNEG,
+	    UGT, UGE, GT, GE, EQ, NE, FGT, FGE, FEQ, FNE,
+	    PRTS, PRTI, PRTF,
+	    JMP, JMPC, JMPI, JMPCI,
+	    MOVL, MOVS, MOVI, MOVF, MOVIF, MOVFI,
+	    STI, STF, LDI, LDF,
+	    IN, INI, INF
+	};
 
-    enum ParamType {
-        REGISTER,
-        MEMORY_LOC,
-        VALUE
-    };
+	enum ParamType {
+	    REGISTER,
+	    MEMORY_LOC,
+	    VALUE
+	};
 
-    Instruction(InstructionSet instr, string param1, string param2 = "", string param3 = "", string label = "") {
-        instr_ = instr;
-        param1_ = param1;
-        param2_ = param2;
-        param3_ = param3;
-        label_ = label;
-    };
+	Instruction(InstructionSet instr, string param1, string param2 = "", string param3 = "", string label = "") {
+	    instr_ = instr;
+	    param1_ = param1;
+	    param2_ = param2;
+	    param3_ = param3;
+	    label_ = label;
+	};
 
-    ~ Instruction() {};
+	~ Instruction() {};
 
-    InstructionSet getInstr() {
-        return instr_;
-    };
-    string getParam1() {
-        return param1_;
-    };
-    string getParam2() {
-        return param2_;
-    };
-    string getParam3() {
-        return param3_;
-    };
-    string getLabel() {
-        return label_;
-    };
-    
-    static Instruction* decrSP();
+	InstructionSet getInstr() {
+	    return instr_;
+	};
 
-private:
-    InstructionSet instr_;
-    string param1_;
-    string param2_;
-    string param3_;
-    string label_;
+	string getParam1() {
+	    return param1_;
+	};
+	string getParam2() {
+	    return param2_;
+	};
+	string getParam3() {
+	    return param3_;
+	};
+	string getLabel() {
+	    return label_;
+	};
+
+	static Instruction* decrSP();
+
+    private:
+	InstructionSet instr_;
+	string param1_;
+	string param2_;
+	string param3_;
+	string label_;
 };
 
 #endif

@@ -139,6 +139,7 @@ public:
         const_ = false;
 	inMem_ = false;
 	regName_ = "";
+	iCodeTable_ = new vector<Quadruple*>();
     };
 
     VariableEntry(const VariableEntry &v);
@@ -199,6 +200,7 @@ private:
     ExprNode* initVal_;
     bool inMem_;
     string regName_;
+    vector<Quadruple*>* iCodeTable_;
 };
 
 class ClassEntry: public SymTabEntry {
