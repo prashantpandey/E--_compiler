@@ -25,6 +25,8 @@
 #include <iostream>
 #include <iomanip>
 #include <stack>
+#include <unordered_map>
+#include "STEClasses.h"
 
 using namespace std;
 
@@ -40,12 +42,41 @@ using namespace std;
 #define INT_REG_AVAIL 996
 #define FLOAT_REG_AVAIL 999
 
+class VariableEntry;
+class VEntryPriority {
+
+private:
+    
+    VariableEntry *ve_;
+    int priority_;
+
+public:
+
+    VEntryPriority(VariableEntry *ve, int priority) {
+        ve_ = ve;
+        priority_ = priority;
+    }
+
+    VariableEntry* entry() const {
+        return ve_;
+    }
+
+    int priority() const {
+        return priority_;
+    }
+
+    void priority(int priority) {
+        priority_ = priority;
+    }
+};
+
 class RegMgr {
 
 private:
 
     bool *iReg_, *fReg_;
     int iCountStart_, fCountStart_;
+    unordered_map<string,VEntryPriority*> regMap_;
 
     RegMgr();
 
@@ -55,7 +86,7 @@ public:
         return instance;
     }
 
-    string fetchNextAvailReg(bool isInt);
+    string fetchNextAvailReg(bool isInt, VariableEntry *ve = NULL, int priority = 0);
     void purgeReg(string regName);
 
 

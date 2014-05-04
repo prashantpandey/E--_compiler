@@ -5,7 +5,7 @@ CXXFLAGS = -c -g -O -Wno-deprecated -std=c++0x -Wall
 FLEX = flex
 BISON = bison
 
-parser:   driveParse.o E--_lexer.o E--_parser.o Ast.o STEClasses.o SymTabMgr.o Value.o Type.o SymTabEntry.o Error.o ParserUtil.o SymTab.o CodeGen.o RegMgr.o
+parser:   driveParse.o E--_lexer.o E--_parser.o RegMgr.o Ast.o STEClasses.o SymTabMgr.o Value.o Type.o SymTabEntry.o Error.o ParserUtil.o SymTab.o CodeGen.o
 	$(CXX) -o $@  $^ -lfl
 assembler:	driver.o ICode_lexer.o ICode_parser.o ICode.tab.h 
 	$(CC) -o demo ICode_lexer.o ICode_parser.o driver.o -lfl

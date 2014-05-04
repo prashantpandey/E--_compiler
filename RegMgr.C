@@ -34,7 +34,7 @@ RegMgr::RegMgr() {
 }
 
 
-string RegMgr::fetchNextAvailReg(bool isInt) {
+string RegMgr::fetchNextAvailReg(bool isInt, VariableEntry *ve, int priority) {
     bool *reg = iReg_;
     int avail_reg =  INT_REG_AVAIL;
     int countStart = iCountStart_;
@@ -67,7 +67,11 @@ string RegMgr::fetchNextAvailReg(bool isInt) {
         iCountStart_ = countStart;
     else
         fCountStart_ = countStart;
-    return os.str();
+    string reg_str = os.str();
+    if (ve != NULL) {
+        regMap_.insert(make_pair<string, VEntryPriority*>(string(reg_str), new VEntryPriority(ve, priority)));
+    } 
+    return reg_str;
 }
 
 
@@ -85,6 +89,9 @@ void RegMgr::purgeReg(string regName) {
     case 'F' :
         fCountStart_ = reg - (TOTAL_REG - FLOAT_REG_AVAIL);
         fReg_[fCountStart_] = true;
+    }
+    if (regMap_.count(regName) == 1) {
+        regMap_.erase(regName);
     }
 }
 
