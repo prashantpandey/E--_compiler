@@ -118,7 +118,8 @@ vector<Instruction*>* VariableEntry::codeGen() {
 		val = "0";
 	    }
 	    else
-		val = initVal()->value()->toString();
+		//val = initVal()->value()->toString();
+		val = fetchExprRegValue();
 	    // initVal type is ExprNode*, check how does this work
 	    if (Type::isInt(type()->tag()))
 	    {
@@ -192,6 +193,14 @@ vector<Instruction*>* FunctionEntry::codeGen() {
     inst_vec->insert(inst_vec->end(), tmp->begin(), tmp->end());
     return inst_vec;
 }
+
+
+string VariableEntry::fetchExprRegValue() {
+    
+    iCodeTable_->insertQuadrupleSet(expr_->iCodeGen());
+    return expr_->getTReg();
+}
+
 void FunctionEntry::checkType() const
 {
     if (body())
