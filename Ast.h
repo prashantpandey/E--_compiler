@@ -135,7 +135,7 @@ public:
     string getTReg() { return tReg_; }
     void setTReg(string reg) { tReg_ = reg; }
     
-    vector<Quadruple*>* iCodeGen();
+    virtual vector<Quadruple*>* iCodeGen();
 
     void print(ostream& os, int indent=0) const=0;
 
@@ -511,8 +511,8 @@ public:
     virtual const Type* typeCheck() const = 0;
     
     virtual string fetchExprRegValue();
-    void setReg(string regName) { regName_ = regName; };
-    string getReg() { return regName_; };
+    void setReg(string regName) { tReg_ = regName; };
+    string getReg() { return tReg_; };
 
     void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
 	if (instrVector != NULL) 
@@ -555,7 +555,7 @@ public:
     const Type* typeCheck() const;
     
     string fetchExprRegValue() {
-	iCodeTable_->insertQuadrupleSet(expr_->iCodeGen());
+	insertQuadrupleSet(expr_->iCodeGen());
 	return expr_->getTReg();
     }
 
@@ -635,7 +635,7 @@ public:
     };
     
     string fetchExprRegValue() {
-	iCodeTable_->insertQuadrupleSet(expr_->iCodeGen());
+	insertQuadrupleSet(expr_->iCodeGen());
 	return expr_->getTReg();
     }
 
@@ -712,7 +712,7 @@ public:
     };
     
     string fetchExprRegValue() {
-	iCodeTable_->insertQuadrupleSet(cond_->iCodeGen());
+	insertQuadrupleSet(cond_->iCodeGen());
 	return cond_->getTReg();
     }
 
@@ -750,7 +750,7 @@ public:
     };
     
     string fetchExprRegValue() {
-	iCodeTable_->insertQuadrupleSet(cond_->iCodeGen());
+	insertQuadrupleSet(cond_->iCodeGen());
 	return cond_->getTReg();
     }
 
