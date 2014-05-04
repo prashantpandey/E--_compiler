@@ -43,16 +43,22 @@ void GlobalEntry::genFinalCode(string progName) {
 
     // initialize the global vars in global/static section
     if ((st = symTab()) != nullptr) {
-        SymTab::const_iterator it = st->begin();
-        CodeModule* codeMod = NULL;
-        for (; it != (st->end()); ++it) {
-            SymTabEntry *ste = (SymTabEntry *)(*it);
-            if (ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
-                codeMod = new CodeModule("GlobalSec");
-                codeMod->insertInstructionSet(((VariableEntry*)ste)->codeGen());
-            }
-        }
-        progCode_->insertModule(codeMod);
+	SymTab::const_iterator it = st->begin();
+	CodeModule* codeModGlobalSec =  new CodeModule("GlobalSec");
+	CodeModule* functionCodeMod =  NULL;
+	for (; it != (st->end()); ++it) {
+	    SymTabEntry *ste = (SymTabEntry *)(*it);
+	    if (ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
+		codeModGlobalSec->insertInstructionSet(((VariableEntry*)ste)->codeGen());
+	    }
+	    if (ste->kind() == SymTabEntry::Kind::FUNCTION_KIND) {
+		FunctionEntry *fe = (FunctionEntry *)ste;
+		functionCodeMod = new CodeModule(fe->name());
+		functionCodeMod->insertInstructionSet(fe->codeGen());
+	    }
+
+	}
+	progCode_->insertModule(codeModGlobalSec);
     }
 
     // TODO: Add code for function and rule modules
@@ -98,67 +104,94 @@ vector<Instruction*>* VariableEntry::codeGen() {
     string regName, val;
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     switch(varKind()) {
-    case VariableEntry::VarKind::LOCAL_VAR :
+	case VariableEntry::VarKind::LOCAL_VAR :
 
-    case VariableEntry::VarKind::PARAM_VAR :
+	case VariableEntry::VarKind::PARAM_VAR :
 
-    case VariableEntry::VarKind::GLOBAL_VAR :
-        regName = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
-        regName_ = regName;
-	if(initVal() == NULL){
-	    val = "0";
-	}
-	else
-	if(initVal()->value() == NULL){
+	case VariableEntry::VarKind::GLOBAL_VAR :
+	    regName_ = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
+	    if(initVal() == NULL){
+		val = "0";
+	    }
+	    else if(initVal()->value() == NULL){
 
-	        val = "0";
-	}
-	else
+		val = "0";
+	    }
+	    else
 		val = initVal()->value()->toString();
-        // initVal type is ExprNode*, check how does this work
-        if (Type::isInt(type()->tag()))
-        {
-            inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, val, regName));
+	    // initVal type is ExprNode*, check how does this work
+	    if (Type::isInt(type()->tag()))
+	    {
+		inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, val, regName));
 
-            /* If is mem is set then storing the corresponding
-             * global variable register to the global section,
-             * updating the stack pointer and purging the register*/
+		/* If is mem is set then storing the corresponding
+		 * global variable register to the global section,
+		 * updating the stack pointer and purging the register*/
 
-            if (isMem()) {
-                inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
-                inst_vec->push_back(Instruction::decrSP());
-                regMgr->purgeReg(regName);
-            }
+		if (isMem()) {
+		    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
+		    inst_vec->push_back(Instruction::decrSP());
+		    regMgr->purgeReg(regName);
+		}
 
-        }
+	    }
 
-        else if (Type::isString(type()->tag())) {
-            inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVS, val, regName));
-            if (isMem()) {
-                inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
-                inst_vec->push_back(Instruction::decrSP());
-                regMgr->purgeReg(regName);
-            }
+	    else if (Type::isString(type()->tag())) {
+		inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVS, val, regName));
+		if (isMem()) {
+		    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
+		    inst_vec->push_back(Instruction::decrSP());
+		    regMgr->purgeReg(regName);
+		}
 
-        }
+	    }
 
-        else if (Type::isFloat(type()->tag())) {
-            inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVF, val, regName));
-            if (isMem()) {
-                inst_vec->push_back(new Instruction(Instruction::InstructionSet::STF, regName, SP_REG));
-                inst_vec->push_back(Instruction::decrSP());
-                regMgr->purgeReg(regName);
-            }
+	    else if (Type::isFloat(type()->tag())) {
+		inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVF, val, regName));
+		if (isMem()) {
+		    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STF, regName, SP_REG));
+		    inst_vec->push_back(Instruction::decrSP());
+		    regMgr->purgeReg(regName);
+		}
 
-        }
+	    }
 
-        break;
-    case VariableEntry::VarKind::UNDEFINED :
-        break;
+	    break;
+	case VariableEntry::VarKind::UNDEFINED :
+	    break;
     }
     return inst_vec;
 }
 
+vector<Instruction*>* FunctionEntry::codeGen() {
+
+    if(body() == NULL){
+	return NULL;
+    }
+
+    vector<Instruction*> *inst_vec = new vector<Instruction*>();
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, name()));
+    inst_vec->push_back(Instruction::decrSP());
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, SP_REG, BP_REG));
+
+    const SymTab *st = NULL;
+    if ((st = symTab()) != nullptr) {
+	for (SymTab::const_iterator it = st->begin(); it != (st->end()); ++it)  {
+	    SymTabEntry *ste = (SymTabEntry *)(*it);
+	    if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
+		VariableEntry *ve = (VariableEntry *) ste;
+		if (ve->varKind() != VariableEntry::VarKind::LOCAL_VAR) {
+		    vector<Instruction*> *tmp = ve->codeGen();
+		    inst_vec->insert(inst_vec->end(), tmp->begin(), tmp->end());
+		}
+	    }
+	}
+    }
+
+    vector<Instruction*> *tmp = body()->codeGen();
+    inst_vec->insert(inst_vec->end(), tmp->begin(), tmp->end());
+    return inst_vec;
+}
 void FunctionEntry::checkType() const
 {
     if (body())

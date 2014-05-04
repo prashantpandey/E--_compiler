@@ -57,11 +57,13 @@ public:
     };
 
     void insertInstructionSet(Instruction *instr) {
-        instructions_->push_back(instr);
+	if (instr != NULL)
+	    instructions_->push_back(instr);
     }
 
     void insertInstructionSet(vector<Instruction *> *instrVector) {
-        instructions_->insert(instructions_->end(), instrVector->begin(), instrVector->end());
+	if (instrVector != NULL)
+	    instructions_->insert(instructions_->end(), instrVector->begin(), instrVector->end());
     }
 
 private:

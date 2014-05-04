@@ -3,6 +3,7 @@
 
 #include "all.h"
 #include "Value.h"
+#include "CodeGen.h"
 #include "ProgramElem.h"
 #include "SymTabEntry.h"
 
@@ -71,7 +72,8 @@ public:
         return NULL;
     };
     virtual void print(ostream& os, int indent=0) const=0;
-    virtual EFSA* codeGen() {
+    //virtual EFSA* codeGen() {
+    virtual vector<Instruction*> *codeGen() {
         return NULL;
     };
 
