@@ -90,7 +90,7 @@ string Value::toString() const {
 		if (sVal_ == NULL)
 		    os << "0";
 		else
-		    os << "\"" << sVal_ << "\"";
+		    os << "\"" << *sVal_ << "\"";
 	    }
 	    else if (Type::isInt(t)) {
 		if (Type::isSigned(t))
