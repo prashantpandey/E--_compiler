@@ -175,21 +175,25 @@ class Instruction {
 
 	~ Instruction() {};
 
-	InstructionSet getInstr() {
+	InstructionSet getInstr() const{
 	    return instr_;
 	};
 
-	string getParam1() {
+	string getParam1() const{
 	    return param1_;
 	};
-	string getParam2() {
+	string getParam2() const{
 	    return param2_;
 	};
-	string getParam3() {
+	string getParam3() const{
 	    return param3_;
 	};
-	string getLabel() {
+	string getLabel() const{
 	    return label_;
+	};
+
+	void setLabel(string label) {
+	    label_ = label;
 	};
 
 	string name(InstructionSet inst);
