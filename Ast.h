@@ -77,7 +77,7 @@ public:
     virtual void print(ostream& os, int indent=0) const=0;
     //virtual EFSA* codeGen() {
     virtual vector<Instruction*> *codeGen() {
-        return NULL;
+        return new vector<Instruction*>();
     };
 
     virtual void renameRV(string prefix) {}; // new names start with given prefix

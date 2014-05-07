@@ -37,7 +37,6 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 	    ((GlobalEntry*)currentScope)->incrementCnt(Type::getTypeSize(type));
 	}
 	else if(v == VariableEntry::VarKind::GLOBAL_VAR) {
-	    cout << ((GlobalEntry*)currentScope)->getCntI() << GLOBAL_MAX_REG_COUNT << endl;
 	    if(((GlobalEntry*)currentScope)->getCntI() < GLOBAL_MAX_REG_COUNT) {
 		((GlobalEntry*)currentScope)->incrCntI();
 		varEntry->offSet(((GlobalEntry*)currentScope)->getCnt());
@@ -45,8 +44,6 @@ void varListEntry(vector<VariableEntry*>* var_list, Type* type) {
 	    else {
 		varEntry->setMem();
 		varEntry->offSet(currentScope->getCnt() - GLOBAL_MAX_REG_COUNT);
-		cout << "setMem" << endl;
-		cout << varEntry->isMem() << endl;
 	    }
 	    ((GlobalEntry*)currentScope)->incrementCnt(Type::getTypeSize(type));
 	}
