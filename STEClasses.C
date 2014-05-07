@@ -165,7 +165,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
     }
 
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "", name()));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "", name(), "Function Start: Saving BP"));
     inst_vec->push_back(Instruction::decrSP());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, SP_REG, BP_REG));
 
@@ -185,10 +185,10 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 
     vector<Instruction*> *tmp = body()->codeGen();
     inst_vec->insert(inst_vec->end(), tmp->begin(), tmp->end());
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, BP_REG, SP_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, BP_REG, SP_REG, "", "" ,"Function Exit: Restoring BP"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::LDI, SP_REG, BP_REG));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::LDI, SP_REG, RET_ADDR_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::LDI, SP_REG, RET_ADDR_REG, "", "", "Getting Return Address"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, to_string(getArgCnt()), SP_REG));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPI, RET_ADDR_REG));
     return inst_vec;
