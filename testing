@@ -5,8 +5,12 @@
 int a;
 int b;
 int c;
-
-
+    
+    void abc() {
+	int g = 2;
+	int h;
+    }
+    
     open(file, flags, mode) -> {
                      
 		;
