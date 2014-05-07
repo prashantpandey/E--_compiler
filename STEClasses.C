@@ -59,6 +59,8 @@ void GlobalEntry::genFinalCode(string progName) {
 	    }
 
 	}
+	Instruction* firstInst = (codeModGlobalSec->getInstructions())->front();
+	firstInst->setLabel("begin");
 	progCode_->insertModule(codeModGlobalSec);
     }
 
