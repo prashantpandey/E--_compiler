@@ -56,6 +56,7 @@ void GlobalEntry::genFinalCode(string progName) {
 		FunctionEntry *fe = (FunctionEntry *)ste;
 		functionCodeMod = new CodeModule(fe->name());
 		functionCodeMod->insertInstructionSet(fe->codeGen());
+		progCode_->insertModule(functionCodeMod);
 	    }
 
 	}
