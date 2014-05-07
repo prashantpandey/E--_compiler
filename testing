@@ -6,11 +6,14 @@ int a;
 int b;
 int c;
 
-
+void foo(int h){
+    a = h;
+}
 void abc() {
     int g = 2;
     int h;
     h = 100;
+    foo(h);
 };
     
 open(file, flags, mode) -> {;};

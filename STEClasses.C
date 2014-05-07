@@ -78,6 +78,7 @@ void GlobalEntry::serializeAsm(ostream& os) const
 	    os << (*inst)->toString();
 	    os << "\n";
 	}
+	    os << "\n";
     }
 }
 

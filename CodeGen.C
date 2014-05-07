@@ -65,7 +65,11 @@ string Instruction::toString() {
     ostringstream os;
     if(label_ != "")
 	os << label_ << ": ";
-    os << name(instr_) << " " << param1_ << " " << param2_ << " " << param3_ << " " << comment_;
+    if(comment_ != "")
+	os << name(instr_) << " " << param1_ << " " << param2_ << " " << param3_ << " // " << comment_;
+    else
+	os << name(instr_) << " " << param1_ << " " << param2_ << " " << param3_ ;
+
     return os.str();
 
 }
