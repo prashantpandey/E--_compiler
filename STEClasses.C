@@ -114,7 +114,7 @@ void VariableEntry::checkType() const
 
 vector<Instruction*>* VariableEntry::codeGen() {
 
-    string regName, val;
+    string val;
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     regName_ = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
     if(initVal() == NULL || initVal()->value() == NULL){
@@ -138,16 +138,16 @@ vector<Instruction*>* VariableEntry::codeGen() {
 
 	case VariableEntry::VarKind::GLOBAL_VAR :
 
-	    inst_vec->push_back(new Instruction(movInst, val, regName));
+	    inst_vec->push_back(new Instruction(movInst, val, regName_));
 
 	    /* If is mem is set then storing the corresponding
 	     * global variable register to the global section,
 	     * updating the stack pointer and purging the register*/
 
 	    if (isMem()) {
-		inst_vec->push_back(new Instruction(storeInst, regName, SP_REG));
+		inst_vec->push_back(new Instruction(storeInst, regName_, SP_REG));
 		inst_vec->push_back(Instruction::decrSP());
-		regMgr->purgeReg(regName);
+		regMgr->purgeReg(regName_);
 	    }
 	    break;
 	case VariableEntry::VarKind::UNDEFINED :
