@@ -116,60 +116,39 @@ vector<Instruction*>* VariableEntry::codeGen() {
 
     string regName, val;
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
+    regName_ = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
+    if(initVal() == NULL || initVal()->value() == NULL){
+	val = "0";
+    }
+    else
+	val = fetchExprRegValue();
+    Instruction::InstructionSet movInst = Instruction::InstructionSet::MOVI;
+    Instruction::InstructionSet storeInst = Instruction::InstructionSet::STI;
+    if (Type::isString(type()->tag())) {
+	movInst = Instruction::InstructionSet::MOVS;
+    }
+    else if (Type::isFloat(type()->tag())) {
+	movInst = Instruction::InstructionSet::MOVF;
+	storeInst = Instruction::InstructionSet::STF;
+    }
     switch(varKind()) {
 	case VariableEntry::VarKind::LOCAL_VAR :
 
 	case VariableEntry::VarKind::PARAM_VAR :
 
 	case VariableEntry::VarKind::GLOBAL_VAR :
-	    regName_ = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
-	    if(initVal() == NULL){
-		val = "0";
+
+	    inst_vec->push_back(new Instruction(movInst, val, regName));
+
+	    /* If is mem is set then storing the corresponding
+	     * global variable register to the global section,
+	     * updating the stack pointer and purging the register*/
+
+	    if (isMem()) {
+		inst_vec->push_back(new Instruction(storeInst, regName, SP_REG));
+		inst_vec->push_back(Instruction::decrSP());
+		regMgr->purgeReg(regName);
 	    }
-	    else if(initVal()->value() == NULL){
-
-		val = "0";
-	    }
-	    else
-		//val = initVal()->value()->toString();
-		val = fetchExprRegValue();
-	    // initVal type is ExprNode*, check how does this work
-	    if (Type::isInt(type()->tag()))
-	    {
-		inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, val, regName));
-
-		/* If is mem is set then storing the corresponding
-		 * global variable register to the global section,
-		 * updating the stack pointer and purging the register*/
-
-		if (isMem()) {
-		    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
-		    inst_vec->push_back(Instruction::decrSP());
-		    regMgr->purgeReg(regName);
-		}
-
-	    }
-
-	    else if (Type::isString(type()->tag())) {
-		inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVS, val, regName));
-		if (isMem()) {
-		    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, regName, SP_REG));
-		    inst_vec->push_back(Instruction::decrSP());
-		    regMgr->purgeReg(regName);
-		}
-
-	    }
-
-	    else if (Type::isFloat(type()->tag())) {
-		inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVF, val, regName));
-		if (isMem()) {
-		    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STF, regName, SP_REG));
-		    inst_vec->push_back(Instruction::decrSP());
-		    regMgr->purgeReg(regName);
-		}
-
-	    }
-
 	    break;
 	case VariableEntry::VarKind::UNDEFINED :
 	    break;
@@ -215,7 +194,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 
 
 string VariableEntry::fetchExprRegValue() {
-    
+
     insertQuadrupleSet(initVal_->iCodeGen());
     return initVal_->getTReg();
 }
@@ -223,7 +202,7 @@ string VariableEntry::fetchExprRegValue() {
 void FunctionEntry::checkType() const
 {
     if (body())
-        body()->typeCheck();
+	body()->typeCheck();
 }
 
 void ClassEntry::print(ostream& out, int indent) const
@@ -258,32 +237,32 @@ void FunctionEntry::print(ostream& out, int indent) const
     const SymTab *st = NULL;
     int i = 0;
     if ((st = symTab()) != nullptr) {
-        SymTab::const_iterator it = st->begin();
-        for (i=0; it != (st->end()); i++, ++it)  {
-            SymTabEntry *ste = (SymTabEntry *)(*it);
-            if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
-                VariableEntry *ve = (VariableEntry *) ste;
-                if (ve->varKind() != VariableEntry::VarKind::PARAM_VAR) {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        if (i != 0) {
-            printST(out, indent, '\0', '\0', false, 0, i);
-        }
+	SymTab::const_iterator it = st->begin();
+	for (i=0; it != (st->end()); i++, ++it)  {
+	    SymTabEntry *ste = (SymTabEntry *)(*it);
+	    if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
+		VariableEntry *ve = (VariableEntry *) ste;
+		if (ve->varKind() != VariableEntry::VarKind::PARAM_VAR) {
+		    break;
+		}
+	    } else {
+		break;
+	    }
+	}
+	if (i != 0) {
+	    printST(out, indent, '\0', '\0', false, 0, i);
+	}
 
     }
     out << ")";
     if (body() != NULL || (st != nullptr && st->size() > i)) {
-        cout << " {";
-        if (st != nullptr && st->size() > i)
-            printST(out, indent, '\0', ';', true, i, st->size());
-        else
-            prtln(out, indent);
-        if (body() != NULL)
-            body()->printWithoutBraces(out, indent);
-        cout << "}";
+	cout << " {";
+	if (st != nullptr && st->size() > i)
+	    printST(out, indent, '\0', ';', true, i, st->size());
+	else
+	    prtln(out, indent);
+	if (body() != NULL)
+	    body()->printWithoutBraces(out, indent);
+	cout << "}";
     }
 }
