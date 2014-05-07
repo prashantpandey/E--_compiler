@@ -1,0 +1,14 @@
+
+
+    event open (string a1 , int a2 , unsigned int a3);
+
+int a;
+int b;
+int c;
+
+
+    open(file, flags, mode) -> {
+                     
+		;
+
+    };
