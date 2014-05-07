@@ -37,7 +37,7 @@ using namespace std;
 #define GLOBAL_REG "R003"
 #define RET_ADDR_REG "R004"
 
-#define GLOBAL_MAX_REG_COUNT 0
+#define GLOBAL_MAX_REG_COUNT 100
 
 #define TOTAL_REG 1000
 #define INT_REG_AVAIL 995
