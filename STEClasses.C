@@ -59,6 +59,8 @@ void GlobalEntry::genFinalCode(string progName) {
 	    }
 
 	}
+	Instruction* firstInst = (codeModGlobalSec->getInstructions())->front();
+	firstInst->setLabel("begin");
 	progCode_->insertModule(codeModGlobalSec);
     }
 
@@ -131,15 +133,13 @@ vector<Instruction*>* VariableEntry::codeGen() {
 	movInst = Instruction::InstructionSet::MOVF;
 	storeInst = Instruction::InstructionSet::STF;
     }
+    inst_vec->push_back(new Instruction(movInst, val, regName_));
     switch(varKind()) {
 	case VariableEntry::VarKind::LOCAL_VAR :
-
+	    inst_vec->push_back(Instruction::decrSP());
+	    break;
 	case VariableEntry::VarKind::PARAM_VAR :
-
 	case VariableEntry::VarKind::GLOBAL_VAR :
-
-	    inst_vec->push_back(new Instruction(movInst, val, regName_));
-
 	    /* If is mem is set then storing the corresponding
 	     * global variable register to the global section,
 	     * updating the stack pointer and purging the register*/
