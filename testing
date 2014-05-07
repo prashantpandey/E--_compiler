@@ -1,18 +1,16 @@
 
 
-    event open (string a1 , int a2 , unsigned int a3);
+event open (string a1 , int a2 , unsigned int a3);
 
 int a;
 int b;
 int c;
-    
-    void abc() {
-	int g = 2;
-	int h;
-    }
-    
-    open(file, flags, mode) -> {
-                     
-		;
 
-    };
+
+void abc() {
+    int g = 2;
+    int h;
+    h = 100;
+};
+    
+open(file, flags, mode) -> {;};

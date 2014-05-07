@@ -723,8 +723,11 @@ const Type* CompoundStmtNode::typeCheck() const {
     bool flag = false;
     const list<StmtNode*>* listStmts = stmts();
 
+    if(listStmts == NULL) {
+        return &Type::errorType;
+    }
     for(list<StmtNode*>::const_iterator it = listStmts->begin(); it != listStmts->end(); ++it) {
-        if((*it)->typeCheck()->tag() != Type::TypeTag::UNKNOWN) {
+        if((*it) != NULL && (*it)->typeCheck()->tag() != Type::TypeTag::UNKNOWN) {
             flag = true;
         }
     }
