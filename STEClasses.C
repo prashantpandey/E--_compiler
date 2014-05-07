@@ -175,7 +175,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 	    SymTabEntry *ste = (SymTabEntry *)(*it);
 	    if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
 		VariableEntry *ve = (VariableEntry *) ste;
-		if (ve->varKind() != VariableEntry::VarKind::LOCAL_VAR) {
+		if (ve->varKind() == VariableEntry::VarKind::LOCAL_VAR) {
 		    vector<Instruction*> *tmp = ve->codeGen();
 		    inst_vec->insert(inst_vec->end(), tmp->begin(), tmp->end());
 		}
