@@ -1,4 +1,5 @@
 /*
+ *
  * =====================================================================================
  *
  *       Filename:  CodeGen.h
@@ -134,17 +135,11 @@ class Quadruple {
 	    return res_;
 	};
 
-	bool isEqual(Quadruple *quad){
-
-	    if(quad->opr_.compare(opr_) == 0) {
-		if(quad->opr1_.compare(opr1_) == 0) {
-		    if(quad->opr2_.compare(opr2_) ==0) {
-			return true;
-		    }
-		}
-	    }
-	    return false;
-	}
+    static int tempCnt_;
+    static string fetchTempVar();
+    static void resetTempCnt();
+    bool isEqual(Quadruple *quad);
+    
     private:
 	string opr_;
 	string opr1_;

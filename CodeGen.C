@@ -40,6 +40,8 @@
 //  Code Gen:
 //
 
+int Quadruple::tempCnt_ = 0;
+
 const char* instrName[] = {
     "ADD", "SUB", "DIV", "MUL", "MOD", "FADD", "FSUB", "FDIV", "FMUL",
     "AND", "OR", "XOR", "NEG", "FNEG",
@@ -72,5 +74,26 @@ string Instruction::toString() {
 
     return os.str();
 
+}
+
+string Quadruple::fetchTempVar(){
+    ostringstream os;
+    os << "T" << tempCnt_++;
+    return os.str();
+}
+
+void Quadruple::resetTempCnt(){
+    tempCnt_ = 0;
+}
+
+bool Quadruple::isEqual(Quadruple *quad){
+    if(quad->opr_.compare(opr_) == 0) {
+	if(quad->opr1_.compare(opr1_) == 0) {
+	    if(quad->opr2_.compare(opr2_) ==0) {
+		return true;
+	    }
+	}
+    }
+    return false;
 }
 
