@@ -171,12 +171,13 @@ class Instruction {
 	    VALUE
 	};
 
-	Instruction(InstructionSet instr, string param1, string param2 = "", string param3 = "", string label = "") {
+	Instruction(InstructionSet instr, string param1, string param2 = "", string param3 = "", string label = "", string comment = "") {
 	    instr_ = instr;
 	    param1_ = param1;
 	    param2_ = param2;
 	    param3_ = param3;
 	    label_ = label;
+	    comment_ = comment;
 	};
 
 	~ Instruction() {};
@@ -201,6 +202,10 @@ class Instruction {
 	void setLabel(string label) {
 	    label_ = label;
 	};
+	
+	void setComment(string comment) {
+	    comment_ = comment;
+	};
 
 	string name(InstructionSet inst);
 	string toString();
@@ -212,6 +217,7 @@ class Instruction {
 	string param2_;
 	string param3_;
 	string label_;
+	string comment_;
 };
 
 #endif
