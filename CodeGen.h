@@ -78,9 +78,15 @@ public:
 	    instructions_->insert(instructions_->end(), instrVector->begin(), instrVector->end());
     }
 
+    Instruction* firstInst() const {
+	if (instructions_->size())
+	    return instructions_->front();
+	return NULL;
+    }
+
 private:
     string moduleName_;
-    vector<Instruction*> *instructions_;
+    vector<Instruction*> *instructions_ = NULL;
 };
 
 
