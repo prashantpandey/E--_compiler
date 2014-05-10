@@ -29,8 +29,7 @@
 #include <iomanip>
 #include <stack>
 #include <unordered_map>
-#include "STEClasses.h"
-#include "CodeGen.h"
+#include "IncludeHeaders.h"
 
 using namespace std;
 

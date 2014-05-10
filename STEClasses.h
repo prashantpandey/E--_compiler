@@ -1,10 +1,7 @@
 #ifndef STE_CLASSES_H
 #define STE_CLASSES_H
 
-#include "SymTab.h"
-#include "SymTabEntry.h"
-#include "CodeGen.h"
-#include "Ast.h"
+#include "IncludeHeaders.h"
 
 class StmtNode;
 class RuleNode;

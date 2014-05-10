@@ -1,4 +1,4 @@
-#include "Ast.h"
+#include "IncludeHeaders.h"
 #include "ParserUtil.h"
 
 
@@ -1171,7 +1171,7 @@ const char* opCodeStr_[] = {
 vector<Quadruple*>* OpNode::iCodeGen() {
     
     vector<Quadruple*>* quad = new vector<Quadruple*>();
-    VariableEntry *operands = new VariableEntry[arity_];
+   /* VariableEntry *operands = new VariableEntry[arity_];
     Type *t;
     string reg;
 
@@ -1211,7 +1211,7 @@ vector<Quadruple*>* OpNode::iCodeGen() {
 	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], Quadruple::fetchTempVar()));
 	    break;
     }
-    // TODO:: reset temp count
+    // TODO:: reset temp count*/
     return quad;
 }
 

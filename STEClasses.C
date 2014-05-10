@@ -1,7 +1,5 @@
 
-#include "STEClasses.h"
-#include "RegMgr.h"
-#include "CodeGen.h"
+#include "IncludeHeaders.h"
 #include "Value.h"
 #include "ParserUtil.h"
 

@@ -2,10 +2,9 @@
 #define AST_H
 
 #include "all.h"
+#include "IncludeHeaders.h"
 #include "Value.h"
-#include "STEClasses.h"
 #include "ProgramElem.h"
-#include "SymTabEntry.h"
 
 class BlockEntry;
 class EFSA;

@@ -23,9 +23,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "RegMgr.h"
-#include "STEClasses.h"
-#include "Ast.h"
+#include "IncludeHeaders.h"
 
 using namespace std;
 
