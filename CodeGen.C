@@ -88,7 +88,7 @@ void Quadruple::resetTempCnt(){
 }
 
 bool Quadruple::isEqual(Quadruple *quad){
-    if(quad->instr_ == instr_) {
+    if(quad->opc_ == opc_) {
 	if(quad->opr1_->name().compare(opr1_->name()) == 0) {
 	    if(quad->opr2_->name().compare(opr2_->name()) ==0) {
 		return true;
@@ -119,13 +119,22 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
 	        delete(ve3);
 
 	    //TODO:: Map the opcode to instruction set
-	    instr = new Instruction(---, regName1, regName2, regName3);
-	    inst_set->push_back(instr);
+//	    instr = new Instruction(getInstr(opc), regName1, regName2, regName3);
+//	    inst_set->push_back(instr);
 	
     }
     return inst_set;
 }
 
+/*
+Instruction::InstructionSet getInstr(OpNode::OpCode opc){
+    switch(opc){
+    
+	case OpNode::OpCode::UMINUS:
+	case OpNode
+    }
+}
+*/
 bool Quadruple::checkRegOrTemp(VariableEntry *ve, string &regName){
 
 	    if(ve != NULL){
