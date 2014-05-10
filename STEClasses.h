@@ -26,7 +26,10 @@ extern string newName(const string&);
 class GlobalEntry: public SymTabEntry {
 public:
     GlobalEntry(string name, int line=0, int column=0, string file=""):
-        SymTabEntry(name, SymTabEntry::Kind::GLOBAL_KIND, line, column,file), rules_() { globalCntI_ = 0; globalCntF_ = 0; };
+        SymTabEntry(name, SymTabEntry::Kind::GLOBAL_KIND, line, column,file), rules_() {
+        globalCntI_ = 0;
+        globalCntF_ = 0;
+    };
     ~GlobalEntry() {};
 
     void checkType() const;
@@ -50,11 +53,19 @@ public:
         rules_.push_back(re);
     };
 
-    int getCntI() { return globalCntI_; };
-    int getCntF() { return globalCntF_; };
+    int getCntI() {
+        return globalCntI_;
+    };
+    int getCntF() {
+        return globalCntF_;
+    };
 
-    void incrCntI() { globalCntI_++; };
-    void incrCntF() { globalCntF_++; };
+    void incrCntI() {
+        globalCntI_++;
+    };
+    void incrCntF() {
+        globalCntF_++;
+    };
 
     void print(ostream&, int indent=0) const;
 
@@ -96,22 +107,24 @@ public:
     void insertWhileLabel(int wl) {
         whileLabel_.push_back(wl);
     };
-    
+
     /*
     void setWhileLabel(vector<int> wl) {
         whileLabel_ = wl;
     };
     */
 
-    vector<int> getWhileLabel() { return whileLabel_; };
+    vector<int> getWhileLabel() {
+        return whileLabel_;
+    };
 
     string returnStringLabel() const {
         string label;
         unsigned int i = 0;
-	label.append("while_");
+        label.append("while_");
         for(i = 0; i <= whileLabel_.size(); i++) {
             label.append(to_string(whileLabel_[i]));
-	    label.append("_");
+            label.append("_");
         }
         return label;
     }
@@ -119,7 +132,7 @@ public:
     int nestedWhileCount() const {
         return whileLabel_.size();
     };
-    
+
     vector<int> copyWhileLabel() const {
         vector<int> copiedWhileLabel(whileLabel_);
         return copiedWhileLabel;
@@ -145,10 +158,10 @@ public:
         vkind_ = v;
         initVal(init);
         const_ = false;
-	inMem_ = false;
-	regName_ = "";
-	temp_ = false;
-	iCodeTable_ = new vector<Quadruple*>();
+        inMem_ = false;
+        regName_ = "";
+        temp_ = false;
+        iCodeTable_ = new vector<Quadruple*>();
     };
 
     VariableEntry(const VariableEntry &v);
@@ -175,7 +188,7 @@ public:
     const ExprNode* initVal() const {
         return initVal_;
     }
-    
+
     vector<Instruction*>* fetchExprRegValue();
 
     ExprNode* initVal() {
@@ -195,22 +208,40 @@ public:
     };
 
     void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
-	if (instrVector != NULL)
-	    iCodeTable_->insert(iCodeTable_->end(), instrVector->begin(), instrVector->end());
+        if (instrVector != NULL)
+            iCodeTable_->insert(iCodeTable_->end(), instrVector->begin(), instrVector->end());
     }
 
-    void setMem (bool inMem) { inMem_ = inMem; };
-    void setMem() { setMem(true); };
-    bool isMem() { return inMem_; };
+    void setMem (bool inMem) {
+        inMem_ = inMem;
+    };
+    void setMem() {
+        setMem(true);
+    };
+    bool isMem() {
+        return inMem_;
+    };
 
-    bool isTemp() { return temp_; }
-    void setTemp() { temp_ = true; }
+    bool isTemp() {
+        return temp_;
+    }
+    void setTemp() {
+        temp_ = true;
+    }
 
-    void setReg(string regName) { regName_ = regName; };
-    string getReg() { return regName_; };
-    
-    void setTReg(string regName) { tReg_ = regName; };
-    string getTReg() { return tReg_; };
+    void setReg(string regName) {
+        regName_ = regName;
+    };
+    string getReg() {
+        return regName_;
+    };
+
+    void setTReg(string regName) {
+        tReg_ = regName;
+    };
+    string getTReg() {
+        return tReg_;
+    };
 
     void print(ostream& os, int indent=0) const;
 
@@ -227,93 +258,93 @@ private:
 };
 
 class ClassEntry: public SymTabEntry {
-    public:
-	ClassEntry(string name, int line=0, int column=0, string file="")
-	    : SymTabEntry(name, SymTabEntry::Kind::CLASS_KIND, line,column, file) {};
-	~ClassEntry() {};
+public:
+    ClassEntry(string name, int line=0, int column=0, string file="")
+        : SymTabEntry(name, SymTabEntry::Kind::CLASS_KIND, line,column, file) {};
+    ~ClassEntry() {};
 
-	void print(ostream& os, int indent) const;
+    void print(ostream& os, int indent) const;
 };
 
 class FunctionEntry: public SymTabEntry {
-    public:
-	FunctionEntry(string name, Type* type=nullptr,
-		int line=0, int column=0, string file=""):
-	    SymTabEntry(name, SymTabEntry::Kind::FUNCTION_KIND, line,column, file, type) {
-		body_ = nullptr;
-		argCnt_ = 0;
-	    };
-	~FunctionEntry() {};
+public:
+    FunctionEntry(string name, Type* type=nullptr,
+                  int line=0, int column=0, string file=""):
+        SymTabEntry(name, SymTabEntry::Kind::FUNCTION_KIND, line,column, file, type) {
+        body_ = nullptr;
+        argCnt_ = 0;
+    };
+    ~FunctionEntry() {};
 
-	void checkType() const;
+    void checkType() const;
 
-	vector<Instruction*>* codeGen();
+    vector<Instruction*>* codeGen();
 
-	const CompoundStmtNode* body() const {
-	    return body_;
-	};
-	CompoundStmtNode* body() {
-	    return body_;
-	};
-	void body(CompoundStmtNode* n) {
-	    body_ = n;
-	};
+    const CompoundStmtNode* body() const {
+        return body_;
+    };
+    CompoundStmtNode* body() {
+        return body_;
+    };
+    void body(CompoundStmtNode* n) {
+        body_ = n;
+    };
 
-	int getArgCnt() const {
-	    return argCnt_;
-	}
-	
-        string getALabel() const {
-	    return aLabel_;
-	}
+    int getArgCnt() const {
+        return argCnt_;
+    }
 
-	void incrementArgCnt(int offset) {
-	    argCnt_ += offset;
-	}
+    string getALabel() const {
+        return aLabel_;
+    }
 
-	void print(ostream& os, int indent) const;
+    void incrementArgCnt(int offset) {
+        argCnt_ += offset;
+    }
 
-    private:
-	CompoundStmtNode* body_;
-	int argCnt_;
-        string aLabel_;
+    void print(ostream& os, int indent) const;
+
+private:
+    CompoundStmtNode* body_;
+    int argCnt_;
+    string aLabel_;
 };
 
 class EventEntry: public SymTabEntry {
-    public:
-	EventEntry(string name, int line=0, int column=0, string file=""):
-	    SymTabEntry(name, SymTabEntry::Kind::EVENT_KIND, line,column, file) {};
+public:
+    EventEntry(string name, int line=0, int column=0, string file=""):
+        SymTabEntry(name, SymTabEntry::Kind::EVENT_KIND, line,column, file) {};
 
-	EventEntry(string name, Kind kind, int line=0, int column=0, string file=""):
-	    SymTabEntry(name, kind, line,column, file) {};
+    EventEntry(string name, Kind kind, int line=0, int column=0, string file=""):
+        SymTabEntry(name, kind, line,column, file) {};
 
-	~EventEntry() {};
+    ~EventEntry() {};
 
-	int getArgCnt() const {
-	    return argCnt_;
-	}
-	void incrementArgCnt(int offset) {
-	    argCnt_ += offset;
-	}
+    int getArgCnt() const {
+        return argCnt_;
+    }
+    void incrementArgCnt(int offset) {
+        argCnt_ += offset;
+    }
 
-	void print(ostream& out, int indent=0) const;
+    void print(ostream& out, int indent=0) const;
 
-        vector<Instruction*>* codeGen(vector<VariableEntry*>* params);
+    vector<Instruction*>* codeGen(vector<VariableEntry*>* params);
 
-    private:
-	int argCnt_;
+private:
+    int argCnt_;
 };
 
 class UnknownKindEntry: public SymTabEntry {
-    public:
-	UnknownKindEntry(string name, int line=0, int column=0, string file=""):
-	    SymTabEntry(name, SymTabEntry::Kind::UNKNOWN_KIND, line,column, file) {};
+public:
+    UnknownKindEntry(string name, int line=0, int column=0, string file=""):
+        SymTabEntry(name, SymTabEntry::Kind::UNKNOWN_KIND, line,column, file) {};
 
-	UnknownKindEntry(string name, Kind kind, int line=0, int column=0, string file=""):
-	    SymTabEntry(name, kind, line,column, file) {};
+    UnknownKindEntry(string name, Kind kind, int line=0, int column=0, string file=""):
+        SymTabEntry(name, kind, line,column, file) {};
 
-	~UnknownKindEntry() {};
+    ~UnknownKindEntry() {};
 
-	void print(ostream& out, int indent=0) const;
+    void print(ostream& out, int indent=0) const;
 };
 #endif

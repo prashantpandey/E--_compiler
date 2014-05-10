@@ -124,9 +124,9 @@ public:
     };
 
     const Type* doTypeCheck() {
-	const Type *type = typeCheck();
-	setResultType(type);
-	return type;
+        const Type *type = typeCheck();
+        setResultType(type);
+        return type;
     }
 
     const Value* value() const {
@@ -142,12 +142,12 @@ public:
     }
 
     void setResultType(const Type* type) {
-	resultType_ = type;
+        resultType_ = type;
     }
 
     Type* getResultType() {
-	const Type* temp = coercedType_?coercedType_:resultType_; 
-	return new Type(temp->tag());
+        const Type* temp = coercedType_?coercedType_:resultType_;
+        return new Type(temp->tag());
     }
 
     virtual vector<Quadruple*>* iCodeGen() = 0;
@@ -187,9 +187,9 @@ public:
     void symTabEntry(const SymTabEntry *ste)  {
         sym_ = ste;
     };
-    
+
     vector<Quadruple*>* iCodeGen() {
-	return new vector<Quadruple*>;
+        return new vector<Quadruple*>;
     }
 
     void print(ostream& os, int indent=0) const;
@@ -228,8 +228,8 @@ public:
         // operators with > 2 args can be supported
         // only if types of args k through N are identical, for 1 <= k <= 3,
         // and are given by argType[k-1]
-        
-	Type::TypeTag outType_;
+
+        Type::TypeTag outType_;
         const char *typeConstraints_;
     };
 
@@ -290,9 +290,9 @@ public:
         return new ValueNode(*this);
     }
     ~ValueNode() {};
-    
+
     vector<Quadruple*>* iCodeGen() {
-	return new vector<Quadruple*>();
+        return new vector<Quadruple*>();
     }
 
     void print(ostream& os, int indent=0) const;
@@ -342,12 +342,12 @@ public:
     };
 
     vector<Quadruple*>* iCodeGen() {
-	vector<Quadruple*>* quad = new vector<Quadruple*>();
-	for(vector<ExprNode*>::const_iterator it = params_->begin(); it != params_->end(); ++it) {
-	    vector<Quadruple*>* tempQuad = (*it)->iCodeGen();
-	    quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
-	}
-	return quad;
+        vector<Quadruple*>* quad = new vector<Quadruple*>();
+        for(vector<ExprNode*>::const_iterator it = params_->begin(); it != params_->end(); ++it) {
+            vector<Quadruple*>* tempQuad = (*it)->iCodeGen();
+            quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
+        }
+        return quad;
     }
 
     vector<Instruction*>* codeGen();
@@ -372,503 +372,507 @@ private:
 // combined into a single class PatNode.
 
 class BasePatNode: public AstNode {
-    public:
-	enum class PatNodeKind {
-	    PRIMITIVE, EMPTY, NEG, SEQ, OR, STAR, UNDEFINED
-	};
+public:
+    enum class PatNodeKind {
+        PRIMITIVE, EMPTY, NEG, SEQ, OR, STAR, UNDEFINED
+    };
 
-	BasePatNode(PatNodeKind pk, int ln=0, int col=0, string f=""):
-	    AstNode(AstNode::NodeType::PAT_NODE, ln, col, f) {
-		parent_ = NULL;
-		root_ = NULL;
-		patKind_ = pk;
-	    };
-	BasePatNode(const BasePatNode& bpn): AstNode(bpn) {
-	    patKind_ = bpn.patKind_;
-	    parent_ = bpn.parent_;
-	    root_ = bpn.root_;
-	}
-	~BasePatNode() {};
-	//virtual BasepatNode* clone() const { return new BasePatNode(*this);}
+    BasePatNode(PatNodeKind pk, int ln=0, int col=0, string f=""):
+        AstNode(AstNode::NodeType::PAT_NODE, ln, col, f) {
+        parent_ = NULL;
+        root_ = NULL;
+        patKind_ = pk;
+    };
+    BasePatNode(const BasePatNode& bpn): AstNode(bpn) {
+        patKind_ = bpn.patKind_;
+        parent_ = bpn.parent_;
+        root_ = bpn.root_;
+    }
+    ~BasePatNode() {};
+    //virtual BasepatNode* clone() const { return new BasePatNode(*this);}
 
-	PatNodeKind kind() const {
-	    return patKind_;
-	};
-	void kind(PatNodeKind p) {
-	    patKind_ = p;
-	}
+    PatNodeKind kind() const {
+        return patKind_;
+    };
+    void kind(PatNodeKind p) {
+        patKind_ = p;
+    }
 
-	virtual const Type* typeCheck() const = 0;
+    virtual const Type* typeCheck() const = 0;
 
-	const BasePatNode* parent() const {
-	    return parent_;
-	}
+    const BasePatNode* parent() const {
+        return parent_;
+    }
 
-	BasePatNode* parent() {
-	    return parent_;
-	}
+    BasePatNode* parent() {
+        return parent_;
+    }
 
-	virtual string getLabel() = 0;
+    virtual string getLabel() = 0;
 
-	virtual vector<Instruction*>* codeGen() = 0;
-	virtual void purgeRegisters() = 0;
-	virtual bool hasSeqOps() const=0;
-	virtual bool hasNeg() const=0;
-	virtual bool hasAnyOrOther() const=0;
-	virtual bool isNegatable() const {
-	    return ((!hasSeqOps()) && (!hasNeg()));
-	}
+    virtual vector<Instruction*>* codeGen() = 0;
+    virtual void purgeRegisters() = 0;
+    virtual bool hasSeqOps() const=0;
+    virtual bool hasNeg() const=0;
+    virtual bool hasAnyOrOther() const=0;
+    virtual bool isNegatable() const {
+        return ((!hasSeqOps()) && (!hasNeg()));
+    }
 
-	const static string labelPrefix;
+    const static string labelPrefix;
 
-    private:
-	PatNodeKind patKind_;
-	BasePatNode* parent_;
-	BasePatNode* root_;
+private:
+    PatNodeKind patKind_;
+    BasePatNode* parent_;
+    BasePatNode* root_;
 };
 
 /****************************************************************/
 
 class PrimitivePatNode: public BasePatNode {
-    public:
-	PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* params,
-		ExprNode* c=NULL,
-		int line=0, int column=0, string file="");
-	//PrimitivePatNode(const PrimitivePatNode& ppn);
-	~PrimitivePatNode() {};
-	//BasePatNode* clone() { return new PrimitivePatNode(*this); }
+public:
+    PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* params,
+                     ExprNode* c=NULL,
+                     int line=0, int column=0, string file="");
+    //PrimitivePatNode(const PrimitivePatNode& ppn);
+    ~PrimitivePatNode() {};
+    //BasePatNode* clone() { return new PrimitivePatNode(*this); }
 
-	const EventEntry* event() const {
-	    return ee_;
-	}
+    const EventEntry* event() const {
+        return ee_;
+    }
 
-	EventEntry* event() {
-	    return ee_;
-	}
+    EventEntry* event() {
+        return ee_;
+    }
 
-	const vector<const VariableEntry*>* params() const {
-	    return (vector<const VariableEntry*>*)params_;
-	}
-	vector<VariableEntry*>* params() {
-	    return params_;
-	}
+    const vector<const VariableEntry*>* params() const {
+        return (vector<const VariableEntry*>*)params_;
+    }
+    vector<VariableEntry*>* params() {
+        return params_;
+    }
 
-	virtual vector<Instruction*>* codeGen();
+    virtual vector<Instruction*>* codeGen();
 
-	const ExprNode* cond() const {
-	    return cond_;
-	}
-	ExprNode* cond() {
-	    return cond_;
-	}
-	void cond(ExprNode* c) {
-	    cond_ = c;
-	}
+    const ExprNode* cond() const {
+        return cond_;
+    }
+    ExprNode* cond() {
+        return cond_;
+    }
+    void cond(ExprNode* c) {
+        cond_ = c;
+    }
 
-	ExprNode* condition() {
-	    return condition_;
-	}
-	const ExprNode* condition() const {
-	    return condition_;
-	}
+    ExprNode* condition() {
+        return condition_;
+    }
+    const ExprNode* condition() const {
+        return condition_;
+    }
 
-	const list<const OpNode*>& asgs() const {
-	    return (list<const OpNode*>&)asgs_;
-	}
-	list<OpNode*>& asgs() {
-	    return asgs_;
-	}
+    const list<const OpNode*>& asgs() const {
+        return (list<const OpNode*>&)asgs_;
+    }
+    list<OpNode*>& asgs() {
+        return asgs_;
+    }
 
-	virtual void purgeRegisters();
+    virtual void purgeRegisters();
 
-	const Type* typeCheck() const;
-	bool hasSeqOps() const;
-	bool hasNeg() const;
-	bool hasAnyOrOther() const;
-	    
-	string getLabel(); 
+    const Type* typeCheck() const;
+    bool hasSeqOps() const;
+    bool hasNeg() const;
+    bool hasAnyOrOther() const;
 
-	//-const Type* typeCheck();
-	void print(ostream& os, int indent=0) const;
+    string getLabel();
 
-    private:
+    //-const Type* typeCheck();
+    void print(ostream& os, int indent=0) const;
 
-	EventEntry* ee_;
-	vector<VariableEntry*>* params_;
-	/* cond_ may contain assignments as well as other expressions */
-	/* condition_ contains all expresions in cond_ other than assignments */
-	ExprNode* cond_;
-	ExprNode* condition_;
-	list<OpNode*> asgs_;
+private:
+
+    EventEntry* ee_;
+    vector<VariableEntry*>* params_;
+    /* cond_ may contain assignments as well as other expressions */
+    /* condition_ contains all expresions in cond_ other than assignments */
+    ExprNode* cond_;
+    ExprNode* condition_;
+    list<OpNode*> asgs_;
 };
 
 /****************************************************************/
 class PatNode: public BasePatNode {
-    public:
-	PatNode(int line=0, int column=0, string file="");
-	PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2=NULL, int line=0, int column=0, string file="");
+public:
+    PatNode(int line=0, int column=0, string file="");
+    PatNode(PatNodeKind pk, BasePatNode *p1, BasePatNode*p2=NULL, int line=0, int column=0, string file="");
 
-	~PatNode() {};
-	//AstNode* clone()
-	//  { return new PatNode(*this); }
+    ~PatNode() {};
+    //AstNode* clone()
+    //  { return new PatNode(*this); }
 
-	const BasePatNode* pat1() const {
-	    return pat1_;
-	}
-	BasePatNode* pat1() {
-	    return pat1_;
-	}
-	const BasePatNode* pat2() const {
-	    return pat2_;
-	}
-	BasePatNode* pat2() {
-	    return pat2_;
-	}
+    const BasePatNode* pat1() const {
+        return pat1_;
+    }
+    BasePatNode* pat1() {
+        return pat1_;
+    }
+    const BasePatNode* pat2() const {
+        return pat2_;
+    }
+    BasePatNode* pat2() {
+        return pat2_;
+    }
 
-	virtual vector<Instruction*>* codeGen();
-	virtual void purgeRegisters() {
-	    pat1_->purgeRegisters();
-	}
+    virtual vector<Instruction*>* codeGen();
+    virtual void purgeRegisters() {
+        pat1_->purgeRegisters();
+    }
 
-	bool hasNeg() const;
-	bool hasSeqOps() const;
-	bool hasAnyOrOther() const;
+    bool hasNeg() const;
+    bool hasSeqOps() const;
+    bool hasAnyOrOther() const;
 
-	void print(ostream& os, int indent=0) const;
-	const Type* typeCheck() const;
-	
-	string getLabel() {
-	    return pat1_->getLabel();
-	};
-    private:
-	PatNode(const PatNode&);
+    void print(ostream& os, int indent=0) const;
+    const Type* typeCheck() const;
 
-	BasePatNode *pat1_;
-	BasePatNode *pat2_;
+    string getLabel() {
+        return pat1_->getLabel();
+    };
+private:
+    PatNode(const PatNode&);
+
+    BasePatNode *pat1_;
+    BasePatNode *pat2_;
 };
 
 
 /****************************************************************/
 
 class StmtNode: public AstNode {
-    public:
-	enum class StmtNodeKind {
-	    ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE, BREAK
-	};
-    public:
-	StmtNode(StmtNodeKind skm, int line=0, int column=0, string file=""):
-	    AstNode(AstNode::NodeType::STMT_NODE, line,column,file) {
-		skind_ = skm;
-		iCodeTable_ = new vector<Quadruple*>();
-	    };
-	~StmtNode() {};
-	//AstNode* clone()
-	//  { return new StmtNode(*this); }
+public:
+    enum class StmtNodeKind {
+        ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE, BREAK
+    };
+public:
+    StmtNode(StmtNodeKind skm, int line=0, int column=0, string file=""):
+        AstNode(AstNode::NodeType::STMT_NODE, line,column,file) {
+        skind_ = skm;
+        iCodeTable_ = new vector<Quadruple*>();
+    };
+    ~StmtNode() {};
+    //AstNode* clone()
+    //  { return new StmtNode(*this); }
 
-	StmtNodeKind stmtNodeKind() const {
-	    return skind_;
-	}
+    StmtNodeKind stmtNodeKind() const {
+        return skind_;
+    }
 
-	virtual const Type* typeCheck() const = 0;
+    virtual const Type* typeCheck() const = 0;
 
-	vector<Instruction*>* fetchExprRegValue(ExprNode* expr);
-	virtual vector<Instruction*>* codeGen() = 0;
-	
-	void setTReg(string reg) { tReg_ = reg; };
-	string getTReg() { return tReg_; };
+    vector<Instruction*>* fetchExprRegValue(ExprNode* expr);
+    virtual vector<Instruction*>* codeGen() = 0;
 
-	void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
-	    if (instrVector != NULL) 
-		iCodeTable_->insert(iCodeTable_->end(), instrVector->begin(), instrVector->end());
-	}
+    void setTReg(string reg) {
+        tReg_ = reg;
+    };
+    string getTReg() {
+        return tReg_;
+    };
 
-	void print(ostream& os, int indent) const = 0;
-    private:
-	StmtNodeKind skind_;
-	vector<Quadruple*>* iCodeTable_;
-	string tReg_;
+    void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
+        if (instrVector != NULL)
+            iCodeTable_->insert(iCodeTable_->end(), instrVector->begin(), instrVector->end());
+    }
+
+    void print(ostream& os, int indent) const = 0;
+private:
+    StmtNodeKind skind_;
+    vector<Quadruple*>* iCodeTable_;
+    string tReg_;
 };
 
 /****************************************************************/
 
 class ReturnStmtNode: public StmtNode {
-    public:
-	ReturnStmtNode(ExprNode *e, FunctionEntry* fe,
-		int line=0, int column=0, string file=""):
-	    StmtNode(StmtNode::StmtNodeKind::RETURN,line,column,file) {
-		expr_ = e;
-		fun_ = fe;
-	    };
-	~ReturnStmtNode() {};
+public:
+    ReturnStmtNode(ExprNode *e, FunctionEntry* fe,
+                   int line=0, int column=0, string file=""):
+        StmtNode(StmtNode::StmtNodeKind::RETURN,line,column,file) {
+        expr_ = e;
+        fun_ = fe;
+    };
+    ~ReturnStmtNode() {};
 
-	const ExprNode* exprNode() const {
-	    return expr_;
-	}
-	const FunctionEntry* funEntry() const {
-	    return fun_;
-	}
+    const ExprNode* exprNode() const {
+        return expr_;
+    }
+    const FunctionEntry* funEntry() const {
+        return fun_;
+    }
 
-	ExprNode* exprNode() {
-	    return expr_;
-	}
-	FunctionEntry* funEntry() {
-	    return fun_;
-	}
+    ExprNode* exprNode() {
+        return expr_;
+    }
+    FunctionEntry* funEntry() {
+        return fun_;
+    }
 
-	const Type* typeCheck() const;
+    const Type* typeCheck() const;
 
-	vector<Instruction*>* codeGen();
+    vector<Instruction*>* codeGen();
 
-	void print(ostream& os, int indent) const {
-	    os << "return ";
-	    if(expr_ != NULL) expr_->print(os, indent);
-	    else os << "NULL";
-	};
+    void print(ostream& os, int indent) const {
+        os << "return ";
+        if(expr_ != NULL) expr_->print(os, indent);
+        else os << "NULL";
+    };
 
-    private:
-	ExprNode* expr_;
-	FunctionEntry* fun_;
+private:
+    ExprNode* expr_;
+    FunctionEntry* fun_;
 };
 
 /****************************************************************/
 
 class BreakStmtNode: public StmtNode {
-    public:
-	BreakStmtNode(int num, BlockEntry* be,
-		int line=0, int column=0, string file=""):
-	    StmtNode(StmtNode::StmtNodeKind::BREAK, line, column, file) {
-		num_ = num;
-		blockEntry_ = be;
-	    };
-	~BreakStmtNode() {};
+public:
+    BreakStmtNode(int num, BlockEntry* be,
+                  int line=0, int column=0, string file=""):
+        StmtNode(StmtNode::StmtNodeKind::BREAK, line, column, file) {
+        num_ = num;
+        blockEntry_ = be;
+    };
+    ~BreakStmtNode() {};
 
-	const int num() const {
-	    return num_;
-	}
-	const BlockEntry* blockEntry() const {
-	    return blockEntry_;
-	}
+    const int num() const {
+        return num_;
+    }
+    const BlockEntry* blockEntry() const {
+        return blockEntry_;
+    }
 
-	const Type* typeCheck() const;
-	
-	vector<Instruction*>* codeGen();
+    const Type* typeCheck() const;
 
-	int num() {
-	    return num_;
-	}
+    vector<Instruction*>* codeGen();
 
-	BlockEntry* blockEntry() {
-	    return blockEntry_;
-	}
+    int num() {
+        return num_;
+    }
 
-	void print(ostream& os, int indent) const {
-	    os << "break " << num_;
-	}
+    BlockEntry* blockEntry() {
+        return blockEntry_;
+    }
 
-    private:
-	int num_;
-	string brkNumLabel_;
-	BlockEntry *blockEntry_;
+    void print(ostream& os, int indent) const {
+        os << "break " << num_;
+    }
+
+private:
+    int num_;
+    string brkNumLabel_;
+    BlockEntry *blockEntry_;
 };
 
 /****************************************************************/
 
 class ExprStmtNode: public StmtNode {
-    public:
-	ExprStmtNode(ExprNode* e, int line=0, int column=0, string file=""):
-	    StmtNode(StmtNode::StmtNodeKind::EXPR,line,column,file) {
-		expr_ = e;
-	    };
-	~ExprStmtNode() {};
-	//AstNode* clone()
-	//  { return new ExprStmtNode(*this); }
+public:
+    ExprStmtNode(ExprNode* e, int line=0, int column=0, string file=""):
+        StmtNode(StmtNode::StmtNodeKind::EXPR,line,column,file) {
+        expr_ = e;
+    };
+    ~ExprStmtNode() {};
+    //AstNode* clone()
+    //  { return new ExprStmtNode(*this); }
 
-	const ExprNode* exprNode() const {
-	    return expr_;
-	}
-	ExprNode* exprNode() {
-	    return expr_;
-	}
+    const ExprNode* exprNode() const {
+        return expr_;
+    }
+    ExprNode* exprNode() {
+        return expr_;
+    }
 
-	const Type* typeCheck() const;
-	
-	vector<Instruction*>* codeGen();
-	
-	void print(ostream& os, int indent) const {
-	    if (expr_ != NULL) {
-		expr_->print(os, indent);
-	    }
-	};
+    const Type* typeCheck() const;
 
-    private:
-	ExprNode* expr_;
+    vector<Instruction*>* codeGen();
+
+    void print(ostream& os, int indent) const {
+        if (expr_ != NULL) {
+            expr_->print(os, indent);
+        }
+    };
+
+private:
+    ExprNode* expr_;
 };
 
 /****************************************************************/
 
 class CompoundStmtNode: public StmtNode {
-    public:
-	CompoundStmtNode(list<StmtNode*> *Slist, int ln=0, int col=0, string fl=""):
-	    StmtNode(StmtNode::StmtNodeKind::COMPOUND, ln,col,fl) {
-		stmts_ = Slist;
-	    };
-	~CompoundStmtNode() { };
-	//AstNode* clone()
-	//  { return new CompoundStmtNode(*this); }
+public:
+    CompoundStmtNode(list<StmtNode*> *Slist, int ln=0, int col=0, string fl=""):
+        StmtNode(StmtNode::StmtNodeKind::COMPOUND, ln,col,fl) {
+        stmts_ = Slist;
+    };
+    ~CompoundStmtNode() { };
+    //AstNode* clone()
+    //  { return new CompoundStmtNode(*this); }
 
-	const list<StmtNode*>* stmts() const {
-	    return stmts_;
-	}
+    const list<StmtNode*>* stmts() const {
+        return stmts_;
+    }
 
-	const Type* typeCheck() const;
-	
-	vector<Instruction*>* codeGen();
+    const Type* typeCheck() const;
 
-	list<StmtNode*>* stmts() {
-	    return stmts_;
-	}
-	void add(StmtNode *s)
-	{
-	    if(stmts_ != NULL) stmts_->push_back(s);
-	};
+    vector<Instruction*>* codeGen();
 
-	void  printWithoutBraces(ostream& os, int indent) const;
-	void  print(ostream& os, int indent) const;
+    list<StmtNode*>* stmts() {
+        return stmts_;
+    }
+    void add(StmtNode *s)
+    {
+        if(stmts_ != NULL) stmts_->push_back(s);
+    };
 
-    private:
-	CompoundStmtNode(const CompoundStmtNode&);
+    void  printWithoutBraces(ostream& os, int indent) const;
+    void  print(ostream& os, int indent) const;
 
-	list<StmtNode*>   *stmts_;
+private:
+    CompoundStmtNode(const CompoundStmtNode&);
+
+    list<StmtNode*>   *stmts_;
 };
 
 /****************************************************************/
 
 class IfNode: public StmtNode {
-    public:
+public:
 
-	IfNode(ExprNode* cond, StmtNode* thenStmt,
-		StmtNode* elseStmt=NULL, int line=0, int column=0, string file="");
-	~IfNode() {};
-	//AstNode* clone()
-	//  { return new IfNode(*this); }
+    IfNode(ExprNode* cond, StmtNode* thenStmt,
+           StmtNode* elseStmt=NULL, int line=0, int column=0, string file="");
+    ~IfNode() {};
+    //AstNode* clone()
+    //  { return new IfNode(*this); }
 
-	const ExprNode* cond() const {
-	    return cond_;
-	}
-	const StmtNode* elseStmt() const {
-	    return else_;
-	};
-	const StmtNode* thenStmt() const  {
-	    return then_;
-	};
+    const ExprNode* cond() const {
+        return cond_;
+    }
+    const StmtNode* elseStmt() const {
+        return else_;
+    };
+    const StmtNode* thenStmt() const  {
+        return then_;
+    };
 
-	const Type* typeCheck() const;
-	ExprNode* cond() {
-	    return cond_;
-	}
-	StmtNode* elseStmt() {
-	    return else_;
-	};
-	StmtNode* thenStmt() {
-	    return then_;
-	};
-	
-	vector<Instruction*>* codeGen();
+    const Type* typeCheck() const;
+    ExprNode* cond() {
+        return cond_;
+    }
+    StmtNode* elseStmt() {
+        return else_;
+    };
+    StmtNode* thenStmt() {
+        return then_;
+    };
 
-	void print(ostream& os, int indent) const;
+    vector<Instruction*>* codeGen();
 
-    private:
-	ExprNode *cond_;
-	StmtNode *then_, *else_;
-	string thenLabel_;
-	string elseLabel_;
+    void print(ostream& os, int indent) const;
 
-	IfNode(const IfNode&);
+private:
+    ExprNode *cond_;
+    StmtNode *then_, *else_;
+    string thenLabel_;
+    string elseLabel_;
+
+    IfNode(const IfNode&);
 };
 
 /****************************************************************/
 
 class WhileNode: public StmtNode {
-    public:
+public:
 
-	WhileNode(ExprNode* cond, StmtNode* compStmt, string key,
-		int line=0, int column=0, string file="");
+    WhileNode(ExprNode* cond, StmtNode* compStmt, string key,
+              int line=0, int column=0, string file="");
 
-	~WhileNode() {};
+    ~WhileNode() {};
 
-	const ExprNode* cond() const {
-	    return cond_;
-	}
-	const StmtNode* compStmt() const {
-	    return comp_;
-	};
+    const ExprNode* cond() const {
+        return cond_;
+    }
+    const StmtNode* compStmt() const {
+        return comp_;
+    };
 
-	const Type* typeCheck() const;
-	
-	ExprNode* cond() {
-	    return cond_;
-	}
-	StmtNode* compStmt() {
-	    return comp_;
-	};
+    const Type* typeCheck() const;
 
-	vector<Instruction*>* codeGen();
+    ExprNode* cond() {
+        return cond_;
+    }
+    StmtNode* compStmt() {
+        return comp_;
+    };
 
-	void print(ostream& os, int indent) const;
+    vector<Instruction*>* codeGen();
 
-    private:
-	ExprNode *cond_;
-	StmtNode *comp_;
-	string startLabel_;
-	string endLabel_;
-	string key_;
+    void print(ostream& os, int indent) const;
 
-	WhileNode(const WhileNode&);
+private:
+    ExprNode *cond_;
+    StmtNode *comp_;
+    string startLabel_;
+    string endLabel_;
+    string key_;
+
+    WhileNode(const WhileNode&);
 };
 
 /****************************************************************/
 
 class RuleNode: public AstNode {
-    public:
-	RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction,
-		int line=0, int column=0, string file="");
-	~RuleNode() {};
-	//AstNode* clone()
-	//  { return new RuleNode(*this); }
+public:
+    RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction,
+             int line=0, int column=0, string file="");
+    ~RuleNode() {};
+    //AstNode* clone()
+    //  { return new RuleNode(*this); }
 
-	const BlockEntry* ruleEntry() const {
-	    return rste_;
-	};
-	BlockEntry* ruleEntry() {
-	    return rste_;
-	};
+    const BlockEntry* ruleEntry() const {
+        return rste_;
+    };
+    BlockEntry* ruleEntry() {
+        return rste_;
+    };
 
-	const BasePatNode* pat() const {
-	    return pat_;
-	};
-	BasePatNode* pat() {
-	    return pat_;
-	};
+    const BasePatNode* pat() const {
+        return pat_;
+    };
+    BasePatNode* pat() {
+        return pat_;
+    };
 
-	const StmtNode* reaction() const {
-	    return reaction_;
-	};
-	StmtNode* reaction() {
-	    return reaction_;
-	};
+    const StmtNode* reaction() const {
+        return reaction_;
+    };
+    StmtNode* reaction() {
+        return reaction_;
+    };
 
-	const Type* typeCheck() const;
+    const Type* typeCheck() const;
 
-	void print(ostream& os, int indent=0) const;
+    void print(ostream& os, int indent=0) const;
 
-	vector<Instruction*>* codeGen();
+    vector<Instruction*>* codeGen();
 
-    private:
-	BlockEntry    *rste_;
-	BasePatNode *pat_;
-	StmtNode *reaction_;
+private:
+    BlockEntry    *rste_;
+    BasePatNode *pat_;
+    StmtNode *reaction_;
 
-	RuleNode(const RuleNode&);
+    RuleNode(const RuleNode&);
 };
 
 /****************************************************************/

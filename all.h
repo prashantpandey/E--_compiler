@@ -55,7 +55,7 @@ inline void endln(ostream& os, int n) {
 template<typename T>
 inline void mergeVec(vector<T> *inst1, vector<T> *inst2) {
     if (inst2 != NULL)
-	inst1->insert(inst1->end(), inst2->begin(), inst2->end());
+        inst1->insert(inst1->end(), inst2->begin(), inst2->end());
 }
 
 #endif
