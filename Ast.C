@@ -398,7 +398,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVL, label, reg));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, reg, SP_REG));
     inst_vec->push_back(Instruction::decrSP());
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, symTabEntry()->name()));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, ((FunctionEntry*)symTabEntry())->getALabel()));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, nullptr, nullptr, label));
 
     return inst_vec;
