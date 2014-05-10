@@ -542,8 +542,8 @@ class StmtNode: public AstNode {
 
 	virtual const Type* typeCheck() const = 0;
 
-	virtual vector<Instruction*>* fetchExprRegValue();
-	virtual vector<Instruction*>* codeGen();
+	vector<Instruction*>* fetchExprRegValue(ExprNode* expr);
+	virtual vector<Instruction*>* codeGen() = 0;
 	
 	void setTReg(string reg) { tReg_ = reg; };
 	string getTReg() { return tReg_; };
@@ -587,10 +587,10 @@ class ReturnStmtNode: public StmtNode {
 	}
 
 	const Type* typeCheck() const;
-	
-	vector<Instruction*>* fetchExprRegValue();
-	vector<Instruction*>* codeGen();
 
+	vector<Instruction*>* fetchExprInst() { return fetchExprRegValue(expr_); };
+	
+	vector<Instruction*>* codeGen();
 
 	void print(ostream& os, int indent) const {
 	    os << "return ";
@@ -624,8 +624,8 @@ class BreakStmtNode: public StmtNode {
 
 	const Type* typeCheck() const;
 	
-	vector<Instruction*>* fetchExprRegValue() { return NULL; };
 	vector<Instruction*>* codeGen();
+	
 
 	int num() {
 	    return num_;
@@ -664,8 +664,9 @@ class ExprStmtNode: public StmtNode {
 
 	const Type* typeCheck() const;
 	
-	vector<Instruction*>* fetchExprRegValue();
 	vector<Instruction*>* codeGen();
+	
+	vector<Instruction*>* fetchExprInst() { return fetchExprRegValue(expr_); };
 
 	void print(ostream& os, int indent) const {
 	    if (expr_ != NULL) {
@@ -695,7 +696,6 @@ class CompoundStmtNode: public StmtNode {
 
 	const Type* typeCheck() const;
 	
-	vector<Instruction*>* fetchExprRegValue() { return NULL; };
 	vector<Instruction*>* codeGen();
 
 	list<StmtNode*>* stmts() {
@@ -747,8 +747,6 @@ class IfNode: public StmtNode {
 	    return then_;
 	};
 	
-	vector<Instruction*>* fetchExprRegValue();
-	
 	vector<Instruction*>* codeGen() {return NULL; };
 
 	void print(ostream& os, int indent) const;
@@ -777,8 +775,6 @@ class WhileNode: public StmtNode {
 	};
 
 	const Type* typeCheck() const;
-	
-	vector<Instruction*>* fetchExprRegValue();
 	
 	vector<Instruction*>* codeGen() {return NULL; };
 	

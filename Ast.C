@@ -412,59 +412,22 @@ vector<Instruction*>* InvocationNode::codeGen() {
     return inst_vec;
 }
 
-const Type* ReturnStmtNode::typeCheck() const {
-    const ExprNode *expr = exprNode();
-    const FunctionEntry* funEnt = funEntry();
-    if(expr != nullptr) {
-        const Type* retType = expr->typeCheck();
-        if(funEnt != nullptr) {
-            const Type* funRetType = funEnt->type();
-            if(retType->tag() == funRetType->tag()) {
-                return retType;
-            }
-            if (Type::isSubType(retType, funRetType)) {
-                expr_->coercedType(funRetType);
-                return funRetType;
-            }
-            if(funRetType->tag() == Type::TypeTag::VOID) {
-                errMsg(" " + funEnt->name() + ": No return value expected for a void function", this);
-                return &Type::errorType;
-            }
-            else {
-                errMsg(" " + funEnt->name() + ": Return value incompatible with current function's type", this);
-                return &Type::errorType;
-            }
-        }
-        else {
-            errMsg("return statement is not defined in the scope of the function", this);
-            return &Type::errorType;
-        }
-    }
-    else if(funEnt != nullptr) {
-        if(funEnt->type()->tag() != Type::TypeTag::VOID)
-            errMsg("return statement doesn't have a return value", this);
-        return &Type::errorType;
-    }
-    return &Type::errorType;
-}
-
-vector<Instruction*>* ReturnStmtNode::fetchExprRegValue() {
+vector<Instruction*>* StmtNode::fetchExprRegValue(ExprNode* expr) {
     vector<Instruction*>* exprInst = new vector<Instruction*>();
-    ExprNode* expr = exprNode();            
     switch(expr->exprNodeType()) {
 	case ExprNode::ExprNodeType::OP_NODE:
 	    insertQuadrupleSet(expr->iCodeGen());
-	    // TODO: Call code generation on the quadruple table  
+	    // TODO: Call code generation on the quadruple table 
 	    break;
 	case ExprNode::ExprNodeType::REF_EXPR_NODE:
-	    setTReg(((VariableEntry*)(((RefExprNode*)expr)->symTabEntry()))->getReg());
+	    setTReg(((VariableEntry*)((RefExprNode*)expr)->symTabEntry())->getReg());
 	    break;
 	case ExprNode::ExprNodeType::VALUE_NODE:
 	    setTReg(((ValueNode*)expr)->value()->toString());
 	    break;
 	case ExprNode::ExprNodeType::INV_NODE:
 	    insertQuadrupleSet(expr->iCodeGen());
-	    // TODO: Call code generation on the quadruple table  
+	    // TODO: Call code generation on the quadruple table 
 	    break;
     }
     // TODO: Call code generation on the quadruple table 
@@ -473,9 +436,46 @@ vector<Instruction*>* ReturnStmtNode::fetchExprRegValue() {
     return exprInst;
 }
 
+const Type* ReturnStmtNode::typeCheck() const {
+    const ExprNode *expr = exprNode();
+    const FunctionEntry* funEnt = funEntry();
+    if(expr != nullptr) {
+	const Type* retType = expr->typeCheck();
+	if(funEnt != nullptr) {
+	    const Type* funRetType = funEnt->type();
+	    if(retType->tag() == funRetType->tag()) {
+		return retType;
+	    }
+	    if (Type::isSubType(retType, funRetType)) {
+		expr_->coercedType(funRetType);
+		return funRetType;
+	    }
+	    if(funRetType->tag() == Type::TypeTag::VOID) {
+		errMsg(" " + funEnt->name() + ": No return value expected for a void function", this);
+		return &Type::errorType;
+	    }
+	    else {
+		errMsg(" " + funEnt->name() + ": Return value incompatible with current function's type", this);
+		return &Type::errorType;
+	    }
+	}
+	else {
+	    errMsg("return statement is not defined in the scope of the function", this);
+	    return &Type::errorType;
+	}
+    }
+    else if(funEnt != nullptr) {
+	if(funEnt->type()->tag() != Type::TypeTag::VOID)
+	    errMsg("return statement doesn't have a return value", this);
+	return &Type::errorType;
+    }
+    return &Type::errorType;
+}
+
+
 vector<Instruction*>* ReturnStmtNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
-    inst_vec = fetchExprRegValue();
+    inst_vec = fetchExprInst();
 
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, getTReg(), RET_ADDR_REG, "", "" ,"Assign return to pre-defined return reg"));
     return inst_vec;
@@ -498,7 +498,7 @@ const Type* BreakStmtNode::typeCheck() const {
 }
 
 vector<Instruction*>* BreakStmtNode::codeGen() {
-   return NULL;
+    return NULL;
 }
 
 const Type* ExprStmtNode::typeCheck() const {
@@ -509,33 +509,8 @@ const Type* ExprStmtNode::typeCheck() const {
     return &Type::errorType;
 }
 
-vector<Instruction*>* ExprStmtNode::fetchExprRegValue() {
-    vector<Instruction*>* exprInst = new vector<Instruction*>();
-    ExprNode* expr = exprNode();
-    switch(expr->exprNodeType()) {
-	case ExprNode::ExprNodeType::OP_NODE:
-	    insertQuadrupleSet(expr->iCodeGen());
-	    // TODO: Call code generation on the quadruple table 
-	  break;
-	case ExprNode::ExprNodeType::REF_EXPR_NODE:
-	    setTReg(((VariableEntry*)((RefExprNode*)expr)->symTabEntry())->getReg());
-	    break;
-	case ExprNode::ExprNodeType::VALUE_NODE:
-	    setTReg(((ValueNode*)expr)->value()->toString());
-	    break;
-	case ExprNode::ExprNodeType::INV_NODE:
-	    insertQuadrupleSet(expr->iCodeGen());
-	    // TODO: Call code generation on the quadruple table 
-	  break;
-    }
-    // TODO: Call code generation on the quadruple table 
-    // Also perform the required optimization over the quadruple table and
-    // generate the respective resultant reg value
-    return exprInst;
-}
-
 vector<Instruction*>* ExprStmtNode::codeGen() {
-    return fetchExprRegValue();
+    return fetchExprInst();
 }
 
 vector<Instruction*>* PrimitivePatNode::codeGen() {
@@ -1121,31 +1096,35 @@ const char* opCodeStr_[] = {
     "ASSIGN", "PRINT", "INVALID"
 };
 
-/*  
 vector<Quadruple*>* OpNode::iCodeGen() {
+    return NULL;
+}
+
+/*  
+    vector<Quadruple*>* OpNode::iCodeGen() {
     vector<Quadruple*>* quad = new vector<Quadruple*>();
     string* operands = new string[arity_];
     for(int i = 0; i < (signed int)arity_; i++) {
-	if(arg_[i]->exprNodeType() == ExprNode::ExprNodeType::OP_NODE) {
-	    vector<Quadruple*>* tempQuad = arg_[i]->iCodeGen();
-	    quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
-	}
+    if(arg_[i]->exprNodeType() == ExprNode::ExprNodeType::OP_NODE) {
+    vector<Quadruple*>* tempQuad = arg_[i]->iCodeGen();
+    quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
+    }
     }
     Quadruple::resetTempCnt();
     switch(arity_) {
-	case 1: 
-	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], "", Quadruple::fetchTempVar()));
-	    break;
-	case 2:
-	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], Quadruple::fetchTempVar()));
-	    break;
-	case 3:
-	    // TODO: support 3 arity with splitting the ternery expr into two
-	    // quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], operands[2]));
-	    break;
-    }
-    Quadruple::resetTempCnt();
-    return quad;
+    case 1: 
+    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], "", Quadruple::fetchTempVar()));
+    break;
+    case 2:
+    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], Quadruple::fetchTempVar()));
+    break;
+    case 3:
+// TODO: support 3 arity with splitting the ternery expr into two
+// quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], operands[2]));
+break;
+}
+Quadruple::resetTempCnt();
+return quad;
 }
 */
 
