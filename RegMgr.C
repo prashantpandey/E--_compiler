@@ -19,11 +19,15 @@
 #include "RegMgr.h"
 
 
+int RegMgr::cnt_ = 0;
+
 RegMgr::RegMgr() {
 
     iReg_ = new bool[INT_REG_AVAIL];
     fReg_ = new bool[FLOAT_REG_AVAIL];
     iCountStart_ = fCountStart_ = 0;
+    iRegUse_ = TOTAL_REG - INT_REG_AVAIL;
+    fRegUse_ = TOTAL_REG - FLOAT_REG_AVAIL;
 
     for (int i = INT_REG_AVAIL - 1, j = FLOAT_REG_AVAIL - 1; i > -1 || j > -1; i--,j--) {
         if (i > -1)
@@ -34,7 +38,7 @@ RegMgr::RegMgr() {
 }
 
 
-string RegMgr::fetchNextAvailReg(bool isInt, VariableEntry *ve, int priority) {
+string RegMgr::fetchNextAvailReg(bool isInt, VariableEntry *ve, int priority, vector<Instruction*> *instructionSet) {
     bool *reg = iReg_;
     int avail_reg =  INT_REG_AVAIL;
     int countStart = iCountStart_;
@@ -63,10 +67,14 @@ string RegMgr::fetchNextAvailReg(bool isInt, VariableEntry *ve, int priority) {
 
     //Handle out of register
 
-    if (isInt)
+    if (isInt) {
         iCountStart_ = countStart;
-    else
+	iRegUse_++;
+    }
+    else {
         fCountStart_ = countStart;
+	fRegUse_++;
+    }	
     string reg_str = os.str();
     if (ve != NULL) {
         regMap_.insert(make_pair<string, VEntryPriority*>(string(reg_str), new VEntryPriority(ve, priority)));
@@ -96,7 +104,6 @@ void RegMgr::purgeReg(string regName) {
     }
 }
 
-int RegMgr::cnt_ = 0;
 
 string RegMgr::getNextLabel() {
     ostringstream os;

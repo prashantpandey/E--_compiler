@@ -101,7 +101,8 @@ WhileNode::WhileNode(ExprNode* cond, StmtNode* compStmt,
     comp_ = compStmt;
 }
 
-void WhileNode::print(ostream& os, int indent) const {
+void WhileNode::print(ostream& os, int indent) const 
+{
     os << "while (";
     cond()->print(os, indent);
     os << ")";
