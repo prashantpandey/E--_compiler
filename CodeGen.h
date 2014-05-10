@@ -167,8 +167,8 @@ private:
 class Quadruple {
     public: 
 
-	Quadruple(Instruction::InstructionSet instr, VariableEntry *opr1, VariableEntry *opr2 = NULL, VariableEntry *res = NULL) {
-	    instr_ = instr; 
+	Quadruple(OpNode::OpCode opc, VariableEntry *opr1, VariableEntry *opr2 = NULL, VariableEntry *res = NULL) {
+	    opc_ = opc; 
 	    opr1_ = opr1;
 	    opr2_ = opr2;
 	    res_ = res;
@@ -176,8 +176,8 @@ class Quadruple {
 
 	~ Quadruple() {};
 
-	void setInstr(Instruction::InstructionSet instr){
-	    instr_ = instr;
+	void setInstr(OpNode::OpCode opc){
+	    opc_ = opc;
 	};
 
 	void setOpr1(VariableEntry *opr1){
@@ -192,8 +192,8 @@ class Quadruple {
 	    res_ = res;
 	};
 
-	Instruction::InstructionSet getInstr() {
-	    return instr_;
+	OpNode::OpCode getOpc() {
+	    return opc_;
 	};
 
 	VariableEntry* getOpr1() {
@@ -216,7 +216,7 @@ class Quadruple {
     bool isEqual(Quadruple *quad);
     
     private:
-	Instruction::InstructionSet instr_;
+	OpNode::OpCode opc_;
 	VariableEntry *opr1_;
 	VariableEntry *opr2_;
 	VariableEntry *res_;

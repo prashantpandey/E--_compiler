@@ -105,9 +105,9 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
     string regName1 = "", regName2 = "", regName3 = "";
     vector<Instruction*>* inst_set = new vector<Instruction*>();
     Instruction *instr;
-    Instruction::InstructionSet inst;
+    OpNode::OpCode opc;
     for(vector<Quadruple*>::iterator it = quad->begin(); it != quad->end(); ++it){
-	    inst = (*it)->getInstr();
+	    opc = (*it)->getOpc();
 	    ve1 = (*it)->getOpr1();
 	    ve2 = (*it)->getOpr2();
 	    ve3 = (*it)->getRes();
@@ -117,7 +117,9 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
 	        delete(ve2);
 	    if(checkRegOrTemp(ve3, regName3))
 	        delete(ve3);
-	    instr = new Instruction(inst, regName1, regName2, regName3);
+
+	    //TODO:: Map the opcode to instruction set
+	    instr = new Instruction(---, regName1, regName2, regName3);
 	    inst_set->push_back(instr);
 	
     }

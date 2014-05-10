@@ -1087,7 +1087,7 @@ OpNode::OpNode(const OpNode &other):
 		arg_.push_back(NULL);
 	    }
 	}
-    }
+    }`:
 
 const char* opCodeStr_[] = {
     "UMINUS", "PLUS", "MINUS", "MULT", "DIV", "MOD",
@@ -1099,15 +1099,19 @@ const char* opCodeStr_[] = {
 
 
 vector<Quadruple*>* OpNode::iCodeGen() {
+    
     vector<Quadruple*>* quad = new vector<Quadruple*>();
     VariableEntry *operands = new VariableEntry[arity_];
-    
+    Type *t;
+    string reg;
+
     for(int i = 0; i < (signed int)arity_; i++) {
 
+	t = arg_[i]->getResultType();
 	switch(arg_[i]->exprNodeType()) {
 	
 	case ExprNode::ExprNodeType::OP_NODE:
-	     quad->insertQuadrupleSet(arg_[i]->iCodeGen());
+	     mergeVec(quad, arg_[i]->iCodeGen());
 	     break;
 
 	case ExprNode::ExprNodeType::REF_EXPR_NODE:
@@ -1115,14 +1119,19 @@ vector<Quadruple*>* OpNode::iCodeGen() {
 	    break;
 
 	case ExprNode::ExprNodeType::VALUE_NODE:
-	    operands[i] = new VariableEntry(to_string(arg_[i]->value()));
+	    operands[i] = new VariableEntry(to_string(arg_[i]->value()), t);
 	    break;
 
 	case ExprNode::ExprNodeType::INV_NODE:
-	    if(isInt)
-		VariableEntry *ve = new VariableEntry(regMgr->RETI_REG, );
-	    operands[i] = new VariableEntry(regMgr->);
+	    
+	    if (t->tag() == Type::TypeTag::INT)
+		reg = regMgr->RETI_REG;
+	    else if (type->tag() == Type::TypeTag::FLOAT)
+		reg = regMgr->RETF_REG;
+	    operands[i] = new VariableEntry(reg, t);
+	    
 	}
+    }
 
     switch(arity_) {
 	case 1: 
