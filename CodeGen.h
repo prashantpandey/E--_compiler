@@ -24,131 +24,18 @@
 #include <string>
 #include <vector>
 #include "RegMgr.h"
+#include "Ast.h"
+#include "STEClasses.h"
 
 using namespace std;
 
 class Instruction;
 class CodeModule;
-
-
-
-class ProgCode {
-public:
-    ProgCode(string progName) {
-	progName_ = progName;
-	modules_ = new vector<CodeModule*>;
-    }
-    
-    ~ProgCode() {};
-
-    vector <CodeModule*>* getModule(){
-	return modules_;
-    }
-
-    void insertModule(CodeModule* codeMod) {
-	modules_->push_back(codeMod);	
-    }
-
-private:
-    string progName_;
-    vector<CodeModule*> *modules_;
-};
-
-class CodeModule {
-public:
-    CodeModule(string moduleName) {
-        moduleName_ = moduleName;
-        instructions_ = new vector<Instruction*>;
-    }
-
-    ~CodeModule() {
-	delete instructions_;
-    };
-
-    vector <Instruction*>* getInstructions(){
-	return instructions_;
-    }
-
-    void insertInstructionSet(Instruction *instr) {
-	if (instr != NULL)
-	    instructions_->push_back(instr);
-    }
-
-    void insertInstructionSet(vector<Instruction *> *instrVector) {
-	if (instrVector != NULL)
-	    instructions_->insert(instructions_->end(), instrVector->begin(), instrVector->end());
-    }
-
-    Instruction* firstInst() const {
-	if (instructions_->size())
-	    return instructions_->front();
-	return NULL;
-    }
-
-private:
-    string moduleName_;
-    vector<Instruction*> *instructions_ = NULL;
-};
-
-class Quadruple {
-    public: 
-
-	Quadruple(OpNode::OpCode opr, VariableEntry *opr1, VariableEntry *opr2 = NULL, VariableEntry *res = NULL) {
-	    opr_ = opr; 
-	    opr1_ = opr1;
-	    opr2_ = opr2;
-	    res_ = res;
-	};
-
-	~ Quadruple() {};
-
-	void setOpr(OpNode::OpCode opr){
-	    opr_ = opr;
-	};
-
-	void setOpr1(VariableEntry *opr1){
-	    opr1_ = opr1;
-	};
-
-	void setOpr2(VariableEntry *opr2){
-	    opr2_ = opr2;
-	};
-
-	void setRes(VariableEntry *res){
-	    res_ = res;
-	};
-
-	OpNode::OpCode getOpr() {
-	    return opr_;
-	};
-
-	VariableEntry* getOpr1() {
-	    return opr1_;
-	};
-
-	VariableEntry* getOpr2() {
-	    return opr2_;
-	};
-
-	VariableEntry* getRes() {
-	    return res_;
-	};
-
-    static int tempCnt_;
-    static string fetchTempVar();
-    static void resetTempCnt();
-    bool isEqual(Quadruple *quad);
-    
-    private:
-	OpNode::OpCode opr_;
-	VariableEntry *opr1_;
-	VariableEntry *opr2_;
-	VariableEntry *res_;
-};
+class VariableEntry;
 
 class Instruction {
     public:
-	enum InstructionSet {
+	enum class InstructionSet {
 	    ADD, SUB, DIV, MUL, MOD, FADD, FSUB, FDIV, FMUL,
 	    AND, OR, XOR, NEG, FNEG,
 	    UGT, UGE, GT, GE, EQ, NE, FGT, FGE, FEQ, FNE,
@@ -212,6 +99,121 @@ class Instruction {
 	string param3_;
 	string label_;
 	string comment_;
+};
+
+class ProgCode {
+public:
+    ProgCode(string progName) {
+	progName_ = progName;
+	modules_ = new vector<CodeModule*>;
+    }
+    
+    ~ProgCode() {};
+
+    vector <CodeModule*>* getModule(){
+	return modules_;
+    }
+
+    void insertModule(CodeModule* codeMod) {
+	modules_->push_back(codeMod);	
+    }
+
+private:
+    string progName_;
+    vector<CodeModule*> *modules_;
+};
+
+class CodeModule {
+public:
+    CodeModule(string moduleName) {
+        moduleName_ = moduleName;
+        instructions_ = new vector<Instruction*>;
+    }
+
+    ~CodeModule() {
+	delete instructions_;
+    };
+
+    vector <Instruction*>* getInstructions(){
+	return instructions_;
+    }
+
+    void insertInstructionSet(Instruction *instr) {
+	if (instr != NULL)
+	    instructions_->push_back(instr);
+    }
+
+    void insertInstructionSet(vector<Instruction *> *instrVector) {
+	if (instrVector != NULL)
+	    instructions_->insert(instructions_->end(), instrVector->begin(), instrVector->end());
+    }
+
+    Instruction* firstInst() const {
+	if (instructions_->size())
+	    return instructions_->front();
+	return NULL;
+    }
+
+private:
+    string moduleName_;
+    vector<Instruction*> *instructions_ = NULL;
+};
+
+class Quadruple {
+    public: 
+
+	Quadruple(Instruction::InstructionSet instr, VariableEntry *opr1, VariableEntry *opr2 = NULL, VariableEntry *res = NULL) {
+	    instr_ = instr; 
+	    opr1_ = opr1;
+	    opr2_ = opr2;
+	    res_ = res;
+	};
+
+	~ Quadruple() {};
+
+	void setInstr(Instruction::InstructionSet instr){
+	    instr_ = instr;
+	};
+
+	void setOpr1(VariableEntry *opr1){
+	    opr1_ = opr1;
+	};
+
+	void setOpr2(VariableEntry *opr2){
+	    opr2_ = opr2;
+	};
+
+	void setRes(VariableEntry *res){
+	    res_ = res;
+	};
+
+	Instruction::InstructionSet getInstr() {
+	    return instr_;
+	};
+
+	VariableEntry* getOpr1() {
+	    return opr1_;
+	};
+
+	VariableEntry* getOpr2() {
+	    return opr2_;
+	};
+
+	VariableEntry* getRes() {
+	    return res_;
+	};
+
+    static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad);
+    static int tempCnt_;
+    static string fetchTempVar();
+    static void resetTempCnt();
+    bool isEqual(Quadruple *quad);
+    
+    private:
+	Instruction::InstructionSet instr_;
+	VariableEntry *opr1_;
+	VariableEntry *opr2_;
+	VariableEntry *res_;
 };
 
 #endif

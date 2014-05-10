@@ -97,3 +97,44 @@ bool Quadruple::isEqual(Quadruple *quad){
     return false;
 }
 
+vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
+   // TODO:: IMplement Expression Optimization 
+
+    VariableEntry *ve1, *ve2, *ve3;
+    string regName1 = "", regName2 = "", regName3 = "";
+    vector<Instruction*>* inst_set = vector<Instruction*>();
+    Instruction *instr;
+    for(vector<Quadruple*>::iterator it = quad->begin(); it != quad->end(); ++it){
+
+	    if ((*it)->getInstr()!= NULL){
+		ve1 = getOpr1();
+		ve2 = getOpr2();
+		ve3 = getRes();
+		if(checkRegOrTemp(ve1, regName1))
+		    delete(ve1);
+		if(checkRegOrTemp(ve2, regName2))
+		    delete(ve2);
+		if(checkRegOrTemp(ve3, regName3))
+		    delete(ve3);
+	    instr = new Instruction((*it)->getInst(), regName1, regName2, regName3);
+	    inst_set.push_back(inst);
+	}
+	
+    return inst_set;
+
+}
+
+string checkRegOrTemp(VariableEntry *ve, string &regName){
+
+	    if(ve != NULL){
+		    if(ve->isTemp()){ // temperary true
+			regName = regMgr->fetchNextAvailReg(ve->isInt(), ve);
+			ve->setReg(regName);
+		    }
+		    else{
+			regName = ve->getReg();
+		    }
+	    }
+    delete(ve);
+    return ve->isTemp();
+}
