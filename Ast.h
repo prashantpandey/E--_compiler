@@ -124,15 +124,30 @@ public:
         exprType_ = t;
     };
 
+    const Type* doTypeCheck() {
+	const Type *type = typeCheck();
+	setResultType(type);
+	return type;
+    }
+
     const Value* value() const {
         return val_;
     }
-    virtual const Type* typeCheck() const = 0;
+
     const Type* coercedType() const {
         return coercedType_;
     }
+
     void coercedType(const Type* type) {
         coercedType_ = type;
+    }
+
+    void setResultType(const Type* type) {
+	resultType_ = type;
+    }
+
+    const Type* getResultType() {  
+	return coercedType_?coercedType_:resultType_;
     }
 
     virtual vector<Quadruple*>* iCodeGen() = 0;
@@ -140,9 +155,11 @@ public:
     void print(ostream& os, int indent=0) const=0;
 
 private:
+    virtual const Type* typeCheck() const = 0;
     ExprNodeType exprType_;
     const Value *val_; // reference semantics for val_ and coercedType_
     const Type* coercedType_;
+    const Type* resultType_;
 };
 
 /****************************************************************/
@@ -164,7 +181,6 @@ public:
         ext_ = str;
     };
 
-    const Type* typeCheck() const;
     const SymTabEntry* symTabEntry() const {
         return sym_;
     };
@@ -179,6 +195,7 @@ public:
     void print(ostream& os, int indent=0) const;
 
 private:
+    const Type* typeCheck() const;
     string ext_;
     const SymTabEntry* sym_;
 };
@@ -248,12 +265,12 @@ public:
     {
         return &arg_;
     }
-    const Type* typeCheck() const;
     void print(ostream& os, int indent=0) const;
 
     vector<Quadruple*>* iCodeGen();
 
 private:
+    const Type* typeCheck() const;
     unsigned int arity_;
     OpCode   opCode_;
     vector<ExprNode*> arg_;
@@ -271,7 +288,6 @@ public:
     ExprNode* clone() const {
         return new ValueNode(*this);
     }
-    const Type* typeCheck() const;
     ~ValueNode() {};
     
     vector<Quadruple*>* iCodeGen() {
@@ -281,6 +297,7 @@ public:
     void print(ostream& os, int indent=0) const;
 
 private:
+    const Type* typeCheck() const;
     /* val_ field is already included in ExprNode, so no new data members */
 };
 
@@ -335,9 +352,9 @@ public:
     vector<Instruction*>* codeGen();
 
     void print(ostream& os, int indent=0) const;
-    const Type* typeCheck() const;
 
 private:
+    const Type* typeCheck() const;
     vector<ExprNode*>* params_;
     const SymTabEntry *ste_; // reference semantics
 };

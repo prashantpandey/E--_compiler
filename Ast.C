@@ -124,7 +124,7 @@ void WhileNode::print(ostream& os, int indent) const
 
 const Type* WhileNode::typeCheck() const {
     bool flag = true;
-    const Type *cond_type = cond()->typeCheck();
+    const Type *cond_type = cond_->doTypeCheck();
     if (cond_type->tag() != Type::TypeTag::BOOL)
     {
         flag = false;
@@ -172,7 +172,7 @@ void IfNode::print(ostream& os, int indent) const
 const Type* IfNode::typeCheck() const
 {
     bool flag = true;
-    const Type *cond_type = cond()->typeCheck();
+    const Type *cond_type = cond_->doTypeCheck();
     if (cond_type->tag() != Type::TypeTag::BOOL)
     {
         flag = false;
@@ -255,7 +255,7 @@ const Type* PrimitivePatNode::typeCheck() const {
     const ExprNode *exp = cond();
     if (exp!= NULL && exp->exprNodeType() == ExprNode::ExprNodeType::OP_NODE)
     {
-        if(exp->typeCheck() != &Type::errorType)
+        if(cond_->doTypeCheck() != &Type::errorType)
             cond_error_flag = 1;
     }
     if(event_error_flag && cond_error_flag)
@@ -350,19 +350,19 @@ const Type* InvocationNode::typeCheck() const {
         const SymTab *st = ste->symTab();
         if (st != NULL) {
             int i = 1;
-            vector<ExprNode*>::const_iterator ic = callParams->begin();
+            vector<ExprNode*>::iterator ic = params_->begin();
             SymTab::const_iterator it = st->begin();
             for (; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
                 VariableEntry *ve = (VariableEntry*) (*it);
                 if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
-                    if(ve->type()->tag()  == Type::TypeTag::CLASS || (*ic)->typeCheck()->tag() == Type::TypeTag::CLASS) {
-                        if(ve->type()->fullName().compare((*ic)->typeCheck()->fullName()) != 0) {
+                    if(ve->type()->tag()  == Type::TypeTag::CLASS || (*ic)->doTypeCheck()->tag() == Type::TypeTag::CLASS) {
+                        if(ve->type()->fullName().compare((*ic)->doTypeCheck()->fullName()) != 0) {
                             errMsg("Type mismatch for argument " + to_string(i) + " to " + ste->name(), this);
                             flag = false;
                         }
                     }
-                    else if (ve->type()->tag() != (*ic)->typeCheck()->tag()) {
-                        if(!Type::isSubType((*ic)->typeCheck(), ve->type())) {
+                    else if (ve->type()->tag() != (*ic)->doTypeCheck()->tag()) {
+                        if(!Type::isSubType((*ic)->doTypeCheck(), ve->type())) {
                             errMsg("Type mismatch for argument " + to_string(i) + " to " + ste->name(), this);
                             flag = false;
                         }
@@ -440,7 +440,7 @@ const Type* ReturnStmtNode::typeCheck() const {
     const ExprNode *expr = exprNode();
     const FunctionEntry* funEnt = funEntry();
     if(expr != nullptr) {
-	const Type* retType = expr->typeCheck();
+	const Type* retType = expr_->doTypeCheck();
 	if(funEnt != nullptr) {
 	    const Type* funRetType = funEnt->type();
 	    if(retType->tag() == funRetType->tag()) {
@@ -503,7 +503,7 @@ vector<Instruction*>* BreakStmtNode::codeGen() {
 
 const Type* ExprStmtNode::typeCheck() const {
     const ExprNode *expr = exprNode();
-    if(expr != NULL && expr->typeCheck()->tag() != Type::TypeTag::ERROR) {
+    if(expr != NULL && expr_->doTypeCheck()->tag() != Type::TypeTag::ERROR) {
 	return &Type::unkType;
     }
     return &Type::errorType;
@@ -973,7 +973,8 @@ const Type* OpNode::typeCheck() const {
     const Type** argTypes = (const Type**)new Type*[arity_];
     for (unsigned i=0; i < arity_; i++) {
 	if (arg_[i]) {
-	    const Type *type = arg_[i]->typeCheck();
+	    const Type *type = arg_[i]->doTypeCheck();
+	    arg_[i]->setResultType(type);
 	    argTypes[i] = type;
 	    if (type->tag() == Type::TypeTag::ERROR) {
 		delete[] argTypes;
