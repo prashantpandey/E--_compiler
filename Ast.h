@@ -231,8 +231,6 @@ public:
         
 	Type::TypeTag outType_;
         const char *typeConstraints_;
-	int instSize;
-	Instruction::InstructionSet instr[3];
     };
 
 public:
