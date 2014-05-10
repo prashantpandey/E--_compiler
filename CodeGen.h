@@ -35,7 +35,7 @@ class VariableEntry;
 
 class Instruction {
     public:
-	enum class InstructionSet {
+	enum InstructionSet {
 	    ADD, SUB, DIV, MUL, MOD, FADD, FSUB, FDIV, FMUL,
 	    AND, OR, XOR, NEG, FNEG,
 	    UGT, UGE, GT, GE, EQ, NE, FGT, FGE, FEQ, FNE,
@@ -204,6 +204,7 @@ class Quadruple {
 	};
 
     static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad);
+    static bool checkRegOrTemp(VariableEntry *ve, string &regName);
     static int tempCnt_;
     static string fetchTempVar();
     static void resetTempCnt();
