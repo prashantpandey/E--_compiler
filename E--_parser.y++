@@ -347,7 +347,6 @@ while_hdr		: TOK_WHILE {
 				insertSymbolErrCheck(whileBlockEntry);
 				enterScopeErrCheck(whileBlockEntry);
 			    }
-
 			    else{
 				BlockEntry *be = new BlockEntry("unknown", yylinenum);
 				insertSymbolErrCheck(be);
@@ -357,7 +356,11 @@ while_hdr		: TOK_WHILE {
 			}
 
 while_stmt		: while_hdr expr_star statement_star {
-			    $$ = new WhileNode($2, $3, $1);
+			    SymTabEntry* ste = stm.currentScope();
+			    if(ste->kind() == SymTabEntry::Kind::WHILE_BLOCK_KIND) {
+				string key = ((WhileBlockEntry*)ste)->returnStringLabel();
+				$$ = new WhileNode($2, $3, key, $1);
+			    }
 			    stm.leaveScope();
 			}
 

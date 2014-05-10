@@ -616,8 +616,6 @@ class ReturnStmtNode: public StmtNode {
 
 	const Type* typeCheck() const;
 
-	vector<Instruction*>* fetchExprInst() { return fetchExprRegValue(expr_); };
-	
 	vector<Instruction*>* codeGen();
 
 	void print(ostream& os, int indent) const {
@@ -653,11 +651,11 @@ class BreakStmtNode: public StmtNode {
 	const Type* typeCheck() const;
 	
 	vector<Instruction*>* codeGen();
-	
 
 	int num() {
 	    return num_;
 	}
+
 	BlockEntry* blockEntry() {
 	    return blockEntry_;
 	}
@@ -668,6 +666,7 @@ class BreakStmtNode: public StmtNode {
 
     private:
 	int num_;
+	string brkNumLabel_;
 	BlockEntry *blockEntry_;
 };
 
@@ -694,8 +693,6 @@ class ExprStmtNode: public StmtNode {
 	
 	vector<Instruction*>* codeGen();
 	
-	vector<Instruction*>* fetchExprInst() { return fetchExprRegValue(expr_); };
-
 	void print(ostream& os, int indent) const {
 	    if (expr_ != NULL) {
 		expr_->print(os, indent);
@@ -775,13 +772,15 @@ class IfNode: public StmtNode {
 	    return then_;
 	};
 	
-	vector<Instruction*>* codeGen() {return NULL; };
+	vector<Instruction*>* codeGen();
 
 	void print(ostream& os, int indent) const;
 
     private:
 	ExprNode *cond_;
 	StmtNode *then_, *else_;
+	string thenLabel_;
+	string elseLabel_;
 
 	IfNode(const IfNode&);
 };
@@ -791,8 +790,9 @@ class IfNode: public StmtNode {
 class WhileNode: public StmtNode {
     public:
 
-	WhileNode(ExprNode* cond, StmtNode* compStmt,
+	WhileNode(ExprNode* cond, StmtNode* compStmt, string key,
 		int line=0, int column=0, string file="");
+
 	~WhileNode() {};
 
 	const ExprNode* cond() const {
@@ -804,8 +804,6 @@ class WhileNode: public StmtNode {
 
 	const Type* typeCheck() const;
 	
-	vector<Instruction*>* codeGen() {return NULL; };
-	
 	ExprNode* cond() {
 	    return cond_;
 	}
@@ -813,11 +811,16 @@ class WhileNode: public StmtNode {
 	    return comp_;
 	};
 
+	vector<Instruction*>* codeGen();
+
 	void print(ostream& os, int indent) const;
 
     private:
 	ExprNode *cond_;
 	StmtNode *comp_;
+	string startLabel_;
+	string endLabel_;
+	string key_;
 
 	WhileNode(const WhileNode&);
 };

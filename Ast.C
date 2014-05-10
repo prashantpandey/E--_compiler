@@ -2,6 +2,8 @@
 #include "ParserUtil.h"
 
 
+const string BasePatNode:: labelPrefix = "eventLabel_";
+
 AstNode::AstNode(NodeType nt, int line, int column, string file):
     ProgramElem(NULL, line, column, file) {
     nodeType_ = nt;
@@ -67,9 +69,11 @@ RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, int lin
 }
 
 vector<Instruction*>* RuleNode::codeGen() {
-   vector<Instruction*> *inst_vec = pat_->codeGen();
-   vector<Instruction*> *temp = reaction_->codeGen();
-   inst_vec->insert(inst_vec->end(), temp->begin(), temp->end());
+    
+   vector<Instruction*> *inst_vec = new vector<Instruction*>();
+   inst_vec->push_back(new Instruction(pat_->getLabel()));
+   mergeVec(inst_vec, pat_->codeGen());
+   mergeVec(inst_vec, reaction_->codeGen());
    pat_->purgeRegisters();
    return inst_vec;
 }
@@ -101,12 +105,13 @@ const Type*  RuleNode::typeCheck() const {
     }
 }
 
-WhileNode::WhileNode(ExprNode* cond, StmtNode* compStmt,
+WhileNode::WhileNode(ExprNode* cond, StmtNode* compStmt, string key,
                      int line, int column, string file):
     StmtNode(StmtNode::StmtNodeKind::WHILE, line, column, file)
 {
     cond_ = cond;
     comp_ = compStmt;
+    key_ = key;
 }
 
 void WhileNode::print(ostream& os, int indent) const 
@@ -139,6 +144,34 @@ const Type* WhileNode::typeCheck() const {
         return &Type::voidType;
     }
     return &Type::errorType;
+}
+
+// WhileNode is handled in three parts
+// 1. The conditional expression
+// 2. The loop body
+// 3. The jump/break statement
+vector<Instruction*>* WhileNode::codeGen() {
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    
+    startLabel_ = key_.append("_start");
+    endLabel_ = key_.append("_end");
+
+    if(cond_ != NULL) {
+	inst_vec = fetchExprRegValue(cond_);
+	inst_vec->at(0)->setLabel(startLabel_);
+    }
+    
+    Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", getTReg());
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), endLabel_));
+    
+    vector<Instruction*>* stmtInst = comp_->codeGen();
+    mergeVec(inst_vec, stmtInst);
+
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, startLabel_));
+
+    inst_vec->push_back(new Instruction(endLabel_));
+
+    return inst_vec;
 }
 
 IfNode::IfNode(ExprNode* cond, StmtNode* thenStmt,
@@ -192,6 +225,30 @@ const Type* IfNode::typeCheck() const
     return &Type::errorType;
 }
 
+vector<Instruction*>* IfNode::codeGen() {
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    
+    thenLabel_ = regMgr->getNextLabel();
+    elseLabel_ = regMgr->getNextLabel();
+
+    if(cond_ != NULL) {
+	inst_vec = fetchExprRegValue(cond_);
+    }
+    
+    Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", getTReg());
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), elseLabel_));
+    
+    vector<Instruction*>* stmtInst = then_->codeGen();
+    stmtInst->at(0)->setLabel(thenLabel_);
+    mergeVec(inst_vec, stmtInst);
+
+    stmtInst = else_->codeGen();
+    stmtInst->at(0)->setLabel(elseLabel_);
+    mergeVec(inst_vec, stmtInst);
+
+    return inst_vec;
+}
+
 PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* params,
                                    ExprNode* c,
                                    int line, int column, string file):
@@ -202,6 +259,10 @@ PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* param
     params_ = params;
     cond_ = c;
 
+}
+
+string PrimitivePatNode::getLabel() {
+    return labelPrefix + ee_->name();
 }
 
 // TODO: Add const to the param var
@@ -397,8 +458,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
 
     const vector<ExprNode*>* args = params();
     for(vector<ExprNode*>::const_iterator it=args->begin(); it != args->end(); ++it) {
-	vector<Instruction*>* temp = (*it)->codeGen();
-	inst_vec->insert(inst_vec->end(), temp->begin(), temp->end());
+	mergeVec(inst_vec, (*it)->codeGen());
     }
 
     string reg = regMgr->fetchNextAvailReg(true);
@@ -475,8 +535,7 @@ const Type* ReturnStmtNode::typeCheck() const {
 
 vector<Instruction*>* ReturnStmtNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
-    inst_vec = fetchExprInst();
-
+    inst_vec = fetchExprRegValue(expr_);
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, getTReg(), RET_ADDR_REG, "", "" ,"Assign return to pre-defined return reg"));
     return inst_vec;
 }
@@ -498,7 +557,19 @@ const Type* BreakStmtNode::typeCheck() const {
 }
 
 vector<Instruction*>* BreakStmtNode::codeGen() {
-    return NULL;
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    WhileBlockEntry *wBE = (WhileBlockEntry*)blockEntry();
+    int cnt = wBE->nestedWhileCount();
+    vector<int> label = wBE->getWhileLabel();
+    ostringstream os;
+    os << "while_";
+    int i = 0;
+    for(vector<int>::iterator it = label.begin(); it != label.end() && i < cnt; ++it, i++) {
+	os << to_string(*it) << "_";
+    }
+    os << "end";
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, os.str()));
+    return inst_vec;
 }
 
 const Type* ExprStmtNode::typeCheck() const {
@@ -510,12 +581,11 @@ const Type* ExprStmtNode::typeCheck() const {
 }
 
 vector<Instruction*>* ExprStmtNode::codeGen() {
-    return fetchExprInst();
+    return fetchExprRegValue(expr_);
 }
 
 vector<Instruction*>* PrimitivePatNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
-    //TODO:Change priority
     for (vector<VariableEntry*>::const_iterator it = params_->begin();
 	    it != params_->end(); ++it) {
 	VariableEntry *ve = (*it);
@@ -1087,7 +1157,7 @@ OpNode::OpNode(const OpNode &other):
 		arg_.push_back(NULL);
 	    }
 	}
-    }`:
+    }
 
 const char* opCodeStr_[] = {
     "UMINUS", "PLUS", "MINUS", "MULT", "DIV", "MOD",
@@ -1145,6 +1215,9 @@ vector<Quadruple*>* OpNode::iCodeGen() {
     return quad;
 }
 
+
+
+
 void
 OpNode::print(ostream& os, int indent) const {
     int iopcode = static_cast<int>(opCode_);
@@ -1187,3 +1260,6 @@ OpNode::print(ostream& os, int indent) const {
     }
     else internalErr("Unhandled case in OpNode::print");
 }
+
+
+

@@ -112,7 +112,7 @@ void VariableEntry::print(ostream& out, int indent) const
 void VariableEntry::checkType() const
 {
     if (initVal()) {
-        const Type *rhsT = initVal()->typeCheck();
+        const Type *rhsT = initVal_->doTypeCheck();
         if (isConst()) {
             errMsg("Cannot change read only variables.", this);
         }
