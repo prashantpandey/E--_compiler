@@ -1196,7 +1196,7 @@ vector<Quadruple*>* OpNode::iCodeGen() {
 	    
 	    if (t->tag() == Type::TypeTag::INT)
 		reg = regMgr->RETI_REG;
-	    else if (type->tag() == Type::TypeTag::FLOAT)
+	    else if (t->tag() == Type::TypeTag::FLOAT)
 		reg = regMgr->RETF_REG;
 	    operands[i] = new VariableEntry(reg, t);
 	    

@@ -32,6 +32,7 @@ using namespace std;
 class Instruction;
 class CodeModule;
 class VariableEntry;
+class OpNode;
 
 class Instruction {
     public:
@@ -176,7 +177,7 @@ class Quadruple {
 
 	~ Quadruple() {};
 
-	void setInstr(OpNode::OpCode opc){
+	void setOpc(OpNode::OpCode opc){
 	    opc_ = opc;
 	};
 
