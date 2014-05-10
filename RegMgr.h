@@ -52,7 +52,7 @@ class Instruction;
 class VEntryPriority {
 
 private:
-    
+
     VariableEntry *ve_;
     int priority_;
 
@@ -102,7 +102,7 @@ public:
         delete iReg_;
         delete fReg_;
     }
-    
+
 };
 
 extern RegMgr *regMgr;

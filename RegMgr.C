@@ -69,16 +69,16 @@ string RegMgr::fetchNextAvailReg(bool isInt, VariableEntry *ve, int priority, ve
 
     if (isInt) {
         iCountStart_ = countStart;
-	iRegUse_++;
+        iRegUse_++;
     }
     else {
         fCountStart_ = countStart;
-	fRegUse_++;
-    }	
+        fRegUse_++;
+    }
     string reg_str = os.str();
     if (ve != NULL) {
         regMap_.insert(make_pair<string, VEntryPriority*>(string(reg_str), new VEntryPriority(ve, priority)));
-    } 
+    }
     return reg_str;
 }
 
@@ -87,7 +87,7 @@ void RegMgr::purgeReg(string regName) {
 
     const char *tmp = regName.c_str();
     tmp++;
-    
+
     int reg = atoi(tmp);
 
     switch(regName[0])

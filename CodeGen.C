@@ -66,34 +66,34 @@ string Instruction::toString() {
 
     ostringstream os;
     if(label_ != "")
-	os << label_ << ": ";
+        os << label_ << ": ";
     if(instr_ != InstructionSet::BLANK) {
-	    os << name(instr_) << " " << param1_ << " " << param2_ << " " << param3_ ;
-	if(comment_ != "")
-	    os << " // " << comment_;
-	    os << endl;
+        os << name(instr_) << " " << param1_ << " " << param2_ << " " << param3_ ;
+        if(comment_ != "")
+            os << " // " << comment_;
+        os << endl;
     }
     return os.str();
 
 }
 
-string Quadruple::fetchTempVar(){
+string Quadruple::fetchTempVar() {
     ostringstream os;
     os << "T" << tempCnt_++;
     return os.str();
 }
 
-void Quadruple::resetTempCnt(){
+void Quadruple::resetTempCnt() {
     tempCnt_ = 0;
 }
 
-bool Quadruple::isEqual(Quadruple *quad){
+bool Quadruple::isEqual(Quadruple *quad) {
     if(quad->opc_ == opc_) {
-	if(quad->opr1_->name().compare(opr1_->name()) == 0) {
-	    if(quad->opr2_->name().compare(opr2_->name()) ==0) {
-		return true;
-	    }
-	}
+        if(quad->opr1_->name().compare(opr1_->name()) == 0) {
+            if(quad->opr2_->name().compare(opr2_->name()) ==0) {
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -128,59 +128,59 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
 static Instruction::InstructionSet getInstr(OpNode::OpCode opc, Type *t) {
     int instNum = 0;
     switch(opc) {
-	case OpNode::OpCode::LT:
-	    break;
-	case OpNode::OpCode::LE:
-	    break;
-	case OpNode::OpCode::SHL:
-	    break;
-	case OpNode::OpCode::SHR:
-	    break;
-	default:
-	    if(Type::isFloat(t->tag()))
-		instNum = 1;
-	    else
-		instNum = 0;
+    case OpNode::OpCode::LT:
+        break;
+    case OpNode::OpCode::LE:
+        break;
+    case OpNode::OpCode::SHL:
+        break;
+    case OpNode::OpCode::SHR:
+        break;
+    default:
+        if(Type::isFloat(t->tag()))
+            instNum = 1;
+        else
+            instNum = 0;
     }
     return OpCodeInstMap::fetchInstr(opc, instNum);
 }
 
-vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
-    // TODO:: IMplement Expression Optimization 
+vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
+    // TODO:: IMplement Expression Optimization
 
     VariableEntry *ve1, *ve2, *ve3;
     string regName1 = "", regName2 = "", regName3 = "";
     vector<Instruction*>* inst_set = new vector<Instruction*>();
     Instruction *instr;
     OpNode::OpCode opc;
-    for(vector<Quadruple*>::iterator it = quad->begin(); it != quad->end(); ++it){
-	opc = (*it)->getOpc();
-	ve1 = (*it)->getOpr1();
-	ve2 = (*it)->getOpr2();
-	ve3 = (*it)->getRes();
-	if(checkRegOrTemp(ve1, regName1))
-	    delete(ve1);
-	if(checkRegOrTemp(ve2, regName2))
-	    delete(ve2);
-	if(checkRegOrTemp(ve3, regName3))
-	    delete(ve3);
+    for(vector<Quadruple*>::iterator it = quad->begin(); it != quad->end(); ++it) {
+        opc = (*it)->getOpc();
+        ve1 = (*it)->getOpr1();
+        ve2 = (*it)->getOpr2();
+        ve3 = (*it)->getRes();
+        if(checkRegOrTemp(ve1, regName1))
+            delete(ve1);
+        if(checkRegOrTemp(ve2, regName2))
+            delete(ve2);
+        if(checkRegOrTemp(ve3, regName3))
+            delete(ve3);
 
-	//TODO:: Map the opcode to instruction set
-	instr = new Instruction(getInstr(opc, ve3->type()), regName1, regName2, regName3);
-	inst_set->push_back(instr);
+        //TODO:: Map the opcode to instruction set
+        instr = new Instruction(getInstr(opc, ve3->type()), regName1, regName2, regName3);
+        inst_set->push_back(instr);
     }
     return inst_set;
 }
 
-bool Quadruple::checkRegOrTemp(VariableEntry *ve, string &regName){
-    if(ve != NULL){
-	if(ve->isTemp()){ // temperary true
-	    regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->type()->tag()), ve, 0);
-	    ve->setReg(regName);
-	}
-	else{
-	    regName = ve->getReg();
-	}
+bool Quadruple::checkRegOrTemp(VariableEntry *ve, string &regName) {
+    if(ve != NULL) {
+        if(ve->isTemp()) { // temperary true
+            regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->type()->tag()), ve, 0);
+            ve->setReg(regName);
+        }
+        else {
+            regName = ve->getReg();
+        }
     }
     delete(ve);
     return ve->isTemp();
