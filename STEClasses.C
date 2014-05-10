@@ -215,15 +215,13 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 	    if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
 		VariableEntry *ve = (VariableEntry *) ste;
 		if (ve->varKind() == VariableEntry::VarKind::LOCAL_VAR) {
-		    vector<Instruction*> *tmp = ve->codeGen();
-		    inst_vec->insert(inst_vec->end(), tmp->begin(), tmp->end());
+		    ProgCode::merge(inst_vec, ve->codeGen());
 		}
 	    }
 	}
     }
-
-    vector<Instruction*> *tmp = body()->codeGen();
-    inst_vec->insert(inst_vec->end(), tmp->begin(), tmp->end());
+    
+    ProgCode::merge(inst_vec, body()->codeGen());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, BP_REG, SP_REG, "", "" ,"Function Exit: Restoring BP"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::LDI, SP_REG, BP_REG, "", "", "Loading BP from stack"));

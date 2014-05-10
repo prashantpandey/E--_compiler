@@ -405,8 +405,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
 
     const vector<ExprNode*>* args = params();
     for(vector<ExprNode*>::const_iterator it=args->begin(); it != args->end(); ++it) {
-	vector<Instruction*>* temp = (*it)->codeGen();
-	inst_vec->insert(inst_vec->end(), temp->begin(), temp->end());
+	ProgCode::merge(inst_vec, (*it)->codeGen());
     }
 
     string reg = regMgr->fetchNextAvailReg(true);
@@ -523,7 +522,6 @@ vector<Instruction*>* ExprStmtNode::codeGen() {
 
 vector<Instruction*>* PrimitivePatNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
-    //TODO:Change priority
     for (vector<VariableEntry*>::const_iterator it = params_->begin();
 	    it != params_->end(); ++it) {
 	VariableEntry *ve = (*it);
