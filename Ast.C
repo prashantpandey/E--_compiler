@@ -153,12 +153,12 @@ const Type* WhileNode::typeCheck() const {
 vector<Instruction*>* WhileNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
     
-    startLabel_ = key.append("_start");
-    endLabel_ = key.append("_end");
+    startLabel_ = key_.append("_start");
+    endLabel_ = key_.append("_end");
 
     if(cond_ != NULL) {
 	inst_vec = fetchExprRegValue(cond_);
-	inst_vec[0]->setLabel(startLabel_);
+	inst_vec->at(0)->setLabel(startLabel_);
     }
     
     Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", getTReg());
@@ -239,11 +239,11 @@ vector<Instruction*>* IfNode::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), elseLabel_));
     
     vector<Instruction*>* stmtInst = then_->codeGen();
-    stmtInst[0]->setLabel(thenLabel_);
+    stmtInst->at(0)->setLabel(thenLabel_);
     mergeVec(inst_vec, stmtInst);
 
     stmtInst = else_->codeGen();
-    stmtInst[0]->setLabel(elseLabel_);
+    stmtInst->at(0)->setLabel(elseLabel_);
     mergeVec(inst_vec, stmtInst);
 
     return inst_vec;
@@ -557,15 +557,16 @@ const Type* BreakStmtNode::typeCheck() const {
 }
 
 vector<Instruction*>* BreakStmtNode::codeGen() {
-    vector<Instruction*> inst_vec = new vector<Instruction*>();
-    WhileBlockEntry *wBE = blockEntry();
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    WhileBlockEntry *wBE = (WhileBlockEntry*)blockEntry();
     int cnt = wBE->nestedWhileCount();
     vector<int> label = wBE->getWhileLabel();
     ostringstream os;
     os << "while_";
     int i = 0;
-    for(vector<int>::iterator it = label->begin(); it != label->end() && i < cnt; ++it, i++) {
-	os << to_string(it) << "_";
+    for(vector<int>::iterator it = label.begin(); it != label.end() && i < cnt; ++it, i++) {
+	int temp = *it;
+	os << to_string(temp) << "_";
     }
     os << "end";
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, os.str()));

@@ -114,7 +114,7 @@ public:
 	label.append("while_");
         for(i = 0; i <= whileLabel_.size(); i++) {
             label.append(to_string(whileLabel_[i]));
-	    label.append("_")
+	    label.append("_");
         }
         return label;
     }

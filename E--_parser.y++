@@ -4,7 +4,6 @@
 #include "ParserUtil.h"
 #include "Error.h"
 #include "RegMgr.h"
-#include "Util.h"
 
 using namespace std;
 
@@ -360,7 +359,7 @@ while_stmt		: while_hdr expr_star statement_star {
 			    SymTabEntry* ste = stm.currentScope();
 			    if(ste->kind() == SymTabEntry::Kind::WHILE_BLOCK_KIND) {
 				string key = ((WhileBlockEntry*)ste)->returnStringLabel();
-				$$ = new WhileNode($2, $3, $1, key);
+				$$ = new WhileNode($2, $3, key, $1);
 			    }
 			    stm.leaveScope();
 			}
