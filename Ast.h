@@ -145,8 +145,9 @@ public:
 	resultType_ = type;
     }
 
-    const Type* getResultType() {  
-	return coercedType_?coercedType_:resultType_;
+    Type* getResultType() {
+	const Type* temp = coercedType_?coercedType_:resultType_; 
+	return new Type(temp->tag());
     }
 
     virtual vector<Quadruple*>* iCodeGen() = 0;

@@ -1169,46 +1169,38 @@ const char* opCodeStr_[] = {
 
 
 vector<Quadruple*>* OpNode::iCodeGen() {
-    
     vector<Quadruple*>* quad = new vector<Quadruple*>();
-   /* VariableEntry *operands = new VariableEntry[arity_];
+    vector<VariableEntry*>* operands = new vector<VariableEntry*>();
     Type *t;
     string reg;
-
     for(int i = 0; i < (signed int)arity_; i++) {
-
 	t = arg_[i]->getResultType();
 	switch(arg_[i]->exprNodeType()) {
-	
-	case ExprNode::ExprNodeType::OP_NODE:
-	     mergeVec(quad, arg_[i]->iCodeGen());
-	     break;
-
-	case ExprNode::ExprNodeType::REF_EXPR_NODE:
-	    operands[i] = ((VariableEntry*)((RefExprNode*)arg_[i])->symTabEntry());
-	    break;
-
-	case ExprNode::ExprNodeType::VALUE_NODE:
-	    operands[i] = new VariableEntry(to_string(arg_[i]->value()), t);
-	    break;
-
-	case ExprNode::ExprNodeType::INV_NODE:
-	    
-	    if (t->tag() == Type::TypeTag::INT)
-		reg = regMgr->RETI_REG;
-	    else if (t->tag() == Type::TypeTag::FLOAT)
-		reg = regMgr->RETF_REG;
-	    operands[i] = new VariableEntry(reg, t);
-	    
+	    case ExprNode::ExprNodeType::OP_NODE:
+		mergeVec(quad, arg_[i]->iCodeGen());
+		break;
+	    case ExprNode::ExprNodeType::REF_EXPR_NODE:
+		operands->insert((operands->begin() + i) ,((VariableEntry*)((RefExprNode*)arg_[i])->symTabEntry()));
+		break;
+	    case ExprNode::ExprNodeType::VALUE_NODE:
+		operands->insert(operands->begin() + i, new VariableEntry(arg_[i]->value()->toString(), VariableEntry::VarKind::TEMP_VAR, t));
+		break;
+	    case ExprNode::ExprNodeType::INV_NODE:
+		if (Type::isInt(t->tag()) || Type::isString(t->tag()))
+		    reg = RETI_REG;
+		else if (Type::isFloat(t->tag()))
+		    reg = RETF_REG;
+		operands->insert((operands->begin() + i), new VariableEntry(reg, VariableEntry::VarKind::TEMP_VAR, t));
+		break;
 	}
     }
 
     switch(arity_) {
 	case 1: 
-	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], "", Quadruple::fetchTempVar()));
+	    quad->push_back(new Quadruple(opCode_, operands->at(0), NULL, new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType())));
 	    break;
 	case 2:
-	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], Quadruple::fetchTempVar()));
+	    quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType())));
 	    break;
     }
     // TODO:: reset temp count*/

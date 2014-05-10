@@ -136,7 +136,7 @@ private:
 
 class VariableEntry: public SymTabEntry {
 public:
-    enum VarKind {GLOBAL_VAR, LOCAL_VAR, PARAM_VAR, UNDEFINED};
+    enum VarKind {GLOBAL_VAR, LOCAL_VAR, PARAM_VAR, UNDEFINED, TEMP_VAR};
 
 public:
     VariableEntry(string name, VarKind v, Type* type=nullptr,

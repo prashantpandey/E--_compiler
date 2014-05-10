@@ -165,6 +165,8 @@ vector<Instruction*>* VariableEntry::codeGen() {
 	    break;
 	case VariableEntry::VarKind::UNDEFINED :
 	    break;
+	case VariableEntry::VarKind::TEMP_VAR :
+	    break;
     }
     return inst_vec;
 }
