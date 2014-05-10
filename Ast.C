@@ -565,8 +565,7 @@ vector<Instruction*>* BreakStmtNode::codeGen() {
     os << "while_";
     int i = 0;
     for(vector<int>::iterator it = label.begin(); it != label.end() && i < cnt; ++it, i++) {
-	int temp = *it;
-	os << to_string(temp) << "_";
+	os << to_string(*it) << "_";
     }
     os << "end";
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, os.str()));
