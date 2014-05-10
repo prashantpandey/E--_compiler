@@ -86,7 +86,6 @@ void GlobalEntry::serializeAsm(ostream& os) const
     for(vector<CodeModule*>::iterator it = modules->begin(); it != modules->end(); ++it){
 	for (vector<Instruction*>::iterator inst = ((*it)->getInstructions())->begin(); inst != ((*it)->getInstructions())->end(); ++inst){
 	    os << (*inst)->toString();
-	    os << "\n";
 	}
 	    os << "\n";
     }
