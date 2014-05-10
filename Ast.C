@@ -968,6 +968,7 @@ extern const OpNode::OpInfo opInfo[] = {
     //    e: Output type is the same as type of element of list arguments.
     //        Can be used only in conjunction with first character L.
     //
+
     {OpNode::OpCode::UMINUS, "-",  1, 0, OpNode::OpPrintType::PREFIX, {Type::NUMERIC}, Type::SIGNED, "N1"},
     {OpNode::OpCode::PLUS, "+",  2, 1, OpNode::OpPrintType::INFIX, {Type::NUMERIC, Type::NUMERIC}, Type::NUMERIC, "SS"},
     {OpNode::OpCode::MINUS, "-",  2, 1, OpNode::OpPrintType::INFIX, {Type::NUMERIC, Type::NUMERIC}, Type::NUMERIC, "SS"},
@@ -993,6 +994,7 @@ extern const OpNode::OpInfo opInfo[] = {
     {OpNode::OpCode::PRINT, "print", OpNode::VARIABLE, 1, OpNode::OpPrintType::PREFIX, {Type::NATIVE}, Type::VOID, "NO"},
     {OpNode::OpCode::INVALID, "invalid",            0, 0, OpNode::OpPrintType::PREFIX, {}, Type::ERROR, "NO"}
 };
+
 
 bool checkType(const Type::TypeTag typeTag, const Type *type) {
     Type::TypeTag tag = type->tag();

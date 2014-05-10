@@ -98,6 +98,20 @@ bool Quadruple::isEqual(Quadruple *quad){
     return false;
 }
 
+
+
+static Instruction::InstructionSet getInstr(OpNode::OpCode opc, Type *t){
+    
+    int isInt;
+    if(Type::isFloat(t->tag()))
+	isInt = 0;
+    else
+	isInt = 1;
+    //TODO:: to get instruction from OpCode
+    return Instruction::InstructionSet::ADD;
+}
+
+
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
    // TODO:: IMplement Expression Optimization 
 
@@ -119,22 +133,13 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
 	        delete(ve3);
 
 	    //TODO:: Map the opcode to instruction set
-//	    instr = new Instruction(getInstr(opc), regName1, regName2, regName3);
-//	    inst_set->push_back(instr);
+	    instr = new Instruction(getInstr(opc, ve3->type()), regName1, regName2, regName3);
+	    inst_set->push_back(instr);
 	
     }
     return inst_set;
 }
 
-/*
-Instruction::InstructionSet getInstr(OpNode::OpCode opc){
-    switch(opc){
-    
-	case OpNode::OpCode::UMINUS:
-	case OpNode
-    }
-}
-*/
 bool Quadruple::checkRegOrTemp(VariableEntry *ve, string &regName){
 
 	    if(ve != NULL){

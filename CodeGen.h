@@ -32,6 +32,7 @@ class CodeModule;
 class VariableEntry;
 class OpNode;
 
+
 class Instruction {
     public:
 	enum InstructionSet {

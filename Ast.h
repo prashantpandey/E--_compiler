@@ -228,8 +228,11 @@ public:
         // operators with > 2 args can be supported
         // only if types of args k through N are identical, for 1 <= k <= 3,
         // and are given by argType[k-1]
-        Type::TypeTag outType_;
+        
+	Type::TypeTag outType_;
         const char *typeConstraints_;
+	int instSize;
+	Instruction::InstructionSet instr[3];
     };
 
 public:
