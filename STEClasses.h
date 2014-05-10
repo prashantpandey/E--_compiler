@@ -198,7 +198,8 @@ public:
 	    iCodeTable_->insert(iCodeTable_->end(), instrVector->begin(), instrVector->end());
     }
 
-    void setMem() { inMem_ = true; };
+    void setMem (bool inMem) { inMem_ = inMem; };
+    void setMem() { setMem(true); };
     bool isMem() { return inMem_; };
 
     bool isTemp() { return temp_; }
@@ -295,6 +296,8 @@ class EventEntry: public SymTabEntry {
 	}
 
 	void print(ostream& out, int indent=0) const;
+
+        vector<Instruction*>* codeGen(vector<VariableEntry*>* params);
 
     private:
 	int argCnt_;

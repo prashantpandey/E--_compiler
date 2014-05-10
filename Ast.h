@@ -390,6 +390,8 @@ class BasePatNode: public AstNode {
 	    return parent_;
 	}
 
+	virtual vector<Instruction*>* codeGen() = 0;
+	virtual void purgeRegisters() = 0;
 	virtual bool hasSeqOps() const=0;
 	virtual bool hasNeg() const=0;
 	virtual bool hasAnyOrOther() const=0;
@@ -428,6 +430,8 @@ class PrimitivePatNode: public BasePatNode {
 	    return params_;
 	}
 
+	virtual vector<Instruction*>* codeGen();
+
 	const ExprNode* cond() const {
 	    return cond_;
 	}
@@ -451,6 +455,8 @@ class PrimitivePatNode: public BasePatNode {
 	list<OpNode*>& asgs() {
 	    return asgs_;
 	}
+
+	virtual void purgeRegisters();
 
 	const Type* typeCheck() const;
 	bool hasSeqOps() const;
@@ -492,6 +498,11 @@ class PatNode: public BasePatNode {
 	}
 	BasePatNode* pat2() {
 	    return pat2_;
+	}
+
+	virtual vector<Instruction*>* codeGen();
+	virtual void purgeRegisters() {
+	    pat1_->purgeRegisters();
 	}
 
 	bool hasNeg() const;
@@ -821,6 +832,8 @@ class RuleNode: public AstNode {
 	const Type* typeCheck() const;
 
 	void print(ostream& os, int indent=0) const;
+
+	vector<Instruction*>* codeGen();
 
     private:
 	BlockEntry    *rste_;

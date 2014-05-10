@@ -38,6 +38,8 @@ void GlobalEntry::checkType() const
     }
 }
 
+
+
 void GlobalEntry::genFinalCode(string progName) {
     const SymTab *st = NULL;
     progCode_ = new ProgCode(progName);
@@ -46,7 +48,7 @@ void GlobalEntry::genFinalCode(string progName) {
     if ((st = symTab()) != nullptr) {
 	SymTab::const_iterator it = st->begin();
 	CodeModule* codeModGlobalSec =  new CodeModule("GlobalSec");
-	CodeModule* functionCodeMod =  NULL;
+	CodeModule* codeMode =  NULL;
 	for (; it != (st->end()); ++it) {
 	    SymTabEntry *ste = (SymTabEntry *)(*it);
 	    if (ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
@@ -54,11 +56,19 @@ void GlobalEntry::genFinalCode(string progName) {
 	    }
 	    if (ste->kind() == SymTabEntry::Kind::FUNCTION_KIND) {
 		FunctionEntry *fe = (FunctionEntry *)ste;
-		functionCodeMod = new CodeModule(fe->name());
-		functionCodeMod->insertInstructionSet(fe->codeGen());
-		progCode_->insertModule(functionCodeMod);
+		codeMode = new CodeModule(fe->name());
+		codeMode->insertInstructionSet(fe->codeGen());
+		progCode_->insertModule(codeMode);
 	    }
 
+	}
+	if (rules_.size() != 0) {
+	    for(vector<RuleNode*>::const_iterator it = rules_.begin(); it != rules_.end(); ++it) {
+		codeMode = new CodeModule("Rule");
+		codeMode->insertInstructionSet((*it)->codeGen());
+		codeMode->insertInstructionSet(new Instruction(Instruction::InstructionSet::JMPI, RET_ADDR_EREG));
+		progCode_->insertModule(codeMode);
+	    }
 	}
 	Instruction* firstInst = codeModGlobalSec->firstInst();
 	if (firstInst)
@@ -88,6 +98,7 @@ void EventEntry::print(ostream& out, int indent) const
     printST(out, indent, '(', ')', false);
 
 }
+
 
 void VariableEntry::print(ostream& out, int indent) const
 {

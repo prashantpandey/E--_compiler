@@ -40,11 +40,12 @@ using namespace std;
 #define RETF_REG "F000"
 #define GLOBAL_REG "R003"
 #define RET_ADDR_REG "R004"
+#define RET_ADDR_EREG "R005"
 
 #define GLOBAL_MAX_REG_COUNT 100
 
 #define TOTAL_REG 1000
-#define INT_REG_AVAIL 995
+#define INT_REG_AVAIL 994
 #define FLOAT_REG_AVAIL 999
 
 class VariableEntry;

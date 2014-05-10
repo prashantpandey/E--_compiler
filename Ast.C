@@ -66,6 +66,14 @@ RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, int lin
     reaction_ = reaction;
 }
 
+vector<Instruction*>* RuleNode::codeGen() {
+   vector<Instruction*> *inst_vec = pat_->codeGen();
+   vector<Instruction*> *temp = reaction_->codeGen();
+   inst_vec->insert(inst_vec->end(), temp->begin(), temp->end());
+   pat_->purgeRegisters();
+   return inst_vec;
+}
+
 void RuleNode::print(ostream& os, int indent) const
 {
     prtSpace(os, indent);
@@ -530,6 +538,31 @@ vector<Instruction*>* ExprStmtNode::codeGen() {
     return fetchExprRegValue();
 }
 
+vector<Instruction*>* PrimitivePatNode::codeGen() {
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    //TODO:Change priority
+    for (vector<VariableEntry*>::const_iterator it = params_->begin();
+	    it != params_->end(); ++it) {
+	VariableEntry *ve = (*it);
+	bool isFloat = Type::isFloat(ve->type()->tag());
+	string reg = regMgr->fetchNextAvailReg(!isFloat, ve, 1, inst_vec);
+	inst_vec->push_back(new Instruction(isFloat?Instruction::InstructionSet::INF:Instruction::InstructionSet::INI, reg));
+	ve->setReg(reg);
+	ve->setMem(false);
+    }
+    return inst_vec;
+}
+
+void PrimitivePatNode::purgeRegisters() {
+    for (vector<VariableEntry*>::const_iterator it = params_->begin();
+	    it != params_->end(); ++it) {
+	VariableEntry *ve = (*it);
+	if (!ve->isMem()) {
+	    regMgr->purgeReg(ve->getReg());
+	}
+    }
+}
+
 void PrimitivePatNode::print(ostream& os, int indent) const
 {
     os << ee_->name();
@@ -576,7 +609,13 @@ void PatNode::print(ostream& os, int indent) const
     os << ")";
 }
 
-/* Added by KA */
+
+vector<Instruction*>* PatNode::codeGen()  {
+    //TODO:Figure out how to label event
+    vector<Instruction*>* inst_vec = pat1_->codeGen();
+
+    return inst_vec;
+}
 
 const Type* PatNode::typeCheck() const {
 
