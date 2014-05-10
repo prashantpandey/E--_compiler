@@ -105,12 +105,13 @@ const Type*  RuleNode::typeCheck() const {
     }
 }
 
-WhileNode::WhileNode(ExprNode* cond, StmtNode* compStmt,
+WhileNode::WhileNode(ExprNode* cond, StmtNode* compStmt, string key,
                      int line, int column, string file):
     StmtNode(StmtNode::StmtNodeKind::WHILE, line, column, file)
 {
     cond_ = cond;
     comp_ = compStmt;
+    key_ = key;
 }
 
 void WhileNode::print(ostream& os, int indent) const 
@@ -143,6 +144,34 @@ const Type* WhileNode::typeCheck() const {
         return &Type::voidType;
     }
     return &Type::errorType;
+}
+
+// WhileNode is handled in three parts
+// 1. The conditional expression
+// 2. The loop body
+// 3. The jump/break statement
+vector<Instruction*>* WhileNode::codeGen() {
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    
+    startLabel_ = key.append("_start");
+    endLabel_ = key.append("_end");
+
+    if(cond_ != NULL) {
+	inst_vec = fetchExprRegValue(cond_);
+	inst_vec[0]->setLabel(startLabel_);
+    }
+    
+    Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", getTReg());
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), endLabel_));
+    
+    vector<Instruction*>* stmtInst = comp_->codeGen();
+    mergeVec(inst_vec, stmtInst);
+
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, startLabel_));
+
+    inst_vec->push_back(new Instruction(endLabel_));
+
+    return inst_vec;
 }
 
 IfNode::IfNode(ExprNode* cond, StmtNode* thenStmt,
@@ -194,6 +223,30 @@ const Type* IfNode::typeCheck() const
         return &Type::voidType;
     }
     return &Type::errorType;
+}
+
+vector<Instruction*>* IfNode::codeGen() {
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    
+    thenLabel_ = regMgr->getNextLabel();
+    elseLabel_ = regMgr->getNextLabel();
+
+    if(cond_ != NULL) {
+	inst_vec = fetchExprRegValue(cond_);
+    }
+    
+    Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", getTReg());
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), elseLabel_));
+    
+    vector<Instruction*>* stmtInst = then_->codeGen();
+    stmtInst[0]->setLabel(thenLabel_);
+    mergeVec(inst_vec, stmtInst);
+
+    stmtInst = else_->codeGen();
+    stmtInst[0]->setLabel(elseLabel_);
+    mergeVec(inst_vec, stmtInst);
+
+    return inst_vec;
 }
 
 PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* params,
@@ -482,8 +535,7 @@ const Type* ReturnStmtNode::typeCheck() const {
 
 vector<Instruction*>* ReturnStmtNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
-    inst_vec = fetchExprInst();
-
+    inst_vec = fetchExprRegValue(expr_);
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, getTReg(), RET_ADDR_REG, "", "" ,"Assign return to pre-defined return reg"));
     return inst_vec;
 }
@@ -505,7 +557,19 @@ const Type* BreakStmtNode::typeCheck() const {
 }
 
 vector<Instruction*>* BreakStmtNode::codeGen() {
-    return NULL;
+    vector<Instruction*> inst_vec = new vector<Instruction*>();
+    WhileBlockEntry *wBE = blockEntry();
+    int cnt = wBE->nestedWhileCount();
+    vector<int> label = wBE->getWhileLabel();
+    ostringstream os;
+    os << "while_";
+    int i = 0;
+    for(vector<int>::iterator it = label->begin(); it != label->end() && i < cnt; ++it, i++) {
+	os << to_string(it) << "_";
+    }
+    os << "end";
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, os.str()));
+    return inst_vec;
 }
 
 const Type* ExprStmtNode::typeCheck() const {
@@ -517,7 +581,7 @@ const Type* ExprStmtNode::typeCheck() const {
 }
 
 vector<Instruction*>* ExprStmtNode::codeGen() {
-    return fetchExprInst();
+    return fetchExprRegValue(expr_);
 }
 
 vector<Instruction*>* PrimitivePatNode::codeGen() {
@@ -1108,7 +1172,7 @@ vector<Quadruple*>* OpNode::iCodeGen() {
 }
 
 /*  
-    vector<Quadruple*>* OpNode::iCodeGen() {
+    vector<Quadruple*> ROpNodelue(expr_);::iCodeGen() {
     vector<Quadruple*>* quad = new vector<Quadruple*>();
     string* operands = new string[arity_];
     for(int i = 0; i < (signed int)arity_; i++) {
