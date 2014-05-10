@@ -146,6 +146,7 @@ public:
         const_ = false;
 	inMem_ = false;
 	regName_ = "";
+	temp_ = false;
 	iCodeTable_ = new vector<Quadruple*>();
     };
 
@@ -200,6 +201,9 @@ public:
     void setMem() { inMem_ = true; };
     bool isMem() { return inMem_; };
 
+    bool isTemp() { return temp_; }
+    void setTemp() { temp_ = true; }
+
     void setReg(string regName) { regName_ = regName; };
     string getReg() { return regName_; };
 
@@ -213,6 +217,7 @@ private:
     bool inMem_;
     string regName_;
     string tReg_;
+    bool temp_;
     vector<Quadruple*>* iCodeTable_;
 };
 

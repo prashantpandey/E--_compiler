@@ -439,50 +439,116 @@ const Type* ReturnStmtNode::typeCheck() const {
     return &Type::errorType;
 }
 
+vector<Instruction*>* ReturnStmtNode::fetchExprRegValue() {
+    vector<Instruction*>* exprInst = new vector<Instruction*>();
+    ExprNode* expr = exprNode();            
+    swtich(expr->exprNodeType()) {
+	case ExprNode::ExprNodeType::OP_NODE:
+	    insertQuadrupleSet(expr->iCodeGen());
+	    // TODO: Call code generation on the quadruple table  
+	    break;
+	case ExprNode::ExprNodeType::REF_EXPR_NODE:
+	    tReg_ = VariableEntry*((RefExprNode*)expr)->symTabEntry()->getReg();
+	    break;
+	case ExprNode::ExprNodeType::VALUE_NODE:
+	    tReg_ = ((ValueNode*)expr)->value()->toString();
+	    break;
+	case ExprNode::ExprNodeType::INV_NODE:
+	    insertQuadrupleSet(expr->iCodeGen());
+	    // TODO: Call code generation on the quadruple table  
+	    break;
+    }
+    // TODO: Call code generation on the quadruple table 
+    // Also perform the required optimization over the quadruple table and
+    // generate the respective resultant reg value
+    return exprInst;
+}
+
+vector<Instruction*>* ReturnStmtNode::codeGen() {
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    inst_vec = fetchExprRegValue();
+
+    inset_vec->insert(new Instruction(Instruction::InstructionSet::MOVI, tReg_, RET_ADDR_REG, "", "" ,"Assign return to pre-defined return reg"));
+    return inset_vec;
+}
+
 const Type* BreakStmtNode::typeCheck() const {
     const BlockEntry *be = blockEntry();
     if(be->name().compare("unknown") == 0) {
-        errMsg("break statement is not declared inside a while loop", this);
-        return &Type::errorType;
+	errMsg("break statement is not declared inside a while loop", this);
+	return &Type::errorType;
     }
     else if(num() <= ((WhileBlockEntry*)blockEntry())->nestedWhileCount()) {
-        return &Type::voidType;
+	return &Type::voidType;
     }
     else {
-        errMsg("break statement doesn't have the correct number argument", this);
-        return &Type::errorType;
+	errMsg("break statement doesn't have the correct number argument", this);
+	return &Type::errorType;
     }
     return &Type::errorType;
+}
+
+vector<Instruction*>* BreakStmtNode::codeGen() {
+   return NULL;
 }
 
 const Type* ExprStmtNode::typeCheck() const {
     const ExprNode *expr = exprNode();
     if(expr != NULL && expr->typeCheck()->tag() != Type::TypeTag::ERROR) {
-        return &Type::unkType;
+	return &Type::unkType;
     }
     return &Type::errorType;
+}
+
+vector<Instruction*>* ExprStmtNode::fetchExprRegValue() {
+    vector<Instruction*>* exprInst = new vector<Instruction*>();
+    ExprNode* expr = exprNode();
+    swtich(expr->exprNodeType()) {
+	case ExprNode::ExprNodeType::OP_NODE:
+	    insertQuadrupleSet(expr->iCodeGen());
+TODO: Call code generation on the quadruple table 
+	  break;
+	case ExprNode::ExprNodeType::REF_EXPR_NODE:
+      tReg_ = VariableEntry*((RefExprNode*)expr)->symTabEntry()->getReg();
+      break;
+	case ExprNode::ExprNodeType::VALUE_NODE:
+      tReg_ = ((ValueNode*)expr)->value()->toString();
+      break;
+	case ExprNode::ExprNodeType::INV_NODE:
+      insertQuadrupleSet(expr->iCodeGen());
+TODO: Call code generation on the quadruple table 
+	  break;
+    }
+    // TODO: Call code generation on the quadruple table 
+    // Also perform the required optimization over the quadruple table and
+    // generate the respective resultant reg value
+    return exprInst;
+}
+
+vector<Instruction*>* ExprStmtNode::codeGen() {
+    return fetchExprRegValue();
 }
 
 void PrimitivePatNode::print(ostream& os, int indent) const
 {
     os << ee_->name();
     if (ee_->name().compare("any")) {
-        os << "(";
-        bool printComma = false;
-        for (vector<VariableEntry*>::const_iterator it = params_->begin();
-                it != params_->end(); ++it) {
-            if (printComma)
-                os << ", ";
+	os << "(";
+	bool printComma = false;
+	for (vector<VariableEntry*>::const_iterator it = params_->begin();
+		it != params_->end(); ++it) {
+	    if (printComma)
+		os << ", ";
 
-            // TODO: handle the unknown param type in PrimitivePatNode::print().
-            (*it)->print(os, indent);
-            printComma = true;
-        }
-        os << ")";
+	    // TODO: handle the unknown param type in PrimitivePatNode::print().
+	    (*it)->print(os, indent);
+	    printComma = true;
+	}
+	os << ")";
     }
     if (cond()) {
-        os << "|";
-        cond()->print(os, indent);
+	os << "|";
+	cond()->print(os, indent);
     }
 }
 
@@ -491,20 +557,20 @@ void PatNode::print(ostream& os, int indent) const
     PatNodeKind pk = kind();
     os << "(";
     if (pat1_ == NULL || pk == BasePatNode::PatNodeKind::UNDEFINED) {
-        os << "Unknown event Called";
+	os << "Unknown event Called";
     } else {
-        if (pk == BasePatNode::PatNodeKind::NEG)
-            os << "!";
-        pat1_->print(os, indent);
-        if (pk == BasePatNode::PatNodeKind::SEQ)
-            os << ":";
-        else if (pk == BasePatNode::PatNodeKind::STAR)
-            os << "**";
-        else if (pk == BasePatNode::PatNodeKind::OR)
-            os << " \\/ ";
-        if (pat2_) {
-            pat2_->print(os, indent);
-        }
+	if (pk == BasePatNode::PatNodeKind::NEG)
+	    os << "!";
+	pat1_->print(os, indent);
+	if (pk == BasePatNode::PatNodeKind::SEQ)
+	    os << ":";
+	else if (pk == BasePatNode::PatNodeKind::STAR)
+	    os << "**";
+	else if (pk == BasePatNode::PatNodeKind::OR)
+	    os << " \\/ ";
+	if (pat2_) {
+	    pat2_->print(os, indent);
+	}
     }
     os << ")";
 }
@@ -521,104 +587,104 @@ const Type* PatNode::typeCheck() const {
     int p2_type_check = 0;
     if(p1 == NULL)
     {
-        errMsg(" Atleast one event pattern operand expected ", this);
-        return &Type::errorType;
+	errMsg(" Atleast one event pattern operand expected ", this);
+	return &Type::errorType;
     }
     else if(p1 != NULL)	    /* Atleast PAT1 should not be NULL  */
     {
-        if (p1->typeCheck() != &Type::errorType)
-            p1_type_check = 1;
-        switch(kind())
-        {
-        case BasePatNode::PatNodeKind::PRIMITIVE:
+	if (p1->typeCheck() != &Type::errorType)
+	    p1_type_check = 1;
+	switch(kind())
+	{
+	    case BasePatNode::PatNodeKind::PRIMITIVE:
 
-            if(p2 != NULL)
-            {
-                errMsg(" Only one event pattern operand expected ", this);
-                return &Type::errorType;
-            }
-            break;
+		if(p2 != NULL)
+		{
+		    errMsg(" Only one event pattern operand expected ", this);
+		    return &Type::errorType;
+		}
+		break;
 
-        case BasePatNode::PatNodeKind::EMPTY:
-            break;
+	    case BasePatNode::PatNodeKind::EMPTY:
+		break;
 
-        case BasePatNode::PatNodeKind::NEG:
+	    case BasePatNode::PatNodeKind::NEG:
 
-            if(p2 != NULL)
-            {
-                errMsg(" Only one event pattern operand expected ", this);
-                return &Type::errorType;
-            }
-            else if(!p1->isNegatable())
-            {
-                errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
-                return &Type::errorType;
-            }
+		if(p2 != NULL)
+		{
+		    errMsg(" Only one event pattern operand expected ", this);
+		    return &Type::errorType;
+		}
+		else if(!p1->isNegatable())
+		{
+		    errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
+		    return &Type::errorType;
+		}
 
-            break;
+		break;
 
-        case BasePatNode::PatNodeKind::SEQ:
-            if(p2 == NULL)
-            {
-                errMsg(" Event pattern operand expected ", this);
-                return &Type::errorType;
-            }
-            /*
-            if(p1->hasAnyOrOther() || p2->hasAnyOrOther()) {
-                errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
-                return &Type::errorType;
-            }
-            */
-            if (p2->typeCheck() != &Type::errorType)
-                p2_type_check = 1;
-            break;
+	    case BasePatNode::PatNodeKind::SEQ:
+		if(p2 == NULL)
+		{
+		    errMsg(" Event pattern operand expected ", this);
+		    return &Type::errorType;
+		}
+		/*
+		   if(p1->hasAnyOrOther() || p2->hasAnyOrOther()) {
+		   errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
+		   return &Type::errorType;
+		   }
+		   */
+		if (p2->typeCheck() != &Type::errorType)
+		    p2_type_check = 1;
+		break;
 
-        case BasePatNode::PatNodeKind::OR:
-            if(p2 == NULL)
-            {
-                errMsg(" Event pattern operand expected ", this);
-                return &Type::errorType;
-            }
-            /*
-            if(p1->hasAnyOrOther() || p2->hasAnyOrOther()) {
-                errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
-                return &Type::errorType;
-            }
-            */
-            if (p2->typeCheck() != &Type::errorType)
-                p2_type_check = 1;
-            break;
+	    case BasePatNode::PatNodeKind::OR:
+		if(p2 == NULL)
+		{
+		    errMsg(" Event pattern operand expected ", this);
+		    return &Type::errorType;
+		}
+		/*
+		   if(p1->hasAnyOrOther() || p2->hasAnyOrOther()) {
+		   errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
+		   return &Type::errorType;
+		   }
+		   */
+		if (p2->typeCheck() != &Type::errorType)
+		    p2_type_check = 1;
+		break;
 
-        case BasePatNode::PatNodeKind::STAR:
-            if(p2 != NULL)
-            {
-                errMsg(" Only one event pattern operand expected ", this);
-                return &Type::errorType;
-            }
-            /*
-            if(p1->hasAnyOrOther()) {
-                errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
-                return &Type::errorType;
-            }
-            */
-            break;
+	    case BasePatNode::PatNodeKind::STAR:
+		if(p2 != NULL)
+		{
+		    errMsg(" Only one event pattern operand expected ", this);
+		    return &Type::errorType;
+		}
+		/*
+		   if(p1->hasAnyOrOther()) {
+		   errMsg(" Only simple patterns without `.', `*', and `!' operatorscan be negated ", this);
+		   return &Type::errorType;
+		   }
+		   */
+		break;
 
-        case BasePatNode::PatNodeKind::UNDEFINED:
-            if(p2 != NULL)
-            {
-                errMsg(" Only one event pattern operand expected ", this);
-                return &Type::errorType;
-            }
+	    case BasePatNode::PatNodeKind::UNDEFINED:
+		if(p2 != NULL)
+		{
+		    errMsg(" Only one event pattern operand expected ", this);
+		    return &Type::errorType;
+		}
 
-            break;
+		break;
 
-        default :
-            errMsg(" No such event pattern operand kind ", this);
-            return &Type::errorType;
-        }
+	    default :
+		errMsg(" No such event pattern operand kind ", this);
+		return &Type::errorType;
+	}
     }
     if(p1_type_check && p2_type_check)
-        return &Type::voidType;
+	return &Type::voidType;
 
     return &Type::errorType;
 }
@@ -627,7 +693,7 @@ const Type* PatNode::typeCheck() const {
 bool PrimitivePatNode::hasNeg() const
 {
     if(kind() == BasePatNode::PatNodeKind::SEQ)
-        return true;
+	return true;
     return false;
 }
 
@@ -636,7 +702,7 @@ bool PrimitivePatNode::hasNeg() const
 bool PrimitivePatNode::hasSeqOps() const
 {
     if(kind() == BasePatNode::PatNodeKind::SEQ || kind() == BasePatNode::PatNodeKind::STAR)
-        return true;
+	return true;
     return false;
 }
 
@@ -645,22 +711,22 @@ bool PrimitivePatNode::hasSeqOps() const
 bool PrimitivePatNode::hasAnyOrOther() const
 {
     /*
-    if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
-    return true;
-    return false;
-    */
+       if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
+       return true;
+       return false;
+       */
     if(event()->name().compare("any") == 0 || kind() == BasePatNode::PatNodeKind::UNDEFINED) {
-        return true;
+	return true;
     }
     else
-        return false;
+	return false;
 }
 
 /* */
 bool PatNode::hasNeg() const
 {
     if(kind() == BasePatNode::PatNodeKind::NEG)
-        return true;
+	return true;
     return false;
 }
 
@@ -668,28 +734,28 @@ bool PatNode::hasSeqOps() const
 {
 
     if(kind() == BasePatNode::PatNodeKind::SEQ || kind() == BasePatNode::PatNodeKind::STAR)
-        return true;
+	return true;
     return false;
 }
 
 bool PatNode::hasAnyOrOther() const
 {
     /*
-    if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
-    return true;
-    return false;
-    */
+       if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
+       return true;
+       return false;
+       */
     bool flag1 = true;
     bool flag2 = true;
     if(pat1() != NULL) {
-        flag1 = pat1()->hasAnyOrOther();
+	flag1 = pat1()->hasAnyOrOther();
     }
     if(pat2() != NULL) {
-        flag2 = pat2()->hasAnyOrOther();
+	flag2 = pat2()->hasAnyOrOther();
     }
 
     if(flag1 || flag2) {
-        return true;
+	return true;
     }
     return false;
 }
@@ -698,13 +764,13 @@ void CompoundStmtNode::printWithoutBraces(ostream& os, int indent) const
 {
     const std::list<StmtNode*> *stmtList = stmts();
     for (std::list<StmtNode*>::const_iterator it=stmtList->begin();
-            it != stmtList->end(); ++it) {
-        if ((*it) != NULL) {
-            prtSpace(os, indent);
-            (*it)->print(os, indent);
-            if (stmtNoSemicolonAtEnd(*it))
-                endln(os, indent);
-        }
+	    it != stmtList->end(); ++it) {
+	if ((*it) != NULL) {
+	    prtSpace(os, indent);
+	    (*it)->print(os, indent);
+	    if (stmtNoSemicolonAtEnd(*it))
+		endln(os, indent);
+	}
     }
 }
 
@@ -712,8 +778,8 @@ void CompoundStmtNode::print(ostream& os, int indent) const
 {
     os << "{";
     if (stmts()->size() != 0) {
-        prtln(os, indent);
-        printWithoutBraces(os, indent);
+	prtln(os, indent);
+	printWithoutBraces(os, indent);
     }
     os << "}";
     endln(os, indent);
@@ -724,22 +790,30 @@ const Type* CompoundStmtNode::typeCheck() const {
     const list<StmtNode*>* listStmts = stmts();
 
     if(listStmts == NULL) {
-        return &Type::errorType;
+	return &Type::errorType;
     }
     for(list<StmtNode*>::const_iterator it = listStmts->begin(); it != listStmts->end(); ++it) {
-        if((*it) != NULL && (*it)->typeCheck()->tag() != Type::TypeTag::UNKNOWN) {
-            flag = true;
-        }
+	if((*it) != NULL && (*it)->typeCheck()->tag() != Type::TypeTag::UNKNOWN) {
+	    flag = true;
+	}
     }
     if (flag) {
-        return &Type::errorType;
+	return &Type::errorType;
     }
 
     return &Type::unkType;
 }
 
+vector<Instruction*>* CompoundStmtNode::codeGen() {
+    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    for(vector<Instruction*>::const_iterator it = stmts_->begin(); it != stmts_->end(); ++it) {
+	inst_vec->insert(inst_vec->end(), (*it)->codeGen()->begin(), (*it)->codeGen()->end());
+    }
+    return inst_vec;
+}
+
 RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
-                         int line, int column, string file):
+	int line, int column, string file):
     ExprNode(ExprNode::ExprNodeType::REF_EXPR_NODE, NULL, line, column, file)
 {
     ext_ = ext;
@@ -838,29 +912,29 @@ extern const OpNode::OpInfo opInfo[] = {
 bool checkType(const Type::TypeTag typeTag, const Type *type) {
     Type::TypeTag tag = type->tag();
     switch(typeTag) {
-    case Type::TypeTag::NUMERIC : {
-        return Type::isNumeric(tag);
-    }
-    case Type::TypeTag::SIGNED : {
-        return Type::isSigned(tag);
-    }
-    case Type::TypeTag::INTEGRAL : {
-        return Type::isIntegral(tag);
-    }
-    case Type::TypeTag::PRIMITIVE : {
-        return Type::isPrimitive(tag);
-    }
-    case Type::TypeTag::SCALAR : {
-        return Type::isScalar(tag);
-    }
-    case Type::TypeTag::BOOL : {
-        return Type::isBool(tag);
-    }
-    case Type::TypeTag::NATIVE : {
-        return Type::isNative(tag);
-    }
-    default:
-        break;
+	case Type::TypeTag::NUMERIC : {
+					  return Type::isNumeric(tag);
+				      }
+	case Type::TypeTag::SIGNED : {
+					 return Type::isSigned(tag);
+				     }
+	case Type::TypeTag::INTEGRAL : {
+					   return Type::isIntegral(tag);
+				       }
+	case Type::TypeTag::PRIMITIVE : {
+					    return Type::isPrimitive(tag);
+					}
+	case Type::TypeTag::SCALAR : {
+					 return Type::isScalar(tag);
+				     }
+	case Type::TypeTag::BOOL : {
+				       return Type::isBool(tag);
+				   }
+	case Type::TypeTag::NATIVE : {
+					 return Type::isNative(tag);
+				     }
+	default:
+				     break;
     }
     //cout >> "TypeTag invalid";
     return false;
@@ -869,11 +943,11 @@ bool checkType(const Type::TypeTag typeTag, const Type *type) {
 bool argTypeCheck(const Type::TypeTag argType[], unsigned arity, const Type** argTypes, const OpNode* opNode) {
 
     for (unsigned i=0; i < arity; i++) {
-        const Type *type = argTypes[i];
-        if (!(checkType(argType[i], type))) {
-            errMsg("Incompatible type for argument " + to_string(i+1) + " for operator `"+ opInfo[static_cast<int>(opNode->opCode())].name_ +"'", opNode);
-            return false;
-        }
+	const Type *type = argTypes[i];
+	if (!(checkType(argType[i], type))) {
+	    errMsg("Incompatible type for argument " + to_string(i+1) + " for operator `"+ opInfo[static_cast<int>(opNode->opCode())].name_ +"'", opNode);
+	    return false;
+	}
     }
     return true;
 }
@@ -883,121 +957,121 @@ const Type* OpNode::typeCheck() const {
     int iopcode = static_cast<int>(opCode_);
     const Type** argTypes = (const Type**)new Type*[arity_];
     for (unsigned i=0; i < arity_; i++) {
-        if (arg_[i]) {
-            const Type *type = arg_[i]->typeCheck();
-            argTypes[i] = type;
-            if (type->tag() == Type::TypeTag::ERROR) {
-                delete[] argTypes;
-                return Type::type[0];
-            }
-        }
+	if (arg_[i]) {
+	    const Type *type = arg_[i]->typeCheck();
+	    argTypes[i] = type;
+	    if (type->tag() == Type::TypeTag::ERROR) {
+		delete[] argTypes;
+		return Type::type[0];
+	    }
+	}
     }
     bool error = false;
     switch (opInfo[iopcode].typeConstraints_[0])
     {
-    case 'N':
-        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
-            error = true;
-        }
-        break;
-    case 'S':
-        if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
-            error = true;
-            break;
-        }
-        if(argTypes[1]->tag() == argTypes[0]->tag())
-            break;
-        if(opInfo[iopcode].typeConstraints_[1] != 'O') {
-            if (Type::isSubType(argTypes[1], argTypes[0]))
-                arg_[1]->coercedType(argTypes[0]);
-            else if(Type::isSubType(argTypes[0], argTypes[1]))
-                arg_[0]->coercedType(argTypes[1]);
-        }
-        break;
-    case 'A':
-        if (argTypes[1]->tag() != argTypes[0]->tag() && !Type::isSubType(argTypes[1], argTypes[0])) {
-            errMsg("Assigned expression must be a subtype of target", this);
-            error = true;
-        }
-        if (argTypes[1]->tag() != argTypes[0]->tag() && Type::isSubType(argTypes[1], argTypes[0]))
-            arg_[1]->coercedType(argTypes[0]);
-        break;
+	case 'N':
+	    if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
+		error = true;
+	    }
+	    break;
+	case 'S':
+	    if (!argTypeCheck(opInfo[iopcode].argType_, arity_, argTypes, this)) {
+		error = true;
+		break;
+	    }
+	    if(argTypes[1]->tag() == argTypes[0]->tag())
+		break;
+	    if(opInfo[iopcode].typeConstraints_[1] != 'O') {
+		if (Type::isSubType(argTypes[1], argTypes[0]))
+		    arg_[1]->coercedType(argTypes[0]);
+		else if(Type::isSubType(argTypes[0], argTypes[1]))
+		    arg_[0]->coercedType(argTypes[1]);
+	    }
+	    break;
+	case 'A':
+	    if (argTypes[1]->tag() != argTypes[0]->tag() && !Type::isSubType(argTypes[1], argTypes[0])) {
+		errMsg("Assigned expression must be a subtype of target", this);
+		error = true;
+	    }
+	    if (argTypes[1]->tag() != argTypes[0]->tag() && Type::isSubType(argTypes[1], argTypes[0]))
+		arg_[1]->coercedType(argTypes[0]);
+	    break;
     }
 
     if (error) {
-        delete[] argTypes;
-        return Type::type[0];
+	delete[] argTypes;
+	return Type::type[0];
     }
 
     const Type* returnType = Type::type[0];
     switch(opInfo[iopcode].typeConstraints_[1])
     {
-    case '1':
-    case '2':
-    {
-        int index = atoi(&opInfo[iopcode].typeConstraints_[1]) - 1;
-        const Type *oprType = arg_[index]->coercedType() != NULL ? arg_[index]->coercedType():argTypes[index];
-        if(!checkType(opInfo[iopcode].outType_, oprType)) {
-            if((returnType = Type::getCoercedType(opInfo[iopcode].outType_, oprType))) {
-                arg_[index]->coercedType(returnType);
-                break;
-            }
-            else {
-                returnType = Type::type[0];
-                error = true;
-                //TODO: show correct error
-                errMsg("Incorrect Operand", this);
-            }
-        }
-        else
-            returnType = oprType;
-        break;
-    }
-    case 'O':
-        returnType = new Type(opInfo[iopcode].outType_);
-        break;
-    case 's':
-        if (Type::isSubType(argTypes[1], argTypes[0]))
-            returnType = argTypes[1];
-        else
-            returnType = argTypes[0];
-    case 'S':
-        if (Type::isSubType(argTypes[1], argTypes[0]))
-            returnType = argTypes[0];
-        else
-            returnType = argTypes[1];
+	case '1':
+	case '2':
+	    {
+		int index = atoi(&opInfo[iopcode].typeConstraints_[1]) - 1;
+		const Type *oprType = arg_[index]->coercedType() != NULL ? arg_[index]->coercedType():argTypes[index];
+		if(!checkType(opInfo[iopcode].outType_, oprType)) {
+		    if((returnType = Type::getCoercedType(opInfo[iopcode].outType_, oprType))) {
+			arg_[index]->coercedType(returnType);
+			break;
+		    }
+		    else {
+			returnType = Type::type[0];
+			error = true;
+			//TODO: show correct error
+			errMsg("Incorrect Operand", this);
+		    }
+		}
+		else
+		    returnType = oprType;
+		break;
+	    }
+	case 'O':
+	    returnType = new Type(opInfo[iopcode].outType_);
+	    break;
+	case 's':
+	    if (Type::isSubType(argTypes[1], argTypes[0]))
+		returnType = argTypes[1];
+	    else
+		returnType = argTypes[0];
+	case 'S':
+	    if (Type::isSubType(argTypes[1], argTypes[0]))
+		returnType = argTypes[0];
+	    else
+		returnType = argTypes[1];
     }
     delete[] argTypes;
     return returnType;
 }
 
 OpNode::OpNode(OpCode op, ExprNode* a1, ExprNode* a2,
-               int ln, int col, string file):
+	int ln, int col, string file):
     ExprNode(ExprNode::ExprNodeType::OP_NODE, NULL, ln,col,file) {
-    opCode_ = op;
-    if (a1 != NULL) {
-        arity_ = 1;
-        arg_.push_back(a1);
-        if (a2 != NULL) {
-            arity_++;
-            arg_.push_back(a2);
-        }
+	opCode_ = op;
+	if (a1 != NULL) {
+	    arity_ = 1;
+	    arg_.push_back(a1);
+	    if (a2 != NULL) {
+		arity_++;
+		arg_.push_back(a2);
+	    }
+	}
     }
-}
 
 OpNode::OpNode(const OpNode &other):
     ExprNode(other) {
-    arity_ = other.arity();
-    opCode_ = other.opCode();
-    for (unsigned int i=0; (i < other.arity()); i++) {
-        if (other.arg_[i]) {
-            arg_.push_back((other.arg_[i])->clone());
-        }
-        else {
-            arg_.push_back(NULL);
-        }
+	arity_ = other.arity();
+	opCode_ = other.opCode();
+	for (unsigned int i=0; (i < other.arity()); i++) {
+	    if (other.arg_[i]) {
+		arg_.push_back((other.arg_[i])->clone());
+	    }
+	    else {
+		arg_.push_back(NULL);
+	    }
+	}
     }
-}
 
 const char* opCodeStr_[] = {
     "UMINUS", "PLUS", "MINUS", "MULT", "DIV", "MOD",
@@ -1007,28 +1081,33 @@ const char* opCodeStr_[] = {
     "ASSIGN", "PRINT", "INVALID"
 };
 
-
+/*  
 vector<Quadruple*>* OpNode::iCodeGen() {
     vector<Quadruple*>* quad = new vector<Quadruple*>();
     string* operands = new string[arity_];
     for(int i = 0; i < (signed int)arity_; i++) {
-	vector<Quadruple*>* tempQuad = arg_[i]->iCodeGen();
-	quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
-	operands[i] = arg_[i]->getTReg();
+	if(arg_[i]->exprNodeType() == ExprNode::ExprNodeType::OP_NODE) {
+	    vector<Quadruple*>* tempQuad = arg_[i]->iCodeGen();
+	    quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
+	}
     }
+    Quadruple::resetTempCnt();
     switch(arity_) {
 	case 1: 
-	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0]));
+	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], "", Quadruple::fetchTempVar()));
 	    break;
 	case 2:
-	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1]));
+	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], Quadruple::fetchTempVar()));
 	    break;
 	case 3:
-	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], operands[2]));
+	    // TODO: support 3 arity with splitting the ternery expr into two
+	    // quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], operands[2]));
 	    break;
     }
+    Quadruple::resetTempCnt();
     return quad;
 }
+*/
 
 void
 OpNode::print(ostream& os, int indent) const {

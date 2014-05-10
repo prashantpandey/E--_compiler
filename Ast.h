@@ -135,9 +135,6 @@ public:
         coercedType_ = type;
     }
 
-    string getTReg() { return tReg_; }
-    void setTReg(string reg) { tReg_ = reg; }
-    
     virtual vector<Quadruple*>* iCodeGen() = 0;
 
     void print(ostream& os, int indent=0) const=0;
@@ -146,7 +143,6 @@ private:
     ExprNodeType exprType_;
     const Value *val_; // reference semantics for val_ and coercedType_
     const Type* coercedType_;
-    string tReg_;   
 };
 
 /****************************************************************/
@@ -177,7 +173,6 @@ public:
     };
     
     vector<Quadruple*>* iCodeGen() {
-	setTReg(ext_);
 	return new vector<Quadruple*>;
     }
 
@@ -539,9 +534,6 @@ class StmtNode: public AstNode {
 
 	virtual string fetchExprRegValue() = 0;
 
-	void setReg(string regName) { tReg_ = regName; };
-	string getReg() { return tReg_; };
-
 	void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
 	    if (instrVector != NULL) 
 		iCodeTable_->insert(iCodeTable_->end(), instrVector->begin(), instrVector->end());
@@ -551,7 +543,6 @@ class StmtNode: public AstNode {
     private:
 	StmtNodeKind skind_;
 	vector<Quadruple*>* iCodeTable_;
-	string tReg_;
 };
 
 /****************************************************************/
@@ -581,11 +572,6 @@ class ReturnStmtNode: public StmtNode {
 	}
 
 	const Type* typeCheck() const;
-
-	string fetchExprRegValue() {
-	    insertQuadrupleSet(expr_->iCodeGen());
-	    return expr_->getTReg();
-	}
 
 	void print(ostream& os, int indent) const {
 	    os << "return ";
@@ -626,10 +612,6 @@ class BreakStmtNode: public StmtNode {
 	    return blockEntry_;
 	}
 
-	string fetchExprRegValue() {
-	    return "";
-	}
-
 	void print(ostream& os, int indent) const {
 	    os << "break " << num_;
 	}
@@ -666,12 +648,6 @@ class ExprStmtNode: public StmtNode {
 	    }
 	};
 
-	string fetchExprRegValue() {
-	    insertQuadrupleSet(expr_->iCodeGen());
-	    return expr_->getTReg();
-	}
-
-
     private:
 	ExprNode* expr_;
 };
@@ -701,10 +677,6 @@ class CompoundStmtNode: public StmtNode {
 	{
 	    if(stmts_ != NULL) stmts_->push_back(s);
 	};
-
-	string fetchExprRegValue() {
-	    return "";
-	}
 
 	void  printWithoutBraces(ostream& os, int indent) const;
 	void  print(ostream& os, int indent) const;
@@ -747,11 +719,6 @@ class IfNode: public StmtNode {
 	    return then_;
 	};
 
-	string fetchExprRegValue() {
-	    insertQuadrupleSet(cond_->iCodeGen());
-	    return cond_->getTReg();
-	}
-
 	void print(ostream& os, int indent) const;
 
     private:
@@ -784,11 +751,6 @@ class WhileNode: public StmtNode {
 	StmtNode* compStmt() {
 	    return comp_;
 	};
-
-	string fetchExprRegValue() {
-	    insertQuadrupleSet(cond_->iCodeGen());
-	    return cond_->getTReg();
-	}
 
 	void print(ostream& os, int indent) const;
 

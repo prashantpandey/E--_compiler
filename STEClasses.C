@@ -118,15 +118,17 @@ void VariableEntry::checkType() const
 }
 
 vector<Instruction*>* VariableEntry::codeGen() {
-
     string val;
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     regName_ = regMgr->fetchNextAvailReg(!Type::isFloat(type()->tag()));
     if(initVal() == NULL || initVal()->value() == NULL){
 	val = "0";
     }
-    else
-	val = fetchExprRegValue();
+    else {
+	inst_vec = fetchExprRegValue();
+	val = getTReg();
+    }
+
     Instruction::InstructionSet movInst = Instruction::InstructionSet::MOVI;
     Instruction::InstructionSet storeInst = Instruction::InstructionSet::STI;
     if (Type::isString(type()->tag())) {
@@ -137,6 +139,7 @@ vector<Instruction*>* VariableEntry::codeGen() {
 	storeInst = Instruction::InstructionSet::STF;
     }
     inst_vec->push_back(new Instruction(movInst, val, regName_));
+    regMgr->purgeReg(val);
     switch(varKind()) {
 	case VariableEntry::VarKind::LOCAL_VAR :
 	    inst_vec->push_back(Instruction::decrSP());
@@ -146,7 +149,6 @@ vector<Instruction*>* VariableEntry::codeGen() {
 	    /* If is mem is set then storing the corresponding
 	     * global variable register to the global section,
 	     * updating the stack pointer and purging the register*/
-
 	    if (isMem()) {
 		inst_vec->push_back(new Instruction(storeInst, regName_, SP_REG));
 		inst_vec->push_back(Instruction::decrSP());
@@ -157,6 +159,31 @@ vector<Instruction*>* VariableEntry::codeGen() {
 	    break;
     }
     return inst_vec;
+}
+
+vector<Instruction*>* VariableEntry::fetchExprRegValue() {
+    vector<Instruction*>* exprInst = new vector<Instruction*>();
+    ExprNode* expr = initVal();
+    swtich(expr->exprNodeType()) {
+	case ExprNode::ExprNodeType::OP_NODE:
+	    insertQuadrupleSet(initVal()->iCodeGen());
+	    // TODO: Call code generation on the quadruple table 
+	    break;
+	case ExprNode::ExprNodeType::REF_EXPR_NODE:
+	    tReg_ = (VariableEntry*((RefExprNode*)expr)->symTabEntry())->getReg();
+	    break;
+	case ExprNode::ExprNodeType::VALUE_NODE:
+	    tReg_ = ((ValueNode*)expr)->value()->toString();
+	    break;
+	case ExprNode::ExprNodeType::INV_NODE:
+	    insertQuadrupleSet(initVal()->iCodeGen());
+	    // TODO: Call code generation on the quadruple table 
+	    break;
+    }
+    // TODO: Call code generation on the quadruple table 
+    // Also perform the required optimization over the quadruple table and
+    // generate the respective resultant reg value
+    return exprInst;
 }
 
 vector<Instruction*>* FunctionEntry::codeGen() {
@@ -194,13 +221,6 @@ vector<Instruction*>* FunctionEntry::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, to_string(getArgCnt()+1), SP_REG));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPI, RET_ADDR_REG));
     return inst_vec;
-}
-
-
-string VariableEntry::fetchExprRegValue() {
-
-    insertQuadrupleSet(initVal_->iCodeGen());
-    return initVal_->getTReg();
 }
 
 void FunctionEntry::checkType() const
