@@ -72,8 +72,8 @@ vector<Instruction*>* RuleNode::codeGen() {
     
    vector<Instruction*> *inst_vec = new vector<Instruction*>();
    inst_vec->push_back(new Instruction(pat_->getLabel()));
-   ProgCode::merge(inst_vec, pat_->codeGen());
-   ProgCode::merge(inst_vec, reaction_->codeGen());
+   mergeVec(inst_vec, pat_->codeGen());
+   mergeVec(inst_vec, reaction_->codeGen());
    pat_->purgeRegisters();
    return inst_vec;
 }
@@ -405,7 +405,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
 
     const vector<ExprNode*>* args = params();
     for(vector<ExprNode*>::const_iterator it=args->begin(); it != args->end(); ++it) {
-	ProgCode::merge(inst_vec, (*it)->codeGen());
+	mergeVec(inst_vec, (*it)->codeGen());
     }
 
     string reg = regMgr->fetchNextAvailReg(true);

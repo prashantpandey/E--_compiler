@@ -124,10 +124,6 @@ public:
 	modules_->push_back(codeMod);	
     }
 
-    static void merge(vector<Instruction*> *inst1, vector<Instruction*> *inst2) {
-	if (inst2 != NULL)
-	    inst1->insert(inst1->end(), inst2->begin(), inst2->end());
-    }
 private:
     string progName_;
     vector<CodeModule*> *modules_;
@@ -154,7 +150,7 @@ public:
     }
 
     void insertInstructionSet(vector<Instruction *> *instrVector) {
-	ProgCode::merge(instructions_, instrVector);
+	mergeVec(instructions_, instrVector);
     }
 
     Instruction* firstInst() const {
