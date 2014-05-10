@@ -1096,37 +1096,32 @@ const char* opCodeStr_[] = {
     "ASSIGN", "PRINT", "INVALID"
 };
 
-vector<Quadruple*>* OpNode::iCodeGen() {
-    return NULL;
-}
 
-/*  
-    vector<Quadruple*>* OpNode::iCodeGen() {
+vector<Quadruple*>* OpNode::iCodeGen() {
     vector<Quadruple*>* quad = new vector<Quadruple*>();
     string* operands = new string[arity_];
     for(int i = 0; i < (signed int)arity_; i++) {
-    if(arg_[i]->exprNodeType() == ExprNode::ExprNodeType::OP_NODE) {
-    vector<Quadruple*>* tempQuad = arg_[i]->iCodeGen();
-    quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
-    }
+	if(arg_[i]->exprNodeType() == ExprNode::ExprNodeType::OP_NODE) {
+	    vector<Quadruple*>* tempQuad = arg_[i]->iCodeGen();
+	    quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
+	}
     }
     Quadruple::resetTempCnt();
     switch(arity_) {
-    case 1: 
-    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], "", Quadruple::fetchTempVar()));
-    break;
-    case 2:
-    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], Quadruple::fetchTempVar()));
-    break;
-    case 3:
-// TODO: support 3 arity with splitting the ternery expr into two
-// quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], operands[2]));
-break;
+	case 1: 
+	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], "", Quadruple::fetchTempVar()));
+	    break;
+	case 2:
+	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], Quadruple::fetchTempVar()));
+	    break;
+	case 3:
+	    // TODO: support 3 arity with splitting the ternery expr into two
+	    // quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], operands[2]));
+	    break;
+    }
+    Quadruple::resetTempCnt();
+    return quad;
 }
-Quadruple::resetTempCnt();
-return quad;
-}
-*/
 
 void
 OpNode::print(ostream& os, int indent) const {
