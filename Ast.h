@@ -359,7 +359,6 @@ class BasePatNode: public AstNode {
 	    PRIMITIVE, EMPTY, NEG, SEQ, OR, STAR, UNDEFINED
 	};
 
-    public:
 	BasePatNode(PatNodeKind pk, int ln=0, int col=0, string f=""):
 	    AstNode(AstNode::NodeType::PAT_NODE, ln, col, f) {
 		parent_ = NULL;
@@ -386,9 +385,12 @@ class BasePatNode: public AstNode {
 	const BasePatNode* parent() const {
 	    return parent_;
 	}
+
 	BasePatNode* parent() {
 	    return parent_;
 	}
+
+	virtual string getLabel() = 0;
 
 	virtual vector<Instruction*>* codeGen() = 0;
 	virtual void purgeRegisters() = 0;
@@ -398,6 +400,8 @@ class BasePatNode: public AstNode {
 	virtual bool isNegatable() const {
 	    return ((!hasSeqOps()) && (!hasNeg()));
 	}
+
+	const static string labelPrefix;
 
     private:
 	PatNodeKind patKind_;
@@ -419,6 +423,7 @@ class PrimitivePatNode: public BasePatNode {
 	const EventEntry* event() const {
 	    return ee_;
 	}
+
 	EventEntry* event() {
 	    return ee_;
 	}
@@ -462,6 +467,8 @@ class PrimitivePatNode: public BasePatNode {
 	bool hasSeqOps() const;
 	bool hasNeg() const;
 	bool hasAnyOrOther() const;
+	    
+	string getLabel(); 
 
 	//-const Type* typeCheck();
 	void print(ostream& os, int indent=0) const;
@@ -511,6 +518,10 @@ class PatNode: public BasePatNode {
 
 	void print(ostream& os, int indent=0) const;
 	const Type* typeCheck() const;
+	
+	string getLabel() {
+	    return pat1_->getLabel();
+	};
     private:
 	PatNode(const PatNode&);
 
@@ -542,8 +553,8 @@ class StmtNode: public AstNode {
 
 	virtual const Type* typeCheck() const = 0;
 
-	virtual vector<Instruction*>* fetchExprRegValue();
-	virtual vector<Instruction*>* codeGen();
+	virtual vector<Instruction*>* fetchExprRegValue() = 0;
+	virtual vector<Instruction*>* codeGen() = 0;
 	
 	void setTReg(string reg) { tReg_ = reg; };
 	string getTReg() { return tReg_; };
