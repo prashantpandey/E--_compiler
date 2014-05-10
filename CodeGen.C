@@ -87,9 +87,9 @@ void Quadruple::resetTempCnt(){
 }
 
 bool Quadruple::isEqual(Quadruple *quad){
-    if(quad->opr_.compare(opr_) == 0) {
-	if(quad->opr1_.compare(opr1_) == 0) {
-	    if(quad->opr2_.compare(opr2_) ==0) {
+    if(quad->instr_ == instr_) {
+	if(quad->opr1_->name().compare(opr1_->name()) == 0) {
+	    if(quad->opr2_->name().compare(opr2_->name()) ==0) {
 		return true;
 	    }
 	}
@@ -102,33 +102,32 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
 
     VariableEntry *ve1, *ve2, *ve3;
     string regName1 = "", regName2 = "", regName3 = "";
-    vector<Instruction*>* inst_set = vector<Instruction*>();
+    vector<Instruction*>* inst_set = new vector<Instruction*>();
     Instruction *instr;
+    Instruction::InstructionSet inst;
     for(vector<Quadruple*>::iterator it = quad->begin(); it != quad->end(); ++it){
-
-	    if ((*it)->getInstr()!= NULL){
-		ve1 = getOpr1();
-		ve2 = getOpr2();
-		ve3 = getRes();
-		if(checkRegOrTemp(ve1, regName1))
-		    delete(ve1);
-		if(checkRegOrTemp(ve2, regName2))
-		    delete(ve2);
-		if(checkRegOrTemp(ve3, regName3))
-		    delete(ve3);
-	    instr = new Instruction((*it)->getInst(), regName1, regName2, regName3);
-	    inst_set.push_back(inst);
-	}
+	    inst = (*it)->getInstr();
+	    ve1 = (*it)->getOpr1();
+	    ve2 = (*it)->getOpr2();
+	    ve3 = (*it)->getRes();
+	    if(checkRegOrTemp(ve1, regName1))
+	        delete(ve1);
+	    if(checkRegOrTemp(ve2, regName2))
+	        delete(ve2);
+	    if(checkRegOrTemp(ve3, regName3))
+	        delete(ve3);
+	    instr = new Instruction(inst, regName1, regName2, regName3);
+	    inst_set->push_back(instr);
 	
+    }
     return inst_set;
-
 }
 
-string checkRegOrTemp(VariableEntry *ve, string &regName){
+bool Quadruple::checkRegOrTemp(VariableEntry *ve, string &regName){
 
 	    if(ve != NULL){
 		    if(ve->isTemp()){ // temperary true
-			regName = regMgr->fetchNextAvailReg(ve->isInt(), ve);
+			regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->type()->tag()), ve, 0);
 			ve->setReg(regName);
 		    }
 		    else{
