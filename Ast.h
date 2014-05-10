@@ -135,6 +135,10 @@ public:
         coercedType_ = type;
     }
 
+    const Type* getResultType() {  
+	return coercedType_?coercedType_:type();
+    }
+
     virtual vector<Quadruple*>* iCodeGen() = 0;
 
     void print(ostream& os, int indent=0) const=0;
