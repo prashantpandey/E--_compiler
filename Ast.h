@@ -275,7 +275,6 @@ public:
     ~ValueNode() {};
     
     vector<Quadruple*>* iCodeGen() {
-	setTReg(value()->toString());
 	return new vector<Quadruple*>();
     }
 
