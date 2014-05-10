@@ -90,11 +90,10 @@ private:
     vector<Instruction*> *instructions_ = NULL;
 };
 
-
 class Quadruple {
     public: 
 
-	Quadruple(string opr, string opr1, string opr2 = "", string res = "") {
+	Quadruple(OpNode::OpCode opr, VariableEntry *opr1, VariableEntry *opr2 = NULL, VariableEntry *res = NULL) {
 	    opr_ = opr; 
 	    opr1_ = opr1;
 	    opr2_ = opr2;
@@ -103,35 +102,35 @@ class Quadruple {
 
 	~ Quadruple() {};
 
-	void setOpr(string opr){
+	void setOpr(OpNode::OpCode opr){
 	    opr_ = opr;
 	};
 
-	void setOpr1(string opr1){
+	void setOpr1(VariableEntry *opr1){
 	    opr1_ = opr1;
 	};
 
-	void setOpr2(string opr2){
+	void setOpr2(VariableEntry *opr2){
 	    opr2_ = opr2;
 	};
 
-	void setRes(string res){
+	void setRes(VariableEntry *res){
 	    res_ = res;
 	};
 
-	string getOpr() {
+	OpNode::OpCode getOpr() {
 	    return opr_;
 	};
 
-	string getOpr1() {
+	VariableEntry* getOpr1() {
 	    return opr1_;
 	};
 
-	string getOpr2() {
+	VariableEntry* getOpr2() {
 	    return opr2_;
 	};
 
-	string getRes() {
+	VariableEntry* getRes() {
 	    return res_;
 	};
 
@@ -141,10 +140,10 @@ class Quadruple {
     bool isEqual(Quadruple *quad);
     
     private:
-	string opr_;
-	string opr1_;
-	string opr2_;
-	string res_;
+	OpNode::OpCode opr_;
+	VariableEntry *opr1_;
+	VariableEntry *opr2_;
+	VariableEntry *res_;
 };
 
 class Instruction {
