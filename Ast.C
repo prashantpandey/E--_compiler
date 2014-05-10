@@ -2,8 +2,6 @@
 #include "ParserUtil.h"
 
 
-const string BasePatNode:: labelPrefix = "eventLabel_";
-
 AstNode::AstNode(NodeType nt, int line, int column, string file):
     ProgramElem(NULL, line, column, file) {
     nodeType_ = nt;
@@ -69,11 +67,9 @@ RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, int lin
 }
 
 vector<Instruction*>* RuleNode::codeGen() {
-    
-   vector<Instruction*> *inst_vec = new vector<Instruction*>();
-   inst_vec->push_back(new Instruction(pat_->getLabel()));
-   mergeVec(inst_vec, pat_->codeGen());
-   mergeVec(inst_vec, reaction_->codeGen());
+   vector<Instruction*> *inst_vec = pat_->codeGen();
+   vector<Instruction*> *temp = reaction_->codeGen();
+   inst_vec->insert(inst_vec->end(), temp->begin(), temp->end());
    pat_->purgeRegisters();
    return inst_vec;
 }
@@ -206,10 +202,6 @@ PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* param
     params_ = params;
     cond_ = c;
 
-}
-
-string PrimitivePatNode::getLabel() {
-    return labelPrefix + ee_->name();
 }
 
 // TODO: Add const to the param var
@@ -405,7 +397,8 @@ vector<Instruction*>* InvocationNode::codeGen() {
 
     const vector<ExprNode*>* args = params();
     for(vector<ExprNode*>::const_iterator it=args->begin(); it != args->end(); ++it) {
-	mergeVec(inst_vec, (*it)->codeGen());
+	vector<Instruction*>* temp = (*it)->codeGen();
+	inst_vec->insert(inst_vec->end(), temp->begin(), temp->end());
     }
 
     string reg = regMgr->fetchNextAvailReg(true);
@@ -522,6 +515,7 @@ vector<Instruction*>* ExprStmtNode::codeGen() {
 
 vector<Instruction*>* PrimitivePatNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
+    //TODO:Change priority
     for (vector<VariableEntry*>::const_iterator it = params_->begin();
 	    it != params_->end(); ++it) {
 	VariableEntry *ve = (*it);
@@ -1105,14 +1099,30 @@ const char* opCodeStr_[] = {
 
 vector<Quadruple*>* OpNode::iCodeGen() {
     vector<Quadruple*>* quad = new vector<Quadruple*>();
-    string* operands = new string[arity_];
+    VariableEntry *operands = new VariableEntry[arity_];
+    
     for(int i = 0; i < (signed int)arity_; i++) {
-	if(arg_[i]->exprNodeType() == ExprNode::ExprNodeType::OP_NODE) {
-	    vector<Quadruple*>* tempQuad = arg_[i]->iCodeGen();
-	    quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
+
+	switch(arg_[i]->exprNodeType()) {
+	
+	case ExprNode::ExprNodeType::OP_NODE:
+	     quad->insertQuadrupleSet(arg_[i]->iCodeGen());
+	     break;
+
+	case ExprNode::ExprNodeType::REF_EXPR_NODE:
+	    operands[i] = ((VariableEntry*)((RefExprNode*)arg_[i])->symTabEntry());
+	    break;
+
+	case ExprNode::ExprNodeType::VALUE_NODE:
+	    operands[i] = new VariableEntry(to_string(arg_[i]->value()));
+	    break;
+
+	case ExprNode::ExprNodeType::INV_NODE:
+	    if(isInt)
+		VariableEntry *ve = new VariableEntry(regMgr->RETI_REG, );
+	    operands[i] = new VariableEntry(regMgr->);
 	}
-    }
-    Quadruple::resetTempCnt();
+
     switch(arity_) {
 	case 1: 
 	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], "", Quadruple::fetchTempVar()));
@@ -1120,12 +1130,8 @@ vector<Quadruple*>* OpNode::iCodeGen() {
 	case 2:
 	    quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], Quadruple::fetchTempVar()));
 	    break;
-	case 3:
-	    // TODO: support 3 arity with splitting the ternery expr into two
-	    // quad->push_back(new Quadruple(opCodeStr_[(int)opCode_], operands[0], operands[1], operands[2]));
-	    break;
     }
-    Quadruple::resetTempCnt();
+    // TODO:: reset temp count
     return quad;
 }
 
@@ -1171,6 +1177,3 @@ OpNode::print(ostream& os, int indent) const {
     }
     else internalErr("Unhandled case in OpNode::print");
 }
-
-
-
