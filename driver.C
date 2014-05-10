@@ -29,10 +29,12 @@ extern int yyparse();
 extern int yylinenum;
 extern const char* yyfilename;
 extern YYSTYPE yylval;
+extern int compilationError = false;
 
 ofstream outs;
 
 void errMsg(const char* s) {
+    compilationError = true;
     cerr << yyfilename << ":" << yylinenum << ":" << s << endl;
 };
 
