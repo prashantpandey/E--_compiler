@@ -164,16 +164,16 @@ vector<Instruction*>* VariableEntry::codeGen() {
 vector<Instruction*>* VariableEntry::fetchExprRegValue() {
     vector<Instruction*>* exprInst = new vector<Instruction*>();
     ExprNode* expr = initVal();
-    swtich(expr->exprNodeType()) {
+    switch(expr->exprNodeType()) {
 	case ExprNode::ExprNodeType::OP_NODE:
 	    insertQuadrupleSet(initVal()->iCodeGen());
 	    // TODO: Call code generation on the quadruple table 
 	    break;
 	case ExprNode::ExprNodeType::REF_EXPR_NODE:
-	    tReg_ = (VariableEntry*((RefExprNode*)expr)->symTabEntry())->getReg();
+	    setTReg(((VariableEntry*)((RefExprNode*)expr)->symTabEntry())->getReg());
 	    break;
 	case ExprNode::ExprNodeType::VALUE_NODE:
-	    tReg_ = ((ValueNode*)expr)->value()->toString();
+	    setTReg(((ValueNode*)expr)->value()->toString());
 	    break;
 	case ExprNode::ExprNodeType::INV_NODE:
 	    insertQuadrupleSet(initVal()->iCodeGen());

@@ -175,7 +175,7 @@ public:
         return initVal_;
     }
     
-    string fetchExprRegValue();
+    vector<Instruction*>* fetchExprRegValue();
 
     ExprNode* initVal() {
         return initVal_;
@@ -206,6 +206,9 @@ public:
 
     void setReg(string regName) { regName_ = regName; };
     string getReg() { return regName_; };
+    
+    void setTReg(string regName) { tReg_ = regName; };
+    string getTReg() { return tReg_; };
 
     void print(ostream& os, int indent=0) const;
 

@@ -531,7 +531,11 @@ class StmtNode: public AstNode {
 
 	virtual const Type* typeCheck() const = 0;
 
-	virtual string fetchExprRegValue() = 0;
+	virtual vector<Instruction*>* fetchExprRegValue();
+	virtual vector<Instruction*>* codeGen();
+	
+	void setTReg(string reg) { tReg_ = reg; };
+	string getTReg() { return tReg_; };
 
 	void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
 	    if (instrVector != NULL) 
@@ -542,6 +546,7 @@ class StmtNode: public AstNode {
     private:
 	StmtNodeKind skind_;
 	vector<Quadruple*>* iCodeTable_;
+	string tReg_;
 };
 
 /****************************************************************/
@@ -571,6 +576,10 @@ class ReturnStmtNode: public StmtNode {
 	}
 
 	const Type* typeCheck() const;
+	
+	vector<Instruction*>* fetchExprRegValue();
+	vector<Instruction*>* codeGen();
+
 
 	void print(ostream& os, int indent) const {
 	    os << "return ";
@@ -603,6 +612,9 @@ class BreakStmtNode: public StmtNode {
 	}
 
 	const Type* typeCheck() const;
+	
+	vector<Instruction*>* fetchExprRegValue() { return NULL; };
+	vector<Instruction*>* codeGen();
 
 	int num() {
 	    return num_;
@@ -640,6 +652,9 @@ class ExprStmtNode: public StmtNode {
 	}
 
 	const Type* typeCheck() const;
+	
+	vector<Instruction*>* fetchExprRegValue();
+	vector<Instruction*>* codeGen();
 
 	void print(ostream& os, int indent) const {
 	    if (expr_ != NULL) {
@@ -668,6 +683,9 @@ class CompoundStmtNode: public StmtNode {
 	}
 
 	const Type* typeCheck() const;
+	
+	vector<Instruction*>* fetchExprRegValue() { return NULL; };
+	vector<Instruction*>* codeGen();
 
 	list<StmtNode*>* stmts() {
 	    return stmts_;
@@ -717,6 +735,10 @@ class IfNode: public StmtNode {
 	StmtNode* thenStmt() {
 	    return then_;
 	};
+	
+	vector<Instruction*>* fetchExprRegValue();
+	
+	vector<Instruction*>* codeGen() {return NULL; };
 
 	void print(ostream& os, int indent) const;
 
@@ -744,6 +766,11 @@ class WhileNode: public StmtNode {
 	};
 
 	const Type* typeCheck() const;
+	
+	vector<Instruction*>* fetchExprRegValue();
+	
+	vector<Instruction*>* codeGen() {return NULL; };
+	
 	ExprNode* cond() {
 	    return cond_;
 	}

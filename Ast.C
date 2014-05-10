@@ -443,16 +443,16 @@ const Type* ReturnStmtNode::typeCheck() const {
 vector<Instruction*>* ReturnStmtNode::fetchExprRegValue() {
     vector<Instruction*>* exprInst = new vector<Instruction*>();
     ExprNode* expr = exprNode();            
-    swtich(expr->exprNodeType()) {
+    switch(expr->exprNodeType()) {
 	case ExprNode::ExprNodeType::OP_NODE:
 	    insertQuadrupleSet(expr->iCodeGen());
 	    // TODO: Call code generation on the quadruple table  
 	    break;
 	case ExprNode::ExprNodeType::REF_EXPR_NODE:
-	    tReg_ = VariableEntry*((RefExprNode*)expr)->symTabEntry()->getReg();
+	    setTReg(((VariableEntry*)(((RefExprNode*)expr)->symTabEntry()))->getReg());
 	    break;
 	case ExprNode::ExprNodeType::VALUE_NODE:
-	    tReg_ = ((ValueNode*)expr)->value()->toString();
+	    setTReg(((ValueNode*)expr)->value()->toString());
 	    break;
 	case ExprNode::ExprNodeType::INV_NODE:
 	    insertQuadrupleSet(expr->iCodeGen());
@@ -469,8 +469,8 @@ vector<Instruction*>* ReturnStmtNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
     inst_vec = fetchExprRegValue();
 
-    inset_vec->insert(new Instruction(Instruction::InstructionSet::MOVI, tReg_, RET_ADDR_REG, "", "" ,"Assign return to pre-defined return reg"));
-    return inset_vec;
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, getTReg(), RET_ADDR_REG, "", "" ,"Assign return to pre-defined return reg"));
+    return inst_vec;
 }
 
 const Type* BreakStmtNode::typeCheck() const {
@@ -504,20 +504,20 @@ const Type* ExprStmtNode::typeCheck() const {
 vector<Instruction*>* ExprStmtNode::fetchExprRegValue() {
     vector<Instruction*>* exprInst = new vector<Instruction*>();
     ExprNode* expr = exprNode();
-    swtich(expr->exprNodeType()) {
+    switch(expr->exprNodeType()) {
 	case ExprNode::ExprNodeType::OP_NODE:
 	    insertQuadrupleSet(expr->iCodeGen());
-TODO: Call code generation on the quadruple table 
+	    // TODO: Call code generation on the quadruple table 
 	  break;
 	case ExprNode::ExprNodeType::REF_EXPR_NODE:
-      tReg_ = VariableEntry*((RefExprNode*)expr)->symTabEntry()->getReg();
-      break;
+	    setTReg(((VariableEntry*)((RefExprNode*)expr)->symTabEntry())->getReg());
+	    break;
 	case ExprNode::ExprNodeType::VALUE_NODE:
-      tReg_ = ((ValueNode*)expr)->value()->toString();
-      break;
+	    setTReg(((ValueNode*)expr)->value()->toString());
+	    break;
 	case ExprNode::ExprNodeType::INV_NODE:
-      insertQuadrupleSet(expr->iCodeGen());
-TODO: Call code generation on the quadruple table 
+	    insertQuadrupleSet(expr->iCodeGen());
+	    // TODO: Call code generation on the quadruple table 
 	  break;
     }
     // TODO: Call code generation on the quadruple table 
@@ -807,7 +807,7 @@ const Type* CompoundStmtNode::typeCheck() const {
 
 vector<Instruction*>* CompoundStmtNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
-    for(vector<Instruction*>::const_iterator it = stmts_->begin(); it != stmts_->end(); ++it) {
+    for(list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); ++it) {
 	inst_vec->insert(inst_vec->end(), (*it)->codeGen()->begin(), (*it)->codeGen()->end());
     }
     return inst_vec;
