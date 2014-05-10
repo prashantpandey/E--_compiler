@@ -150,8 +150,7 @@ public:
     }
 
     void insertInstructionSet(vector<Instruction *> *instrVector) {
-	if (instrVector != NULL)
-	    instructions_->insert(instructions_->end(), instrVector->begin(), instrVector->end());
+	mergeVec(instructions_, instrVector);
     }
 
     Instruction* firstInst() const {

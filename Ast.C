@@ -2,6 +2,8 @@
 #include "ParserUtil.h"
 
 
+const string BasePatNode:: labelPrefix = "eventLabel_";
+
 AstNode::AstNode(NodeType nt, int line, int column, string file):
     ProgramElem(NULL, line, column, file) {
     nodeType_ = nt;
@@ -67,9 +69,11 @@ RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, int lin
 }
 
 vector<Instruction*>* RuleNode::codeGen() {
-   vector<Instruction*> *inst_vec = pat_->codeGen();
-   vector<Instruction*> *temp = reaction_->codeGen();
-   inst_vec->insert(inst_vec->end(), temp->begin(), temp->end());
+    
+   vector<Instruction*> *inst_vec = new vector<Instruction*>();
+   inst_vec->push_back(new Instruction(pat_->getLabel()));
+   mergeVec(inst_vec, pat_->codeGen());
+   mergeVec(inst_vec, reaction_->codeGen());
    pat_->purgeRegisters();
    return inst_vec;
 }
@@ -202,6 +206,10 @@ PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* param
     params_ = params;
     cond_ = c;
 
+}
+
+string PrimitivePatNode::getLabel() {
+    return labelPrefix + ee_->name();
 }
 
 // TODO: Add const to the param var
@@ -397,8 +405,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
 
     const vector<ExprNode*>* args = params();
     for(vector<ExprNode*>::const_iterator it=args->begin(); it != args->end(); ++it) {
-	vector<Instruction*>* temp = (*it)->codeGen();
-	inst_vec->insert(inst_vec->end(), temp->begin(), temp->end());
+	mergeVec(inst_vec, (*it)->codeGen());
     }
 
     string reg = regMgr->fetchNextAvailReg(true);
@@ -515,7 +522,6 @@ vector<Instruction*>* ExprStmtNode::codeGen() {
 
 vector<Instruction*>* PrimitivePatNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
-    //TODO:Change priority
     for (vector<VariableEntry*>::const_iterator it = params_->begin();
 	    it != params_->end(); ++it) {
 	VariableEntry *ve = (*it);
@@ -1165,4 +1171,6 @@ OpNode::print(ostream& os, int indent) const {
     }
     else internalErr("Unhandled case in OpNode::print");
 }
+
+
 
