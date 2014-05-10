@@ -98,19 +98,52 @@ bool Quadruple::isEqual(Quadruple *quad){
     return false;
 }
 
+OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
+    new OpCodeInstMap(OpNode::OpCode::UMINUS, {Instruction::InstructionSet::NEG, Instruction::InstructionSet::FNEG}),
+    new OpCodeInstMap(OpNode::OpCode::PLUS, {Instruction::InstructionSet::ADD, Instruction::InstructionSet::FADD}),
+    new OpCodeInstMap(OpNode::OpCode::MINUS, {Instruction::InstructionSet::SUB, Instruction::InstructionSet::FSUB}),
+    new OpCodeInstMap(OpNode::OpCode::MULT, {Instruction::InstructionSet::MUL, Instruction::InstructionSet::FMUL}),
+    new OpCodeInstMap(OpNode::OpCode::DIV, {Instruction::InstructionSet::DIV, Instruction::InstructionSet::FDIV}),
+    new OpCodeInstMap(OpNode::OpCode::MOD, {Instruction::InstructionSet::MOD}),
+    new OpCodeInstMap(OpNode::OpCode::EQ, {Instruction::InstructionSet::EQ, Instruction::InstructionSet::FEQ}),
+    new OpCodeInstMap(OpNode::OpCode::NE, {Instruction::InstructionSet::NE, Instruction::InstructionSet::FNE}),
+    new OpCodeInstMap(OpNode::OpCode::GT, {Instruction::InstructionSet::GT, Instruction::InstructionSet::FGT}),
+    new OpCodeInstMap(OpNode::OpCode::LT, {}),
+    new OpCodeInstMap(OpNode::OpCode::GE, {Instruction::InstructionSet::GE, Instruction::InstructionSet::FGE}),
+    new OpCodeInstMap(OpNode::OpCode::LE, {}),
+    new OpCodeInstMap(OpNode::OpCode::AND, {Instruction::InstructionSet::AND}),
+    new OpCodeInstMap(OpNode::OpCode::OR, {Instruction::InstructionSet::OR}),
+    new OpCodeInstMap(OpNode::OpCode::NOT, {Instruction::InstructionSet::XOR}),
+    new OpCodeInstMap(OpNode::OpCode::BITNOT, {Instruction::InstructionSet::XOR}),
+    new OpCodeInstMap(OpNode::OpCode::BITAND, {Instruction::InstructionSet::AND}),
+    new OpCodeInstMap(OpNode::OpCode::BITOR, {Instruction::InstructionSet::OR}),
+    new OpCodeInstMap(OpNode::OpCode::BITXOR, {Instruction::InstructionSet::XOR}),
+    new OpCodeInstMap(OpNode::OpCode::SHL, {}),
+    new OpCodeInstMap(OpNode::OpCode::SHR, {}),
+    new OpCodeInstMap(OpNode::OpCode::ASSIGN, {Instruction::InstructionSet::MOVI, Instruction::InstructionSet::MOVF,  Instruction::InstructionSet::MOVS,  Instruction::InstructionSet::MOVL,  Instruction::InstructionSet::MOVIF, Instruction::InstructionSet::MOVFI}),
+    new OpCodeInstMap(OpNode::OpCode::PRINT, {Instruction::InstructionSet::PRTI, Instruction::InstructionSet::PRTF}),
+    new OpCodeInstMap(OpNode::OpCode::INVALID, {})
+};
 
-
-static Instruction::InstructionSet getInstr(OpNode::OpCode opc, Type *t){
-    
-    int isInt;
-    if(Type::isFloat(t->tag()))
-	isInt = 0;
-    else
-	isInt = 1;
-    //TODO:: to get instruction from OpCode
-    return Instruction::InstructionSet::ADD;
+static Instruction::InstructionSet getInstr(OpNode::OpCode opc, Type *t) {
+    int instNum = 0;
+    switch(opc) {
+	case OpNode::OpCode::LT:
+	    break;
+	case OpNode::OpCode::LE:
+	    break;
+	case OpNode::OpCode::SHL:
+	    break;
+	case OpNode::OpCode::SHR:
+	    break;
+	default:
+	    if(Type::isFloat(t->tag()))
+		instNum = 1;
+	    else
+		instNum = 0;
+    }
+    return OpCodeInstMap::fetchInstr(opc, instNum);
 }
-
 
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
    // TODO:: IMplement Expression Optimization 
@@ -141,16 +174,15 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
 }
 
 bool Quadruple::checkRegOrTemp(VariableEntry *ve, string &regName){
-
-	    if(ve != NULL){
-		    if(ve->isTemp()){ // temperary true
-			regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->type()->tag()), ve, 0);
-			ve->setReg(regName);
-		    }
-		    else{
-			regName = ve->getReg();
-		    }
-	    }
+    if(ve != NULL){
+	if(ve->isTemp()){ // temperary true
+	    regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->type()->tag()), ve, 0);
+	    ve->setReg(regName);
+	}
+	else{
+	    regName = ve->getReg();
+	}
+    }
     delete(ve);
     return ve->isTemp();
 }

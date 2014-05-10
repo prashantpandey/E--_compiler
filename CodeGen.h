@@ -28,10 +28,10 @@
 using namespace std;
 
 class Instruction;
+class OpCodeInstMap;
 class CodeModule;
 class VariableEntry;
 class OpNode;
-
 
 class Instruction {
     public:
@@ -43,7 +43,8 @@ class Instruction {
 	    JMP, JMPC, JMPI, JMPCI,
 	    MOVL, MOVS, MOVI, MOVF, MOVIF, MOVFI,
 	    STI, STF, LDI, LDF,
-	    IN, INI, INF, BLANK
+	    IN, INI, INF, BLANK,
+	    DEFAULT
 	};
 
 	enum ParamType {
@@ -107,6 +108,32 @@ class Instruction {
 	string comment_;
 };
 
+class OpCodeInstMap {
+public:
+    static OpCodeInstMap* opCodeInstMap_[30];
+    
+    OpCodeInstMap(OpNode::OpCode oprCode, initializer_list<Instruction::InstructionSet> list) {
+	int i = 0;
+	oprCode_ = oprCode;
+	for(Instruction::InstructionSet inst : list) {
+	    instr_[i++] = inst;
+	}
+    }
+
+    static OpCodeInstMap* getOpCode(OpNode::OpCode oprCode) {
+	// TODO: return  OpCodeInstMap
+	return opCodeInstMap_[(int)oprCode];
+    };
+
+    static Instruction::InstructionSet fetchInstr(OpNode::OpCode oprCode, int instNum) {
+	return	getOpCode(oprCode)->instr_[instNum];
+    };
+
+private:
+    OpNode::OpCode oprCode_;
+    Instruction::InstructionSet instr_[10];
+};
+
 class ProgCode {
 public:
     ProgCode(string progName) {
@@ -164,9 +191,9 @@ private:
     vector<Instruction*> *instructions_ = NULL;
 };
 
+
 class Quadruple {
     public: 
-
 	Quadruple(OpNode::OpCode opc, VariableEntry *opr1, VariableEntry *opr2 = NULL, VariableEntry *res = NULL) {
 	    opc_ = opc; 
 	    opr1_ = opr1;
