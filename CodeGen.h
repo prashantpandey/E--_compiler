@@ -43,7 +43,7 @@ class Instruction {
 	    JMP, JMPC, JMPI, JMPCI,
 	    MOVL, MOVS, MOVI, MOVF, MOVIF, MOVFI,
 	    STI, STF, LDI, LDF,
-	    IN, INI, INF
+	    IN, INI, INF, BLANK
 	};
 
 	enum ParamType {
@@ -60,6 +60,12 @@ class Instruction {
 	    label_ = label;
 	    comment_ = comment;
 	};
+
+	Instruction(string label) {
+	    instr_ = InstructionSet::BLANK;
+	    label_ = label;
+
+	}
 
 	~ Instruction() {};
 
