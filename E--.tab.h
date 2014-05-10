@@ -43,8 +43,8 @@ extern int yydebug;
 /* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-enum yytokentype
-{
+  enum yytokentype
+  {
     TOK_LEX_ERROR = 258,
     TOK_PAT_STAR = 259,
     TOK_PAT_OR = 260,
@@ -110,7 +110,7 @@ enum yytokentype
     TOK_DOUBLE_COLON = 321,
     TOK_LBRACK = 323,
     TOK_DOT = 324
-};
+  };
 #endif
 
 /* Value type.  */
@@ -118,40 +118,40 @@ enum yytokentype
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 35 "E--_parser.y++" /* yacc.c:1909  */
+#line 61 "E--_parser.y++" /* yacc.c:1909  */
 
-    unsigned int 		 uVal;
-    double             dVal;
-    char*              cVal;
-    vector<string>*    strVector;
-    Value*             valVal;
+  unsigned int 		 uVal;
+  double             dVal;
+  char*              cVal;
+  vector<string>*    strVector;
+  Value*             valVal;
 
-    ExprNode*          exprVal;
-    vector<ExprNode*>* exprList;
-    RefExprNode*       refexpVal;
+  ExprNode*          exprVal;
+  vector<ExprNode*>* exprList;
+  RefExprNode*       refexpVal;
 
-    ClassEntry*        classEntry;
-    Type*              typeVal;
-    vector<Type*>*     typeList;
+  ClassEntry*        classEntry;
+  Type*              typeVal;
+  vector<Type*>*     typeList; 
 
-    EventEntry*        eventEntry;
-    VariableEntry*     variableEntry;
-    FunctionEntry*     functionEntry;
+  EventEntry*        eventEntry;                        
+  VariableEntry*     variableEntry;
+  FunctionEntry*     functionEntry;
 
-    BasePatNode*       patVal;
-    PrimitivePatNode*  primPatVal;
-    StmtNode*          stmtVal;
-    list<StmtNode*>*   stmtList;
-    vector<VariableEntry*>* varEntryList;
-    IfNode*            ifVal;
-    WhileNode*	     whileVal;
-    CompoundStmtNode*  compoundStmtVal;
-    RuleNode*          ruleNode;
-
-    vector<RuleNode*>* transList;
-
-    vector<Type*>*     formalTypeVal;
-    const OpNode::OpInfo*    funIval;
+  BasePatNode*       patVal;
+  PrimitivePatNode*  primPatVal;
+  StmtNode*          stmtVal;
+  list<StmtNode*>*   stmtList;
+  vector<VariableEntry*>* varEntryList;
+  IfNode*            ifVal;
+  WhileNode*	     whileVal;
+  CompoundStmtNode*  compoundStmtVal;
+  RuleNode*          ruleNode;
+  
+  vector<RuleNode*>* transList;
+  
+  vector<Type*>*     formalTypeVal;
+  const OpNode::OpInfo*    funIval;
 
 #line 157 "E--_parser.H" /* yacc.c:1909  */
 };

@@ -3,8 +3,8 @@
 
 #include "SymTab.h"
 #include "SymTabEntry.h"
-#include "Ast.h"
 #include "CodeGen.h"
+#include "Ast.h"
 
 class StmtNode;
 class RuleNode;

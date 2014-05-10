@@ -3,7 +3,7 @@
 
 #include "all.h"
 #include "Value.h"
-#include "CodeGen.h"
+#include "STEClasses.h"
 #include "ProgramElem.h"
 #include "SymTabEntry.h"
 

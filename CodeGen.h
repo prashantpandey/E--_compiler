@@ -24,8 +24,8 @@
 #include <string>
 #include <vector>
 #include "RegMgr.h"
-#include "Ast.h"
 #include "STEClasses.h"
+#include "Ast.h"
 
 using namespace std;
 
