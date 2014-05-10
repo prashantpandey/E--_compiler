@@ -1,4 +1,7 @@
 /*
+	int getArgCnt() const {
+	    return argCnt_;
+	}
  * =====================================================================================
  *
  *       Filename:  RegMgr.h
@@ -27,6 +30,7 @@
 #include <stack>
 #include <unordered_map>
 #include "STEClasses.h"
+#include "CodeGen.h"
 
 using namespace std;
 
@@ -44,6 +48,7 @@ using namespace std;
 #define FLOAT_REG_AVAIL 999
 
 class VariableEntry;
+class Instruction;
 class VEntryPriority {
 
 private:
@@ -76,10 +81,12 @@ class RegMgr {
 private:
 
     bool *iReg_, *fReg_;
-    int iCountStart_, fCountStart_;
+    int iCountStart_, fCountStart_, iRegUse_, fRegUse_;
     unordered_map<string,VEntryPriority*> regMap_;
 
     RegMgr();
+
+    static int cnt_;
 
 public:
     static RegMgr& getInstance() {
@@ -87,17 +94,15 @@ public:
         return instance;
     }
 
-    string fetchNextAvailReg(bool isInt, VariableEntry *ve = NULL, int priority = 0);
+    string fetchNextAvailReg(bool isInt, VariableEntry *ve = NULL, int priority = 0, vector<Instruction*> *instructionSet = NULL);
     void purgeReg(string regName);
     string getNextLabel();
-
 
     ~RegMgr() {
         delete iReg_;
         delete fReg_;
     }
     
-    static int cnt_;
 };
 
 extern RegMgr *regMgr;

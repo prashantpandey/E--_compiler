@@ -257,6 +257,11 @@ class FunctionEntry: public SymTabEntry {
 	int getArgCnt() const {
 	    return argCnt_;
 	}
+	
+        string getALabel() const {
+	    return aLabel_;
+	}
+
 	void incrementArgCnt(int offset) {
 	    argCnt_ += offset;
 	}
@@ -266,6 +271,7 @@ class FunctionEntry: public SymTabEntry {
     private:
 	CompoundStmtNode* body_;
 	int argCnt_;
+        string aLabel_;
 };
 
 class EventEntry: public SymTabEntry {
