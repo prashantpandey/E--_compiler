@@ -146,7 +146,7 @@ static Instruction::InstructionSet getInstr(OpNode::OpCode opc, Type *t) {
 }
 
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
-   // TODO:: IMplement Expression Optimization 
+    // TODO:: IMplement Expression Optimization 
 
     VariableEntry *ve1, *ve2, *ve3;
     string regName1 = "", regName2 = "", regName3 = "";
@@ -154,21 +154,20 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad){
     Instruction *instr;
     OpNode::OpCode opc;
     for(vector<Quadruple*>::iterator it = quad->begin(); it != quad->end(); ++it){
-	    opc = (*it)->getOpc();
-	    ve1 = (*it)->getOpr1();
-	    ve2 = (*it)->getOpr2();
-	    ve3 = (*it)->getRes();
-	    if(checkRegOrTemp(ve1, regName1))
-	        delete(ve1);
-	    if(checkRegOrTemp(ve2, regName2))
-	        delete(ve2);
-	    if(checkRegOrTemp(ve3, regName3))
-	        delete(ve3);
+	opc = (*it)->getOpc();
+	ve1 = (*it)->getOpr1();
+	ve2 = (*it)->getOpr2();
+	ve3 = (*it)->getRes();
+	if(checkRegOrTemp(ve1, regName1))
+	    delete(ve1);
+	if(checkRegOrTemp(ve2, regName2))
+	    delete(ve2);
+	if(checkRegOrTemp(ve3, regName3))
+	    delete(ve3);
 
-	    //TODO:: Map the opcode to instruction set
-	    instr = new Instruction(getInstr(opc, ve3->type()), regName1, regName2, regName3);
-	    inst_set->push_back(instr);
-	
+	//TODO:: Map the opcode to instruction set
+	instr = new Instruction(getInstr(opc, ve3->type()), regName1, regName2, regName3);
+	inst_set->push_back(instr);
     }
     return inst_set;
 }
