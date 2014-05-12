@@ -228,23 +228,27 @@ const Type* IfNode::typeCheck() const
 vector<Instruction*>* IfNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
 
-    thenLabel_ = regMgr->getNextLabel();
     elseLabel_ = regMgr->getNextLabel();
+    endLabel_ = regMgr->getNextLabel();
 
     if(cond_ != NULL) {
         inst_vec = fetchExprRegValue(cond_);
     }
 
+    // TODO: implement short circuit of expressions
     Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", getTReg());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), elseLabel_));
 
     vector<Instruction*>* stmtInst = then_->codeGen();
-    stmtInst->at(0)->setLabel(thenLabel_);
+    stmtInst->push_back(new Instruction(new Instruction(Instruction::InstructionSet::JMPC, endLabel_));
     mergeVec(inst_vec, stmtInst);
-
+    
     stmtInst = else_->codeGen();
     stmtInst->at(0)->setLabel(elseLabel_);
+
     mergeVec(inst_vec, stmtInst);
+    
+    inst_vec->push_back(new Instruction(endLabel_));
 
     return inst_vec;
 }

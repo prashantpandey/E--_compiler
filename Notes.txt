@@ -139,9 +139,12 @@
 		    > RETI_REG "R002"
 		    > RETF_REG "F000"
 		    > GLOBAL_REG "R003"
+    
     10th May:- 
     TODO:
     >   Fixing segmentation faults
+    >	Implement shorcircuit for IF/Else expressions
+    >	Implement class/struct for classes
     >	Code generation for lt, le, shl, shr opcodes
     >	optimizations: 
 	    >Quadruple set optimization
