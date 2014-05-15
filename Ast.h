@@ -784,7 +784,7 @@ public:
 private:
     ExprNode *cond_;
     StmtNode *then_, *else_;
-    string thenLabel_;
+    string endLabel_;
     string elseLabel_;
 
     IfNode(const IfNode&);
