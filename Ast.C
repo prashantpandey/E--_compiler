@@ -240,7 +240,7 @@ vector<Instruction*>* IfNode::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), elseLabel_));
 
     vector<Instruction*>* stmtInst = then_->codeGen();
-    stmtInst->push_back(new Instruction(new Instruction(Instruction::InstructionSet::JMPC, endLabel_));
+    stmtInst->push_back(new Instruction(Instruction::InstructionSet::JMPC, endLabel_));
     mergeVec(inst_vec, stmtInst);
     
     stmtInst = else_->codeGen();
