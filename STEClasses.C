@@ -134,7 +134,7 @@ vector<Instruction*>* VariableEntry::codeGen() {
     }
     else {
         inst_vec = fetchExprRegValue();
-        val = getTReg();
+        val = initVal()->getTReg();
     }
 
     Instruction::InstructionSet movInst = Instruction::InstructionSet::MOVI;
@@ -180,10 +180,10 @@ vector<Instruction*>* VariableEntry::fetchExprRegValue() {
         // TODO: Call code generation on the quadruple table
         break;
     case ExprNode::ExprNodeType::REF_EXPR_NODE:
-        setTReg(((VariableEntry*)((RefExprNode*)expr)->symTabEntry())->getReg());
+        ((VariableEntry*)((RefExprNode*)expr)->symTabEntry())->getReg();
         break;
     case ExprNode::ExprNodeType::VALUE_NODE:
-        setTReg(((ValueNode*)expr)->value()->toString());
+        ((ValueNode*)expr)->value()->toString();
         break;
     case ExprNode::ExprNodeType::INV_NODE:
         insertQuadrupleSet(initVal()->iCodeGen());

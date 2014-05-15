@@ -159,7 +159,7 @@ public:
         initVal(init);
         const_ = false;
         inMem_ = false;
-        regName_ = "";
+        regName_ = string("");
         temp_ = false;
         iCodeTable_ = new vector<Quadruple*>();
     };
@@ -232,15 +232,9 @@ public:
     void setReg(string regName) {
         regName_ = regName;
     };
+    
     string getReg() {
         return regName_;
-    };
-
-    void setTReg(string regName) {
-        tReg_ = regName;
-    };
-    string getTReg() {
-        return tReg_;
     };
 
     void print(ostream& os, int indent=0) const;
@@ -252,7 +246,6 @@ private:
     ExprNode* initVal_;
     bool inMem_;
     string regName_;
-    string tReg_;
     bool temp_;
     vector<Quadruple*>* iCodeTable_;
 };

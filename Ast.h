@@ -144,6 +144,13 @@ public:
     void setResultType(const Type* type) {
         resultType_ = type;
     }
+    
+    void setTReg(string reg) {
+        tReg_ = reg;
+    };
+    string getTReg() {
+        return tReg_;
+    };
 
     Type* getResultType() {
         const Type* temp = coercedType_?coercedType_:resultType_;
@@ -160,6 +167,7 @@ private:
     const Value *val_; // reference semantics for val_ and coercedType_
     const Type* coercedType_;
     const Type* resultType_;
+    string tReg_;
 };
 
 /****************************************************************/
@@ -574,23 +582,16 @@ public:
     vector<Instruction*>* fetchExprRegValue(ExprNode* expr);
     virtual vector<Instruction*>* codeGen() = 0;
 
-    void setTReg(string reg) {
-        tReg_ = reg;
-    };
-    string getTReg() {
-        return tReg_;
-    };
 
     void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
         if (instrVector != NULL)
-            iCodeTable_->insert(iCodeTable_->end(), instrVector->begin(), instrVector->end());
+	    mergeVec(iCodeTable_, instrVector);
     }
 
     void print(ostream& os, int indent) const = 0;
 private:
     StmtNodeKind skind_;
     vector<Quadruple*>* iCodeTable_;
-    string tReg_;
 };
 
 /****************************************************************/

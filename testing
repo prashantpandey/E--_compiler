@@ -2,12 +2,17 @@
 
 event open (string a1 , int a2 , unsigned int a3);
 
-int a;
+event a(int x);
+
 int b;
 int c;
+int s;
+int e;
+int i;
 
 void foo(int h){
-    a = h;
+    int a = h;
+    a= 0;
 }
 void abc() {
     int g = 2;
@@ -15,5 +20,10 @@ void abc() {
     h = 100;
     foo(h);
 };
-    
-open(file, flags, mode) -> {;};
+
+//a(e) -> {;};
+
+open(file, flags, mode) -> {
+        i = s ; 
+	};
+

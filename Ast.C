@@ -24,8 +24,10 @@ ExprNode::ExprNode(ExprNodeType et, const Value* val, int line, int column,
                    string file):
     AstNode(AstNode::NodeType::EXPR_NODE, line, column, file)
 {
+    exprType_ = et;
     val_ = val;
     coercedType_ = nullptr;
+    tReg_ = "";
 }
 
 
@@ -161,7 +163,7 @@ vector<Instruction*>* WhileNode::codeGen() {
         inst_vec->at(0)->setLabel(startLabel_);
     }
 
-    Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", getTReg());
+    Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", cond_->getTReg());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), endLabel_));
 
     vector<Instruction*>* stmtInst = comp_->codeGen();
@@ -236,17 +238,18 @@ vector<Instruction*>* IfNode::codeGen() {
     }
 
     // TODO: implement short circuit of expressions
-    Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", getTReg());
+    Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", cond_->getTReg());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), elseLabel_));
 
     vector<Instruction*>* stmtInst = then_->codeGen();
     stmtInst->push_back(new Instruction(Instruction::InstructionSet::JMPC, endLabel_));
     mergeVec(inst_vec, stmtInst);
     
-    stmtInst = else_->codeGen();
-    stmtInst->at(0)->setLabel(elseLabel_);
-
-    mergeVec(inst_vec, stmtInst);
+    if(elseStmt() != NULL) {
+	stmtInst = else_->codeGen();
+	stmtInst->at(0)->setLabel(elseLabel_);
+	mergeVec(inst_vec, stmtInst);
+    }
     
     inst_vec->push_back(new Instruction(endLabel_));
 
@@ -478,16 +481,17 @@ vector<Instruction*>* InvocationNode::codeGen() {
 
 vector<Instruction*>* StmtNode::fetchExprRegValue(ExprNode* expr) {
     vector<Instruction*>* exprInst = new vector<Instruction*>();
+
     switch(expr->exprNodeType()) {
     case ExprNode::ExprNodeType::OP_NODE:
         insertQuadrupleSet(expr->iCodeGen());
         // TODO: Call code generation on the quadruple table
         break;
     case ExprNode::ExprNodeType::REF_EXPR_NODE:
-        setTReg(((VariableEntry*)((RefExprNode*)expr)->symTabEntry())->getReg());
+        // TODO: Call code generation on the quadruple table
         break;
     case ExprNode::ExprNodeType::VALUE_NODE:
-        setTReg(((ValueNode*)expr)->value()->toString());
+        // TODO: Call code generation on the quadruple table
         break;
     case ExprNode::ExprNodeType::INV_NODE:
         insertQuadrupleSet(expr->iCodeGen());
@@ -540,7 +544,7 @@ const Type* ReturnStmtNode::typeCheck() const {
 vector<Instruction*>* ReturnStmtNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
     inst_vec = fetchExprRegValue(expr_);
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, getTReg(), RET_ADDR_REG, "", "" ,"Assign return to pre-defined return reg"));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, expr_->getTReg(), RET_ADDR_REG, "", "" ,"Assign return to pre-defined return reg"));
     return inst_vec;
 }
 
@@ -896,7 +900,7 @@ const Type* CompoundStmtNode::typeCheck() const {
 vector<Instruction*>* CompoundStmtNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
     for(list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); ++it) {
-        inst_vec->insert(inst_vec->end(), (*it)->codeGen()->begin(), (*it)->codeGen()->end());
+        mergeVec(inst_vec, (*it)->codeGen());
     }
     return inst_vec;
 }
@@ -1184,32 +1188,36 @@ vector<Quadruple*>* OpNode::iCodeGen() {
         switch(arg_[i]->exprNodeType()) {
         case ExprNode::ExprNodeType::OP_NODE:
             mergeVec(quad, arg_[i]->iCodeGen());
+	    operands->push_back(new VariableEntry(arg_[i]->getTReg(), VariableEntry::VarKind::TEMP_VAR, getResultType()));
             break;
         case ExprNode::ExprNodeType::REF_EXPR_NODE:
-            operands->insert((operands->begin() + i) ,((VariableEntry*)((RefExprNode*)arg_[i])->symTabEntry()));
+            operands->push_back(((VariableEntry*)((RefExprNode*)arg_[i])->symTabEntry()));
             break;
         case ExprNode::ExprNodeType::VALUE_NODE:
-            operands->insert(operands->begin() + i, new VariableEntry(arg_[i]->value()->toString(), VariableEntry::VarKind::TEMP_VAR, t));
+            operands->push_back(new VariableEntry(arg_[i]->value()->toString(), VariableEntry::VarKind::TEMP_VAR, t));
             break;
         case ExprNode::ExprNodeType::INV_NODE:
             if (Type::isInt(t->tag()) || Type::isString(t->tag()))
                 reg = RETI_REG;
             else if (Type::isFloat(t->tag()))
                 reg = RETF_REG;
-            operands->insert((operands->begin() + i), new VariableEntry(reg, VariableEntry::VarKind::TEMP_VAR, t));
+            operands->push_back(new VariableEntry(reg, VariableEntry::VarKind::TEMP_VAR, t));
             break;
         }
     }
 
+    VariableEntry* tempVarEnt = new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType());
     switch(arity_) {
     case 1:
-        quad->push_back(new Quadruple(opCode_, operands->at(0), NULL, new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType())));
+        quad->push_back(new Quadruple(opCode_, operands->at(0), NULL, tempVarEnt));
         break;
     case 2:
-        quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType())));
+        quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), tempVarEnt));
         break;
     }
     // TODO:: reset temp count*/
+    
+    setTReg(Quadruple::fetchTempVar());
     return quad;
 }
 
