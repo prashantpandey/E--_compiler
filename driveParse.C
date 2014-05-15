@@ -219,7 +219,7 @@ main(int argc, char *argv[], char *envp[]) {
         ge->print(cout, 0);
 	if (errCount() == 0) {
 	    ge->genFinalCode("test");
-	    ofstream fos("test_.l");
+	    ofstream fos(string(yyfilename) + ".l");
 	    ge->serializeAsm(fos);
 	    fos.close();
 	}
