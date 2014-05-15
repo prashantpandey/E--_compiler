@@ -181,7 +181,7 @@ bool Quadruple::checkRegOrTemp(VariableEntry *ve, string &regName) {
         else {
             regName = ve->getReg();
         }
+	// delete(ve);
     }
-    delete(ve);
     return ve->isTemp();
 }

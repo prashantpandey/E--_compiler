@@ -485,8 +485,8 @@ vector<Instruction*>* StmtNode::fetchExprRegValue(ExprNode* expr) {
     switch(expr->exprNodeType()) {
     case ExprNode::ExprNodeType::OP_NODE:
         insertQuadrupleSet(expr->iCodeGen());
+	return Quadruple::iCodeToAsmGen(getICodeTable());
         // TODO: Call code generation on the quadruple table
-        break;
     case ExprNode::ExprNodeType::REF_EXPR_NODE:
         // TODO: Call code generation on the quadruple table
         break;
@@ -495,8 +495,8 @@ vector<Instruction*>* StmtNode::fetchExprRegValue(ExprNode* expr) {
         break;
     case ExprNode::ExprNodeType::INV_NODE:
         insertQuadrupleSet(expr->iCodeGen());
+	return Quadruple::iCodeToAsmGen(getICodeTable());
         // TODO: Call code generation on the quadruple table
-        break;
     }
     // TODO: Call code generation on the quadruple table
     // Also perform the required optimization over the quadruple table and

@@ -582,6 +582,7 @@ public:
     vector<Instruction*>* fetchExprRegValue(ExprNode* expr);
     virtual vector<Instruction*>* codeGen() = 0;
 
+    vector<Quadruple*>* getICodeTable() { return iCodeTable_; };
 
     void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
         if (instrVector != NULL)
