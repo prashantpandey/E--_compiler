@@ -217,10 +217,12 @@ main(int argc, char *argv[], char *envp[]) {
         //cout << "Finished parsing, here is the AST\n";
         ge->checkType();
         ge->print(cout, 0);
-        ge->genFinalCode("test");
-        ofstream fos("test_.l");
-        ge->serializeAsm(fos);
-        fos.close();
+	if (errCount() == 0) {
+	    ge->genFinalCode("test");
+	    ofstream fos("test_.l");
+	    ge->serializeAsm(fos);
+	    fos.close();
+	}
     }
 #endif
 }
