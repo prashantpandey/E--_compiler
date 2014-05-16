@@ -292,6 +292,8 @@ class Quadruple : public ProgramElem {
 	string getLabel() {
 	    return label_;
 	}
+	
+	string toString();
 
 	static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad);
 	static bool checkRegOrTemp(IntrCodeElem *ve, string &regName);
