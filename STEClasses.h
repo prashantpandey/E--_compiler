@@ -266,6 +266,7 @@ public:
         SymTabEntry(name, SymTabEntry::Kind::FUNCTION_KIND, line,column, file, type) {
         body_ = nullptr;
         argCnt_ = 0;
+	iCodeTable_ = new vector<Quadruple*>();
     };
     ~FunctionEntry() {};
 
@@ -301,6 +302,7 @@ private:
     CompoundStmtNode* body_;
     int argCnt_;
     string aLabel_;
+    vector<Quadruple*>* iCodeTable_;
 };
 
 class EventEntry: public SymTabEntry {

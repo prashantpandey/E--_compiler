@@ -134,7 +134,7 @@ vector<Instruction*>* VariableEntry::codeGen() {
     }
     else {
         inst_vec = fetchExprRegValue();
-        val = initVal()->getTVar();
+        val = "0";//TODO:initVal()->getTVar();
     }
 
     Instruction::InstructionSet movInst = Instruction::InstructionSet::MOVI;
@@ -220,8 +220,10 @@ vector<Instruction*>* FunctionEntry::codeGen() {
             }
         }
     }
-
-    mergeVec(inst_vec, body()->codeGen());
+    
+    mergeVec(iCodeTable_, body_->iCodeGen());
+    //TODO:Generate Low level Code
+    //mergeVec(inst_vec, body()->codeGen());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, BP_REG, SP_REG, "", "" ,"Function Exit: Restoring BP"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::LDI, SP_REG, BP_REG, "", "", "Loading BP from stack"));

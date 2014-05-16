@@ -68,6 +68,7 @@ RuleNode::RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction, int lin
     rste_ = re;
     pat_ = pat;
     reaction_ = reaction;
+    iCodeTable_ = new vector<Quadruple*>();
 }
 
 vector<Instruction*>* RuleNode::codeGen() {
@@ -75,7 +76,9 @@ vector<Instruction*>* RuleNode::codeGen() {
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     inst_vec->push_back(new Instruction(pat_->getLabel()));
     mergeVec(inst_vec, pat_->codeGen());
-    mergeVec(inst_vec, reaction_->codeGen());
+    iCodeTable_ = reaction_->iCodeGen();
+    //TODO: Generate machine code and merge
+    //mergeVec(inst_vec, reaction_->codeGen());
     pat_->purgeRegisters();
     return inst_vec;
 }

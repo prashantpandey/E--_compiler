@@ -888,6 +888,7 @@ private:
     StmtNode *reaction_;
 
     RuleNode(const RuleNode&);
+    vector<Quadruple*>* iCodeTable_;
 };
 
 /****************************************************************/
