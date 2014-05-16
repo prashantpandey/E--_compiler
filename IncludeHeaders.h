@@ -31,17 +31,17 @@ class IntrCodeElem {
 	    LABEL_TYPE, REG_TYPE, PARAM_TYPE
 	};
 
-	IntrCodeElem(const ProgramElem *elem, ElemType type) {
+	IntrCodeElem(ProgramElem *elem, ElemType type) {
 	    progElem_ = elem;
 	    type_ = type;
 	};
 
-	const ProgramElem* getElem() const { return progElem_; };
+	ProgramElem* getElem()  { return progElem_; };
 	ElemType getType() { return type_; };
 
     private:
 	ElemType type_;
-	const ProgramElem* progElem_;
+	ProgramElem* progElem_;
 };
 
 #include "Ast.h"

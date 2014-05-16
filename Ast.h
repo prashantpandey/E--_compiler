@@ -179,7 +179,7 @@ private:
 /****************************************************************/
 class RefExprNode: public ExprNode {
 public:
-    RefExprNode(string ext, const SymTabEntry* ste=NULL,
+    RefExprNode(string ext, SymTabEntry* ste=NULL,
                 int line=0, int column=0, string file="");
     RefExprNode(const RefExprNode&);
     ExprNode* clone() const {
@@ -195,10 +195,10 @@ public:
         ext_ = str;
     };
 
-    const SymTabEntry* symTabEntry() const {
+    SymTabEntry* symTabEntry() const {
         return sym_;
     };
-    void symTabEntry(const SymTabEntry *ste)  {
+    void symTabEntry(SymTabEntry *ste)  {
         sym_ = ste;
     };
 
@@ -209,7 +209,7 @@ public:
 private:
     const Type* typeCheck() const;
     string ext_;
-    const SymTabEntry* sym_;
+    SymTabEntry* sym_;
 };
 
 /****************************************************************/

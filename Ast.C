@@ -936,7 +936,7 @@ vector<Instruction*>* CompoundStmtNode::codeGen() {
     return inst_vec;
 }
 
-RefExprNode::RefExprNode(string ext, const SymTabEntry* ste,
+RefExprNode::RefExprNode(string ext, SymTabEntry* ste,
 	int line, int column, string file):
     ExprNode(ExprNode::ExprNodeType::REF_EXPR_NODE, NULL, line, column, file)
 {
