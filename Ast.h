@@ -79,6 +79,8 @@ public:
         return new vector<Instruction*>();
     };
 
+    virtual vector<Quadruple*> *iCodeGen();
+
     virtual void renameRV(string prefix) {}; // new names start with given prefix
     virtual bool operator==(const AstNode&) const {
         return false;
@@ -145,11 +147,12 @@ public:
         resultType_ = type;
     }
     
-    void setTReg(string reg) {
-        tReg_ = reg;
+    void setTVar(IntrCodeElem *var) {
+        tVar_ = var;
     };
-    string getTReg() {
-        return tReg_;
+    
+    IntrCodeElem* getTVar() {
+        return tVar_;
     };
 
     Type* getResultType() {
@@ -167,7 +170,7 @@ private:
     const Value *val_; // reference semantics for val_ and coercedType_
     const Type* coercedType_;
     const Type* resultType_;
-    string tReg_;
+    IntrCodeElem *tVar_;
 };
 
 /****************************************************************/
@@ -197,7 +200,11 @@ public:
     };
 
     vector<Quadruple*>* iCodeGen() {
-        return new vector<Quadruple*>;
+        vector<Quadruple*> *quad = new vector<Quadruple*>();
+	IntrCodeElem *tempVar = new IntrCodeElem(sym_, IntrCodeElem::ElemType::REF_EXPR_TYPE);
+	quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, tempVar));
+	setTVar(tempVar);
+	return quad;
     }
 
     void print(ostream& os, int indent=0) const;
@@ -220,7 +227,9 @@ public:
         EQ, NE, GT, LT, GE, LE,
         AND, OR, NOT,
         BITNOT, BITAND, BITOR, BITXOR, SHL, SHR,
-        ASSIGN, PRINT, INVALID
+        ASSIGN, PRINT, INVALID,
+	JMP, JMPC, CALL, RET
+	DEFAULT
     };
 
     enum class OpPrintType {
@@ -300,7 +309,11 @@ public:
     ~ValueNode() {};
 
     vector<Quadruple*>* iCodeGen() {
-        return new vector<Quadruple*>();
+        vector<Quadruple*> *quad = new vector<Quadruple*>();
+	IntrCodeElem* tempVar = new IntrCodeElem(new VariableEntry(val_->toString(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::REF_EXPR_TYPE);
+	quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, tempVar);
+	setTVar(tempVar);
+	return quad;
     }
 
     void print(ostream& os, int indent=0) const;
@@ -349,15 +362,8 @@ public:
         if (params_ != NULL && i < params_->size()) (*params_)[i] = arg;
     };
 
-    vector<Quadruple*>* iCodeGen() {
-        vector<Quadruple*>* quad = new vector<Quadruple*>();
-        for(vector<ExprNode*>::const_iterator it = params_->begin(); it != params_->end(); ++it) {
-            vector<Quadruple*>* tempQuad = (*it)->iCodeGen();
-            quad->insert(quad->end(), tempQuad->begin(), tempQuad->end());
-        }
-        return quad;
-    }
-
+    vector<Quadruple*>* iCodeGen();
+    
     vector<Instruction*>* codeGen();
 
     void print(ostream& os, int indent=0) const;
@@ -623,7 +629,7 @@ public:
 
     const Type* typeCheck() const;
 
-    vector<Instruction*>* codeGen();
+    vector<Quadruple*>* iCodeGen();
 
     void print(ostream& os, int indent) const {
         os << "return ";
@@ -657,7 +663,7 @@ public:
 
     const Type* typeCheck() const;
 
-    vector<Instruction*>* codeGen();
+    vector<Quadruple*>* iCodeGen();
 
     int num() {
         return num_;
@@ -698,7 +704,9 @@ public:
 
     const Type* typeCheck() const;
 
-    vector<Instruction*>* codeGen();
+    vector<Quadruple*>* iCodeGen() {
+	return expr_->iCodeGen();
+    }
 
     void print(ostream& os, int indent) const {
         if (expr_ != NULL) {
@@ -733,6 +741,15 @@ public:
     list<StmtNode*>* stmts() {
         return stmts_;
     }
+    
+    vector<Quadruple*>* iCodeGen() {
+	vector<Quadruple*>* quad = new vector<Quadruple*>();
+	for(StmtNode* stmt : stmts_) {
+	    mergeVec(quad, stmt->iCodeGen());
+	}
+	return quad;
+    };
+    
     void add(StmtNode *s)
     {
         if(stmts_ != NULL) stmts_->push_back(s);
@@ -779,7 +796,7 @@ public:
         return then_;
     };
 
-    vector<Instruction*>* codeGen();
+    vector<Instruction*>* iCodeGen();
 
     void print(ostream& os, int indent) const;
 

@@ -191,14 +191,61 @@ private:
     vector<Instruction*> *instructions_ = NULL;
 };
 
-
-class Quadruple {
+class IntrCodeElem {
 public:
-    Quadruple(OpNode::OpCode opc, VariableEntry *opr1, VariableEntry *opr2 = NULL, VariableEntry *res = NULL) {
+    enum class ElemType {
+	VAR_TYPE, TEMP_VAR_TYPE, VAL_TYPE, 
+	INV_NODE_TYPE, REF_EXPR_TYPE, QUAD_TYPE,
+	LABEL_TYPE, REG_TYPE
+    };
+
+    IntrCodeElem(const ProgramElem *elem, ElemType type) {
+	progElem_ = elem;
+	type_ = type;
+    };
+
+    const ProgramElem* getElem() const { return progElem_; };
+    ElemType getType() { return type_; };
+
+private:
+    ElemType type_;
+    const ProgramElem* progElem_;
+};
+
+class IntrCodeParams : public IntrCodeElem {
+public:
+	IntrCodeParams(vector<IntrCodeElem*>* params) {
+	    params_ = param;
+	};
+
+	vector<IntrCodeElem*>* getParams() {
+	    return params_;
+	};
+
+private:
+	vector<IntrCodeElem*>* params_;
+};
+
+class IntrLabel : public ProgramElem {
+public:
+    IntrLabel(string label) {
+	label_ = label;
+    };
+
+    string getLabel() { return label_; };
+    
+private:
+    string label_;
+};
+
+class Quadruple : public ProgramElem {
+public:
+    Quadruple(OpNode::OpCode opc, IntrCodeElem *opr1, IntrCodeElem *opr2 = NULL, IntrCodeElem *res = NULL, string label = "") {
         opc_ = opc;
         opr1_ = opr1;
         opr2_ = opr2;
         res_ = res;
+	label_ = label;
     };
 
     ~ Quadruple() {};
@@ -207,36 +254,44 @@ public:
         opc_ = opc;
     };
 
-    void setOpr1(VariableEntry *opr1) {
+    void setOpr1(IntrCodeElem *opr1) {
         opr1_ = opr1;
     };
 
-    void setOpr2(VariableEntry *opr2) {
+    void setOpr2(IntrCodeElem *opr2) {
         opr2_ = opr2;
     };
 
-    void setRes(VariableEntry *res) {
+    void setRes(IntrCodeElem *res) {
         res_ = res;
     };
+
+    void setLabel(string label) {
+	label_ = label;
+    }
 
     OpNode::OpCode getOpc() {
         return opc_;
     };
 
-    VariableEntry* getOpr1() {
+    IntrCodeElem* getOpr1() {
         return opr1_;
     };
 
-    VariableEntry* getOpr2() {
+    IntrCodeElem* getOpr2() {
         return opr2_;
     };
 
-    VariableEntry* getRes() {
+    IntrCodeElem* getRes() {
         return res_;
     };
 
+    string getLabel() {
+	return label_;
+    }
+
     static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad);
-    static bool checkRegOrTemp(VariableEntry *ve, string &regName);
+    static bool checkRegOrTemp(IntrCodeElem *ve, string &regName);
     static int tempCnt_;
     static string fetchTempVar();
     static void resetTempCnt();
@@ -244,9 +299,10 @@ public:
 
 private:
     OpNode::OpCode opc_;
-    VariableEntry *opr1_;
-    VariableEntry *opr2_;
-    VariableEntry *res_;
+    IntrCodeElem *opr1_;
+    IntrCodeElem *opr2_;
+    IntrCodeElem *res_;
+    string label_;
 };
 
 #endif

@@ -209,7 +209,7 @@ public:
 
     void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
         if (instrVector != NULL)
-            iCodeTable_->insert(iCodeTable_->end(), instrVector->begin(), instrVector->end());
+	    mergeVec(iCodeTable_, instrVector);
     }
 
     void setMem (bool inMem) {

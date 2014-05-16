@@ -88,6 +88,7 @@ void Quadruple::resetTempCnt() {
 }
 
 bool Quadruple::isEqual(Quadruple *quad) {
+/*  
     if(quad->opc_ == opc_) {
         if(quad->opr1_->name().compare(opr1_->name()) == 0) {
             if(quad->opr2_->name().compare(opr2_->name()) ==0) {
@@ -95,6 +96,7 @@ bool Quadruple::isEqual(Quadruple *quad) {
             }
         }
     }
+*/
     return false;
 }
 
@@ -125,7 +127,7 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::INVALID, {})
 };
 
-static Instruction::InstructionSet getInstr(OpNode::OpCode opc, Type *t) {
+static Instruction::InstructionSet getInstr(const OpNode::OpCode opc, const Type *t) {
     int instNum = 0;
     switch(opc) {
     case OpNode::OpCode::LT:
@@ -148,7 +150,7 @@ static Instruction::InstructionSet getInstr(OpNode::OpCode opc, Type *t) {
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
     // TODO:: IMplement Expression Optimization
 
-    VariableEntry *ve1, *ve2, *ve3;
+    IntrCodeElem *ve1, *ve2, *ve3;
     string regName1 = "", regName2 = "", regName3 = "";
     vector<Instruction*>* inst_set = new vector<Instruction*>();
     Instruction *instr;
@@ -166,22 +168,22 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
             delete(ve3);
 
         //TODO:: Map the opcode to instruction set
-        instr = new Instruction(getInstr(opc, ve3->type()), regName1, regName2, regName3);
+        instr = new Instruction(getInstr(opc, ve3->getElem()->type()), regName1, regName2, regName3);
         inst_set->push_back(instr);
     }
     return inst_set;
 }
 
-bool Quadruple::checkRegOrTemp(VariableEntry *ve, string &regName) {
+bool Quadruple::checkRegOrTemp(IntrCodeElem *ve, string &regName) {
     if(ve != NULL) {
-        if(ve->isTemp()) { // temperary true
-            regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->type()->tag()), ve, 0);
-            ve->setReg(regName);
+        if(((VariableEntry*)ve->getElem())->isTemp()) { // temperary true
+            regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->getElem()->type()->tag()), ((VariableEntry*)(ve->getElem())), 0);
+            ((VariableEntry*)ve->getElem())->setReg(regName);
         }
         else {
-            regName = ve->getReg();
+            regName = ((VariableEntry*)ve->getElem())->getReg();
         }
 	// delete(ve);
     }
-    return ve->isTemp();
+    return ((VariableEntry*)ve->getElem())->isTemp();
 }
