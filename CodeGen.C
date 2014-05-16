@@ -77,6 +77,40 @@ string Instruction::toString() {
 
 }
 
+string Quadruple::toString() {
+    
+    osstringstream os;
+    string param1, param2, param3;
+    string opc = OpNode::name(getOpc());
+    string label = getLabel();
+    IntrCodeElem *opr1 = getOpr1();
+    IntrCodeElem *opr2 = getOpr2();
+    IntrCodeElem *opr3 = getOpr3();
+
+    if(opr1 != NULL){
+        param1 = (VariableEntry*)(opr1->getElem())->name();
+	
+	if(opr2() != NULL)
+	    param2 = (VariableEntry*)(opr2()->getElem())->name();
+	else {
+	    param2 = "";
+	    break;
+	}
+	
+	if(opr3() != NULL)
+	   param3 = (VariableEntry*)(opr3()->getElem())->name();
+	else {
+	    param3 = "";
+	}
+    }
+
+    if(label != "")
+        os << label << ": ";
+    os << opc << " " << param1 << " " << param2 << " " << param3 ;
+    os << endl;
+}
+
+
 string Quadruple::fetchTempVar() {
     ostringstream os;
     os << "T" << tempCnt_++;
@@ -98,6 +132,21 @@ bool Quadruple::isEqual(Quadruple *quad) {
     }
 */
     return false;
+}
+
+char* opCodeName[] = {
+        "UMINUS", "PLUS", "MINUS", "MULT", "DIV", "MOD",
+        "EQ", "NE", "GT", "LT", "GE", "LE",
+        "AND", "OR", "NOT",
+        "BITNOT", "BITAND", "BITOR", "BITXOR", "SHL", "SHR",
+        "ASSIGN", "PRINT", "INVALID",
+	"JMP", "JMPC", "CALL", "RET",
+	"DEFAULT"
+	};
+
+const string OpNode::name(OpCode t) {
+        return string(opCodeName[(int)t]);
+    else return string();
 }
 
 OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
