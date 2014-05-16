@@ -27,7 +27,7 @@ ExprNode::ExprNode(ExprNodeType et, const Value* val, int line, int column,
     exprType_ = et;
     val_ = val;
     coercedType_ = nullptr;
-    tReg_ = "";
+    tVar_ = NULL;
 }
 
 
@@ -152,26 +152,29 @@ const Type* WhileNode::typeCheck() const {
 // 1. The conditional expression
 // 2. The loop body
 // 3. The jump/break statement
-vector<Instruction*>* WhileNode::codeGen() {
-    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+vector<Quadruple*>* WhileNode::iCodeGen() {
+    vector<Quadruple*>* inst_vec = new vector<Quadruple*>();
 
-    startLabel_ = key_.append("_start");
-    endLabel_ = key_.append("_end");
+    startLabel_ = key_ + "_start";
+    endLabel_ = key_ + "_end";
 
     if(cond_ != NULL) {
-        inst_vec = fetchExprRegValue(cond_);
+        mergeVec(inst_vec, cond_->iCodeGen());
         inst_vec->at(0)->setLabel(startLabel_);
     }
 
-    Instruction* temp = new Instruction(Instruction::InstructionSet::EQ, "0", cond_->getTReg());
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, temp->toString(), endLabel_));
+    IntrCodeElem *cmpVar = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE); 
+    Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, cond_->getTVar());
+    inst_vec->push_back(tempQuad);
+    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), NULL, NULL, endLabel_));
+    
+    mergeVec(inst_vec, comp_->iCodeGen());
 
-    vector<Instruction*>* stmtInst = comp_->codeGen();
-    mergeVec(inst_vec, stmtInst);
+    IntrCodeElem *startLabelTemp =  new IntrCodeElem(new IntrLabel(startLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
+    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMP, startLabelTemp));
 
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, startLabel_));
-
-    inst_vec->push_back(new Instruction(endLabel_));
+    IntrCodeElem *endLabelTemp =  new IntrCodeElem(new IntrLabel(endLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
+    inst_vec->push_back(new Quadruple(OpNode::OpCode::DEFAULT, endLabelTemp));
 
     return inst_vec;
 }
@@ -228,7 +231,7 @@ const Type* IfNode::typeCheck() const
 }
 
 vector<Quadruple*>* IfNode::iCodeGen() {
-    vector<Quadruple*>* inst_vec = new vector<Instruction*>();
+    vector<Quadruple*>* inst_vec = new vector<Quadruple*>();
 
     elseLabel_ = regMgr->getNextLabel();
     endLabel_ = regMgr->getNextLabel();
@@ -245,7 +248,7 @@ vector<Quadruple*>* IfNode::iCodeGen() {
 
     mergeVec(inst_vec, then_->iCodeGen());
     IntrCodeElem *endLabelTemp =  new IntrCodeElem(new IntrLabel(endLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
-    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, endLabelTemp));
+    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMP, endLabelTemp));
     
     if(elseStmt() != NULL) {
 	vector<Quadruple*>* stmtLst = else_->iCodeGen();
@@ -253,7 +256,7 @@ vector<Quadruple*>* IfNode::iCodeGen() {
 	mergeVec(inst_vec, stmtLst);
     }
     
-    inst_vec->push_back(new Quadruple(OpNode::OpCode::DEFAULT, endLabelTemp);
+    inst_vec->push_back(new Quadruple(OpNode::OpCode::DEFAULT, endLabelTemp));
 
     return inst_vec;
 }
@@ -353,19 +356,35 @@ const Type* ValueNode::typeCheck() const {
     return type();
 }
 
+vector<Quadruple*>* ValueNode::iCodeGen() {
+    vector<Quadruple*> *quad = new vector<Quadruple*>();
+    IntrCodeElem* tempVar = new IntrCodeElem(new VariableEntry(value()->toString(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::REF_EXPR_TYPE);
+    quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, tempVar));
+    setTVar(tempVar);
+    return quad;
+}
+
 void RefExprNode::print(ostream& os, int indent) const
 {
     if(!Value::printType)
-        os << ext();
+	os << ext();
     else {
-        if(coercedType())
-            os << "(" << Type::name(coercedType()->tag()) << ")";
-        os << symTabEntry()-> type() ->fullName();
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
+	os << symTabEntry()-> type() ->fullName();
     }
 }
 
+vector<Quadruple*>* RefExprNode::iCodeGen() {
+    vector<Quadruple*> *quad = new vector<Quadruple*>();
+    IntrCodeElem *tempVar = new IntrCodeElem(sym_, IntrCodeElem::ElemType::REF_EXPR_TYPE);
+    quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, tempVar));
+    setTVar(tempVar);
+    return quad;
+}
+
 InvocationNode::InvocationNode(const SymTabEntry *ste, vector<ExprNode*>* param,
-                               int line, int column, string file):
+	int line, int column, string file):
     ExprNode(ExprNode::ExprNodeType::INV_NODE, NULL, line, column, file)
 {
     params_ = param;
@@ -382,23 +401,23 @@ void InvocationNode::print(ostream& os, int indent) const
 {
     const SymTabEntry *ste = symTabEntry();
     if (ste == nullptr) {
-        os << "Function not defined";
+	os << "Function not defined";
     }
     else {
-        FunctionEntry *fe = (FunctionEntry *) ste;
-        if(coercedType())
-            os << "(" << Type::name(coercedType()->tag()) << ")";
-        os << fe -> name() << "(";
-        if (params() != nullptr) {
-            bool prtComma = false;
-            for (std::vector<ExprNode*>::const_iterator it = params()->begin(); it != params()->end(); ++it) {
-                if (prtComma)
-                    os << ", ";
-                (*it)->print(os, indent);
-                prtComma = true;
-            }
-        }
-        os << ")";
+	FunctionEntry *fe = (FunctionEntry *) ste;
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
+	os << fe -> name() << "(";
+	if (params() != nullptr) {
+	    bool prtComma = false;
+	    for (std::vector<ExprNode*>::const_iterator it = params()->begin(); it != params()->end(); ++it) {
+		if (prtComma)
+		    os << ", ";
+		(*it)->print(os, indent);
+		prtComma = true;
+	    }
+	}
+	os << ")";
     }
 
 }
@@ -407,77 +426,77 @@ const Type* InvocationNode::typeCheck() const {
     bool flag = true;
     const SymTabEntry *ste = symTabEntry();
     if(ste != nullptr && ste->kind() == SymTabEntry::Kind::UNKNOWN_KIND) {
-        errMsg("undefined reference to " + ste->name(), this);
-        return &Type::errorType;
+	errMsg("undefined reference to " + ste->name(), this);
+	return &Type::errorType;
     }
     else if (ste != nullptr && ste->kind() != SymTabEntry::Kind::UNKNOWN_KIND && ste->kind() != SymTabEntry::Kind::FUNCTION_KIND) {
-        errMsg(ste->name() + " was not declared in the current scope", this);
-        return &Type::errorType;
+	errMsg(ste->name() + " was not declared in the current scope", this);
+	return &Type::errorType;
     }
     else {
-        const vector<ExprNode*>* callParams = params();
-        int callParamsSize = callParams->size();
-        const SymTab *st = ste->symTab();
-        if (st != NULL) {
-            int i = 1;
-            vector<ExprNode*>::iterator ic = params_->begin();
-            SymTab::const_iterator it = st->begin();
-            for (; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
-                VariableEntry *ve = (VariableEntry*) (*it);
-                if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
-                    if(ve->type()->tag()  == Type::TypeTag::CLASS || (*ic)->doTypeCheck()->tag() == Type::TypeTag::CLASS) {
-                        if(ve->type()->fullName().compare((*ic)->doTypeCheck()->fullName()) != 0) {
-                            errMsg("Type mismatch for argument " + to_string(i) + " to " + ste->name(), this);
-                            flag = false;
-                        }
-                    }
-                    else if (ve->type()->tag() != (*ic)->doTypeCheck()->tag()) {
-                        if(!Type::isSubType((*ic)->doTypeCheck(), ve->type())) {
-                            errMsg("Type mismatch for argument " + to_string(i) + " to " + ste->name(), this);
-                            flag = false;
-                        }
-                        else {
-                            (*ic)->coercedType((ve->type()));
-                        }
-                    }
-                    i++;
-                }
-            }
-            if (((FunctionEntry*)ste)->getArgCnt() != callParamsSize) {
-                errMsg(to_string(((FunctionEntry*)ste)->getArgCnt()) + " arguments expected for " + ste->name(), this);
-                return &Type::errorType;
-            }
-        }
-        else if (callParamsSize > 0) {
-            errMsg(((FunctionEntry*)ste)->getArgCnt() + " arguments expected for " + ste->name(), this);
-            return &Type::errorType;
-        }
-        else {
-            return ((FunctionEntry*)ste)->type();
-        }
+	const vector<ExprNode*>* callParams = params();
+	int callParamsSize = callParams->size();
+	const SymTab *st = ste->symTab();
+	if (st != NULL) {
+	    int i = 1;
+	    vector<ExprNode*>::iterator ic = params_->begin();
+	    SymTab::const_iterator it = st->begin();
+	    for (; it != (st->end())  && ic != (callParams->end()); ++it, ++ic)  {
+		VariableEntry *ve = (VariableEntry*) (*it);
+		if (ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
+		    if(ve->type()->tag()  == Type::TypeTag::CLASS || (*ic)->doTypeCheck()->tag() == Type::TypeTag::CLASS) {
+			if(ve->type()->fullName().compare((*ic)->doTypeCheck()->fullName()) != 0) {
+			    errMsg("Type mismatch for argument " + to_string(i) + " to " + ste->name(), this);
+			    flag = false;
+			}
+		    }
+		    else if (ve->type()->tag() != (*ic)->doTypeCheck()->tag()) {
+			if(!Type::isSubType((*ic)->doTypeCheck(), ve->type())) {
+			    errMsg("Type mismatch for argument " + to_string(i) + " to " + ste->name(), this);
+			    flag = false;
+			}
+			else {
+			    (*ic)->coercedType((ve->type()));
+			}
+		    }
+		    i++;
+		}
+	    }
+	    if (((FunctionEntry*)ste)->getArgCnt() != callParamsSize) {
+		errMsg(to_string(((FunctionEntry*)ste)->getArgCnt()) + " arguments expected for " + ste->name(), this);
+		return &Type::errorType;
+	    }
+	}
+	else if (callParamsSize > 0) {
+	    errMsg(((FunctionEntry*)ste)->getArgCnt() + " arguments expected for " + ste->name(), this);
+	    return &Type::errorType;
+	}
+	else {
+	    return ((FunctionEntry*)ste)->type();
+	}
     }
     if(flag) {
-        return ((FunctionEntry*)ste)->type();
+	return ((FunctionEntry*)ste)->type();
     }
     return &Type::errorType;
 }
 
 vector<Quadruple*>* InvocationNode::iCodeGen() {
     vector<Quadruple*>* quad = new vector<Quadruple*>();
-    vector<IntrCodeElem*>* paramTVar = new vector<IntrCodeElem*>*();
+    vector<IntrCodeElem*>* paramTVar = new vector<IntrCodeElem*>();
 
     for(vector<ExprNode*>::const_iterator it = params_->begin(); it != params_->end(); ++it) {
 	vector<Quadruple*>* tempQuad = (*it)->iCodeGen();
 	mergeVec(quad, tempQuad);
 	paramTVar->push_back((*it)->getTVar());
     }
-    
+
     IntrCodeParams* invcParam = new IntrCodeParams(paramTVar);
     IntrCodeElem* invcVar = new IntrCodeElem(this, IntrCodeElem::ElemType::INV_NODE_TYPE);
     IntrCodeElem* tempVar = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
-    quad->push_back(new Quadruple(OpNode::OpCode::CALL, invcVar, invcParam, tempVar));
+    quad->push_back(new Quadruple(OpNode::OpCode::CALL, invcVar, new IntrCodeElem(invcParam, IntrCodeElem::ElemType::PARAM_TYPE), tempVar));
     setTVar(tempVar);
-    
+
     return quad;
 }
 
@@ -557,7 +576,7 @@ const Type* ReturnStmtNode::typeCheck() const {
 vector<Quadruple*>* ReturnStmtNode::iCodeGen() {
     vector<Quadruple*>* inst_vec = new vector<Quadruple*>();
     mergeVec(inst_vec, expr_->iCodeGen());
-    inst_vec(new Quadruple(OpNode::OpCode::RET, expr_->getTVar()));
+    inst_vec->push_back(new Quadruple(OpNode::OpCode::RET, expr_->getTVar()));
     return inst_vec;
 }
 
@@ -1189,10 +1208,8 @@ const char* opCodeStr_[] = {
 vector<Quadruple*>* OpNode::iCodeGen() {
     vector<Quadruple*>* quad = new vector<Quadruple*>();
     vector<IntrCodeElem*>* operands = new vector<IntrCodeElem*>();
-    Type *t;
     string reg;
     for(int i = 0; i < (signed int)arity_; i++) {
-	t = arg_[i]->getResultType();
 	mergeVec(quad, arg_[i]->iCodeGen());
 	operands->push_back(arg_[i]->getTVar());
 

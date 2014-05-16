@@ -157,152 +157,155 @@ private:
 };
 
 class CodeModule {
-public:
-    CodeModule(string moduleName) {
-        moduleName_ = moduleName;
-        instructions_ = new vector<Instruction*>;
-    }
+    public:
+	CodeModule(string moduleName) {
+	    moduleName_ = moduleName;
+	    instructions_ = new vector<Instruction*>;
+	}
 
-    ~CodeModule() {
-        delete instructions_;
-    };
+	~CodeModule() {
+	    delete instructions_;
+	};
 
-    vector <Instruction*>* getInstructions() {
-        return instructions_;
-    }
+	vector <Instruction*>* getInstructions() {
+	    return instructions_;
+	}
 
-    void insertInstructionSet(Instruction *instr) {
-        if (instr != NULL)
-            instructions_->push_back(instr);
-    }
+	void insertInstructionSet(Instruction *instr) {
+	    if (instr != NULL)
+		instructions_->push_back(instr);
+	}
 
-    void insertInstructionSet(vector<Instruction *> *instrVector) {
-        mergeVec(instructions_, instrVector);
-    }
+	void insertInstructionSet(vector<Instruction *> *instrVector) {
+	    mergeVec(instructions_, instrVector);
+	}
 
-    Instruction* firstInst() const {
-        if (instructions_->size())
-            return instructions_->front();
-        return NULL;
-    }
+	Instruction* firstInst() const {
+	    if (instructions_->size())
+		return instructions_->front();
+	    return NULL;
+	}
 
-private:
-    string moduleName_;
-    vector<Instruction*> *instructions_ = NULL;
+    private:
+	string moduleName_;
+	vector<Instruction*> *instructions_ = NULL;
 };
 
+/*  
 class IntrCodeElem {
-public:
-    enum class ElemType {
-	VAR_TYPE, TEMP_VAR_TYPE, VAL_TYPE, 
-	INV_NODE_TYPE, REF_EXPR_TYPE, QUAD_TYPE,
-	LABEL_TYPE, REG_TYPE
-    };
+    public:
+	enum class ElemType {
+	    VAR_TYPE, TEMP_VAR_TYPE, VAL_TYPE, 
+	    INV_NODE_TYPE, REF_EXPR_TYPE, QUAD_TYPE,
+	    LABEL_TYPE, REG_TYPE, PARAM_TYPE
+	};
 
-    IntrCodeElem(const ProgramElem *elem, ElemType type) {
-	progElem_ = elem;
-	type_ = type;
-    };
+	IntrCodeElem(const ProgramElem *elem, ElemType type) {
+	    progElem_ = elem;
+	    type_ = type;
+	};
 
-    const ProgramElem* getElem() const { return progElem_; };
-    ElemType getType() { return type_; };
+	const ProgramElem* getElem() const { return progElem_; };
+	ElemType getType() { return type_; };
 
-private:
-    ElemType type_;
-    const ProgramElem* progElem_;
+    private:
+	ElemType type_;
+	const ProgramElem* progElem_;
 };
 
-class IntrCodeParams : public IntrCodeElem {
-public:
+*/
+
+class IntrCodeParams : public ProgramElem {
+    public:
 	IntrCodeParams(vector<IntrCodeElem*>* params) {
-	    params_ = param;
+	    params_ = params;
 	};
 
 	vector<IntrCodeElem*>* getParams() {
 	    return params_;
 	};
 
-private:
+    private:
 	vector<IntrCodeElem*>* params_;
 };
 
 class IntrLabel : public ProgramElem {
-public:
-    IntrLabel(string label) {
-	label_ = label;
-    };
+    public:
+	IntrLabel(string label) {
+	    label_ = label;
+	};
 
-    string getLabel() { return label_; };
-    
-private:
-    string label_;
+	string getLabel() { return label_; };
+
+    private:
+	string label_;
 };
 
 class Quadruple : public ProgramElem {
-public:
-    Quadruple(OpNode::OpCode opc, IntrCodeElem *opr1, IntrCodeElem *opr2 = NULL, IntrCodeElem *res = NULL, string label = "") {
-        opc_ = opc;
-        opr1_ = opr1;
-        opr2_ = opr2;
-        res_ = res;
-	label_ = label;
-    };
+    public:
+	Quadruple(OpNode::OpCode opc, IntrCodeElem *opr1, IntrCodeElem *opr2 = NULL, IntrCodeElem *res = NULL, string label = "") {
+	    opc_ = opc;
+	    opr1_ = opr1;
+	    opr2_ = opr2;
+	    res_ = res;
+	    label_ = label;
+	};
 
-    ~ Quadruple() {};
+	~ Quadruple() {};
 
-    void setOpc(OpNode::OpCode opc) {
-        opc_ = opc;
-    };
+	void setOpc(OpNode::OpCode opc) {
+	    opc_ = opc;
+	};
 
-    void setOpr1(IntrCodeElem *opr1) {
-        opr1_ = opr1;
-    };
+	void setOpr1(IntrCodeElem *opr1) {
+	    opr1_ = opr1;
+	};
 
-    void setOpr2(IntrCodeElem *opr2) {
-        opr2_ = opr2;
-    };
+	void setOpr2(IntrCodeElem *opr2) {
+	    opr2_ = opr2;
+	};
 
-    void setRes(IntrCodeElem *res) {
-        res_ = res;
-    };
+	void setRes(IntrCodeElem *res) {
+	    res_ = res;
+	};
 
-    void setLabel(string label) {
-	label_ = label;
-    }
+	void setLabel(string label) {
+	    label_ = label;
+	}
 
-    OpNode::OpCode getOpc() {
-        return opc_;
-    };
+	OpNode::OpCode getOpc() {
+	    return opc_;
+	};
 
-    IntrCodeElem* getOpr1() {
-        return opr1_;
-    };
+	IntrCodeElem* getOpr1() {
+	    return opr1_;
+	};
 
-    IntrCodeElem* getOpr2() {
-        return opr2_;
-    };
+	IntrCodeElem* getOpr2() {
+	    return opr2_;
+	};
 
-    IntrCodeElem* getRes() {
-        return res_;
-    };
+	IntrCodeElem* getRes() {
+	    return res_;
+	};
 
-    string getLabel() {
-	return label_;
-    }
+	string getLabel() {
+	    return label_;
+	}
 
-    static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad);
-    static bool checkRegOrTemp(IntrCodeElem *ve, string &regName);
-    static int tempCnt_;
-    static string fetchTempVar();
-    static void resetTempCnt();
-    bool isEqual(Quadruple *quad);
+	static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad);
+	static bool checkRegOrTemp(IntrCodeElem *ve, string &regName);
+	static int tempCnt_;
+	static string fetchTempVar();
+	static void resetTempCnt();
+	bool isEqual(Quadruple *quad);
 
-private:
-    OpNode::OpCode opc_;
-    IntrCodeElem *opr1_;
-    IntrCodeElem *opr2_;
-    IntrCodeElem *res_;
-    string label_;
+    private:
+	OpNode::OpCode opc_;
+	IntrCodeElem *opr1_;
+	IntrCodeElem *opr2_;
+	IntrCodeElem *res_;
+	string label_;
 };
 
 #endif

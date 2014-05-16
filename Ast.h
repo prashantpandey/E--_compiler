@@ -22,6 +22,7 @@ class VariableEntry;
 
 class Instruction;
 class Quadruple;
+class IntrCodeElem;
 
 /*****************************************************************************
    Here is the class hierarchy:
@@ -79,7 +80,7 @@ public:
         return new vector<Instruction*>();
     };
 
-    virtual vector<Quadruple*> *iCodeGen();
+    virtual vector<Quadruple*> *iCodeGen() = 0;
 
     virtual void renameRV(string prefix) {}; // new names start with given prefix
     virtual bool operator==(const AstNode&) const {
@@ -199,13 +200,7 @@ public:
         sym_ = ste;
     };
 
-    vector<Quadruple*>* iCodeGen() {
-        vector<Quadruple*> *quad = new vector<Quadruple*>();
-	IntrCodeElem *tempVar = new IntrCodeElem(sym_, IntrCodeElem::ElemType::REF_EXPR_TYPE);
-	quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, tempVar));
-	setTVar(tempVar);
-	return quad;
-    }
+    vector<Quadruple*>* iCodeGen();
 
     void print(ostream& os, int indent=0) const;
 
@@ -228,7 +223,7 @@ public:
         AND, OR, NOT,
         BITNOT, BITAND, BITOR, BITXOR, SHL, SHR,
         ASSIGN, PRINT, INVALID,
-	JMP, JMPC, CALL, RET
+	JMP, JMPC, CALL, RET,
 	DEFAULT
     };
 
@@ -308,13 +303,7 @@ public:
     }
     ~ValueNode() {};
 
-    vector<Quadruple*>* iCodeGen() {
-        vector<Quadruple*> *quad = new vector<Quadruple*>();
-	IntrCodeElem* tempVar = new IntrCodeElem(new VariableEntry(val_->toString(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::REF_EXPR_TYPE);
-	quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, tempVar);
-	setTVar(tempVar);
-	return quad;
-    }
+    vector<Quadruple*>* iCodeGen();
 
     void print(ostream& os, int indent=0) const;
 
@@ -744,9 +733,14 @@ public:
     
     vector<Quadruple*>* iCodeGen() {
 	vector<Quadruple*>* quad = new vector<Quadruple*>();
+	for(list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); ++it) {
+	    mergeVec(quad, (*it)->iCodeGen());
+	}
+	/*  
 	for(StmtNode* stmt : stmts_) {
 	    mergeVec(quad, stmt->iCodeGen());
 	}
+	*/
 	return quad;
     };
     
@@ -796,7 +790,7 @@ public:
         return then_;
     };
 
-    vector<Instruction*>* iCodeGen();
+    vector<Quadruple*>* iCodeGen();
 
     void print(ostream& os, int indent) const;
 
@@ -835,7 +829,7 @@ public:
         return comp_;
     };
 
-    vector<Instruction*>* codeGen();
+    vector<Quadruple*>* iCodeGen();
 
     void print(ostream& os, int indent) const;
 
