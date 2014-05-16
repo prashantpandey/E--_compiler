@@ -80,7 +80,9 @@ public:
         return new vector<Instruction*>();
     };
 
-    virtual vector<Quadruple*> *iCodeGen() = 0;
+    virtual vector<Quadruple*> *iCodeGen() {
+	return new vector<Quadruple*>();
+    };
 
     virtual void renameRV(string prefix) {}; // new names start with given prefix
     virtual bool operator==(const AstNode&) const {
@@ -575,7 +577,7 @@ public:
     virtual const Type* typeCheck() const = 0;
 
     vector<Instruction*>* fetchExprRegValue(ExprNode* expr);
-    virtual vector<Instruction*>* codeGen() = 0;
+    virtual vector<Instruction*>* codeGen(){ return new vector<Instruction*>(); };
 
     vector<Quadruple*>* getICodeTable() { return iCodeTable_; };
 

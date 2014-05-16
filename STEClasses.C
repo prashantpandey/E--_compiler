@@ -134,7 +134,7 @@ vector<Instruction*>* VariableEntry::codeGen() {
     }
     else {
         inst_vec = fetchExprRegValue();
-        val = initVal()->getTReg();
+        val = initVal()->getTVar();
     }
 
     Instruction::InstructionSet movInst = Instruction::InstructionSet::MOVI;
