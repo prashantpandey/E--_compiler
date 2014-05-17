@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 
-#include "CodeGen.h"
+#include "IncludeHeaders.h"
 
 //  Add  book keeping for the special puspose registers
 //  Stack pointer: R999
@@ -77,38 +77,89 @@ string Instruction::toString() {
 
 }
 
+const char* opCodeName[] = {
+        "UMINUS", "PLUS", "MINUS", "MULT", "DIV", "MOD",
+        "EQ", "NE", "GT", "LT", "GE", "LE",
+        "AND", "OR", "NOT",
+        "BITNOT", "BITAND", "BITOR", "BITXOR", "SHL", "SHR",
+        "ASSIGN", "PRINT", "INVALID",
+	"JMP", "JMPC", "CALL", "RET",
+	"DEFAULT"
+};
+
 string Quadruple::toString() {
     
-    osstringstream os;
-    string param1, param2, param3;
-    string opc = OpNode::name(getOpc());
-    string label = getLabel();
-    IntrCodeElem *opr1 = getOpr1();
-    IntrCodeElem *opr2 = getOpr2();
-    IntrCodeElem *opr3 = getOpr3();
+    ostringstream os;
+    string param1 = "", param2 = "", param3 = "";
+    string opc = opCodeName[(int)opc_];
+    
+    if(opr1_ != NULL){
+	
+	param1 = IntrCodeElem::toString(opr1_);
+	
+	if(opr2_ != NULL){
+	    param2 = IntrCodeElem::toString(opr2_);
+    	}
 
-    if(opr1 != NULL){
-        param1 = (VariableEntry*)(opr1->getElem())->name();
-	
-	if(opr2() != NULL)
-	    param2 = (VariableEntry*)(opr2()->getElem())->name();
-	else {
-	    param2 = "";
-	    break;
-	}
-	
-	if(opr3() != NULL)
-	   param3 = (VariableEntry*)(opr3()->getElem())->name();
-	else {
-	    param3 = "";
+	if(res_ != NULL){
+	    param3 = IntrCodeElem::toString(res_);
 	}
     }
 
-    if(label != "")
-        os << label << ": ";
+    //TODO:: Change how labels can be fetched
+    
+    if(label_ != "")
+        os << label_ << ": ";
     os << opc << " " << param1 << " " << param2 << " " << param3 ;
     os << endl;
+    return os.str();
 }
+
+
+string IntrCodeElem::toString(IntrCodeElem *ice) {
+
+    ProgramElem *pe = ice->getElem();
+    ElemType et = ice->getType();
+    ostringstream os;
+
+    switch(et) {
+
+    case ElemType::VAR_TYPE:
+        return ((VariableEntry*)pe)->name();
+
+    case ElemType::TEMP_VAR_TYPE: 
+	return ((VariableEntry*)pe)->name();
+
+    case ElemType::VAL_TYPE:
+	return (((ValueNode*)pe)->value())->toString();
+
+    case ElemType::INV_NODE_TYPE:
+	return (((InvocationNode*)pe)->symTabEntry())->name();
+
+    case ElemType::REF_EXPR_TYPE:
+	return ((VariableEntry*)pe)->name();
+    
+    case ElemType::QUAD_TYPE:
+	return ((Quadruple*)pe)->toString();
+
+    case ElemType::LABEL_TYPE:
+	return ((IntrLabel*)pe)->getLabel();
+
+    case ElemType::REG_TYPE:
+	return "";
+
+    case ElemType::PARAM_TYPE:	
+	vector<IntrCodeElem*> *params = ((IntrCodeParams*)pe)->getParams();
+        for(vector<IntrCodeElem*>::iterator it = params->begin(); it != params->end(); ++it) {
+	    os << IntrCodeElem::toString((*it));
+	}
+	return os.str();
+    }
+
+    return string("");
+}
+
+
 
 
 string Quadruple::fetchTempVar() {
@@ -132,21 +183,6 @@ bool Quadruple::isEqual(Quadruple *quad) {
     }
 */
     return false;
-}
-
-char* opCodeName[] = {
-        "UMINUS", "PLUS", "MINUS", "MULT", "DIV", "MOD",
-        "EQ", "NE", "GT", "LT", "GE", "LE",
-        "AND", "OR", "NOT",
-        "BITNOT", "BITAND", "BITOR", "BITXOR", "SHL", "SHR",
-        "ASSIGN", "PRINT", "INVALID",
-	"JMP", "JMPC", "CALL", "RET",
-	"DEFAULT"
-	};
-
-const string OpNode::name(OpCode t) {
-        return string(opCodeName[(int)t]);
-    else return string();
 }
 
 OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {

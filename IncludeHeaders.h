@@ -39,6 +39,8 @@ class IntrCodeElem {
 	ProgramElem* getElem()  { return progElem_; };
 	ElemType getType() { return type_; };
 
+	static string toString(IntrCodeElem *ice);
+
     private:
 	ElemType type_;
 	ProgramElem* progElem_;
