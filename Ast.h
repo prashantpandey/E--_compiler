@@ -81,7 +81,7 @@ public:
     };
 
     virtual vector<Quadruple*> *iCodeGen() {
-	return new vector<Quadruple*>();
+        return new vector<Quadruple*>();
     };
 
     virtual void renameRV(string prefix) {}; // new names start with given prefix
@@ -149,11 +149,11 @@ public:
     void setResultType(const Type* type) {
         resultType_ = type;
     }
-    
+
     void setTVar(IntrCodeElem *var) {
         tVar_ = var;
     };
-    
+
     IntrCodeElem* getTVar() {
         return tVar_;
     };
@@ -225,8 +225,8 @@ public:
         AND, OR, NOT,
         BITNOT, BITAND, BITOR, BITXOR, SHL, SHR,
         ASSIGN, PRINT, INVALID,
-	JMP, JMPC, CALL, RET,
-	DEFAULT
+        JMP, JMPC, CALL, RET,
+        DEFAULT
     };
 
     enum class OpPrintType {
@@ -354,7 +354,7 @@ public:
     };
 
     vector<Quadruple*>* iCodeGen();
-    
+
     vector<Instruction*>* codeGen();
 
     void print(ostream& os, int indent=0) const;
@@ -577,13 +577,17 @@ public:
     virtual const Type* typeCheck() const = 0;
 
     vector<Instruction*>* fetchExprRegValue(ExprNode* expr);
-    virtual vector<Instruction*>* codeGen(){ return new vector<Instruction*>(); };
+    virtual vector<Instruction*>* codeGen() {
+        return new vector<Instruction*>();
+    };
 
-    vector<Quadruple*>* getICodeTable() { return iCodeTable_; };
+    vector<Quadruple*>* getICodeTable() {
+        return iCodeTable_;
+    };
 
     void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
         if (instrVector != NULL)
-	    mergeVec(iCodeTable_, instrVector);
+            mergeVec(iCodeTable_, instrVector);
     }
 
     void print(ostream& os, int indent) const = 0;
@@ -696,7 +700,7 @@ public:
     const Type* typeCheck() const;
 
     vector<Quadruple*>* iCodeGen() {
-	return expr_->iCodeGen();
+        return expr_->iCodeGen();
     }
 
     void print(ostream& os, int indent) const {
@@ -732,20 +736,20 @@ public:
     list<StmtNode*>* stmts() {
         return stmts_;
     }
-    
+
     vector<Quadruple*>* iCodeGen() {
-	vector<Quadruple*>* quad = new vector<Quadruple*>();
-	for(list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); ++it) {
-	    mergeVec(quad, (*it)->iCodeGen());
-	}
-	/*  
-	for(StmtNode* stmt : stmts_) {
-	    mergeVec(quad, stmt->iCodeGen());
-	}
-	*/
-	return quad;
+        vector<Quadruple*>* quad = new vector<Quadruple*>();
+        for(list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); ++it) {
+            mergeVec(quad, (*it)->iCodeGen());
+        }
+        /*
+        for(StmtNode* stmt : stmts_) {
+            mergeVec(quad, stmt->iCodeGen());
+        }
+        */
+        return quad;
     };
-    
+
     void add(StmtNode *s)
     {
         if(stmts_ != NULL) stmts_->push_back(s);

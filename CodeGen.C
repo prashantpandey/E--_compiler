@@ -78,36 +78,36 @@ string Instruction::toString() {
 }
 
 const char* opCodeName[] = {
-        "UMINUS", "PLUS", "MINUS", "MULT", "DIV", "MOD",
-        "EQ", "NE", "GT", "LT", "GE", "LE",
-        "AND", "OR", "NOT",
-        "BITNOT", "BITAND", "BITOR", "BITXOR", "SHL", "SHR",
-        "ASSIGN", "PRINT", "INVALID",
-	"JMP", "JMPC", "CALL", "RET",
-	"DEFAULT"
+    "UMINUS", "PLUS", "MINUS", "MULT", "DIV", "MOD",
+    "EQ", "NE", "GT", "LT", "GE", "LE",
+    "AND", "OR", "NOT",
+    "BITNOT", "BITAND", "BITOR", "BITXOR", "SHL", "SHR",
+    "ASSIGN", "PRINT", "INVALID",
+    "JMP", "JMPC", "CALL", "RET",
+    "DEFAULT"
 };
 
 string Quadruple::toString() {
-    
+
     ostringstream os;
     string param1 = "", param2 = "", param3 = "";
     string opc = opCodeName[(int)opc_];
-    
-    if(opr1_ != NULL){
-	
-	param1 = IntrCodeElem::toString(opr1_);
-	
-	if(opr2_ != NULL){
-	    param2 = IntrCodeElem::toString(opr2_);
-    	}
 
-	if(res_ != NULL){
-	    param3 = IntrCodeElem::toString(res_);
-	}
+    if(opr1_ != NULL) {
+
+        param1 = IntrCodeElem::toString(opr1_);
+
+        if(opr2_ != NULL) {
+            param2 = IntrCodeElem::toString(opr2_);
+        }
+
+        if(res_ != NULL) {
+            param3 = IntrCodeElem::toString(res_);
+        }
     }
 
     //TODO:: Change how labels can be fetched
-    
+
     if(label_ != "")
         os << label_ << ": ";
     os << opc << " " << param1 << " " << param2 << " " << param3 ;
@@ -127,33 +127,30 @@ string IntrCodeElem::toString(IntrCodeElem *ice) {
     case ElemType::VAR_TYPE:
         return ((VariableEntry*)pe)->name();
 
-    case ElemType::TEMP_VAR_TYPE: 
-	return ((VariableEntry*)pe)->name();
+    case ElemType::TEMP_VAR_TYPE:
+        return ((VariableEntry*)pe)->name();
 
     case ElemType::VAL_TYPE:
-	return (((ValueNode*)pe)->value())->toString();
+        return (((ValueNode*)pe)->value())->toString();
 
     case ElemType::INV_NODE_TYPE:
-	return (((InvocationNode*)pe)->symTabEntry())->name();
+        return (((InvocationNode*)pe)->symTabEntry())->name();
 
     case ElemType::REF_EXPR_TYPE:
-	return ((VariableEntry*)pe)->name();
-    
+        return ((VariableEntry*)pe)->name();
+
     case ElemType::QUAD_TYPE:
-	return ((Quadruple*)pe)->toString();
+        return ((Quadruple*)pe)->toString();
 
     case ElemType::LABEL_TYPE:
-	return ((IntrLabel*)pe)->getLabel();
+        return ((IntrLabel*)pe)->getLabel();
 
-    case ElemType::REG_TYPE:
-	return "";
-
-    case ElemType::PARAM_TYPE:	
-	vector<IntrCodeElem*> *params = ((IntrCodeParams*)pe)->getParams();
+    case ElemType::PARAM_TYPE:
+        vector<IntrCodeElem*> *params = ((IntrCodeParams*)pe)->getParams();
         for(vector<IntrCodeElem*>::iterator it = params->begin(); it != params->end(); ++it) {
-	    os << IntrCodeElem::toString((*it));
-	}
-	return os.str();
+            os << IntrCodeElem::toString((*it));
+        }
+        return os.str();
     }
 
     return string("");
@@ -173,15 +170,15 @@ void Quadruple::resetTempCnt() {
 }
 
 bool Quadruple::isEqual(Quadruple *quad) {
-/*  
-    if(quad->opc_ == opc_) {
-        if(quad->opr1_->name().compare(opr1_->name()) == 0) {
-            if(quad->opr2_->name().compare(opr2_->name()) ==0) {
-                return true;
+    /*
+        if(quad->opc_ == opc_) {
+            if(quad->opr1_->name().compare(opr1_->name()) == 0) {
+                if(quad->opr2_->name().compare(opr2_->name()) ==0) {
+                    return true;
+                }
             }
         }
-    }
-*/
+    */
     return false;
 }
 
@@ -195,9 +192,9 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::EQ, {Instruction::InstructionSet::EQ, Instruction::InstructionSet::FEQ}),
     new OpCodeInstMap(OpNode::OpCode::NE, {Instruction::InstructionSet::NE, Instruction::InstructionSet::FNE}),
     new OpCodeInstMap(OpNode::OpCode::GT, {Instruction::InstructionSet::GT, Instruction::InstructionSet::FGT}),
-    new OpCodeInstMap(OpNode::OpCode::LT, {}),
+    new OpCodeInstMap(OpNode::OpCode::LT, {Instruction::InstructionSet::GT, Instruction::InstructionSet::FGT}),
     new OpCodeInstMap(OpNode::OpCode::GE, {Instruction::InstructionSet::GE, Instruction::InstructionSet::FGE}),
-    new OpCodeInstMap(OpNode::OpCode::LE, {}),
+    new OpCodeInstMap(OpNode::OpCode::LE, {Instruction::InstructionSet::GE, Instruction::InstructionSet::FGE}),
     new OpCodeInstMap(OpNode::OpCode::AND, {Instruction::InstructionSet::AND}),
     new OpCodeInstMap(OpNode::OpCode::OR, {Instruction::InstructionSet::OR}),
     new OpCodeInstMap(OpNode::OpCode::NOT, {Instruction::InstructionSet::XOR}),
@@ -207,29 +204,76 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::BITXOR, {Instruction::InstructionSet::XOR}),
     new OpCodeInstMap(OpNode::OpCode::SHL, {}),
     new OpCodeInstMap(OpNode::OpCode::SHR, {}),
-    new OpCodeInstMap(OpNode::OpCode::ASSIGN, {Instruction::InstructionSet::MOVI, Instruction::InstructionSet::MOVF,  Instruction::InstructionSet::MOVS,  Instruction::InstructionSet::MOVL,  Instruction::InstructionSet::MOVIF, Instruction::InstructionSet::MOVFI}),
+    new OpCodeInstMap(OpNode::OpCode::ASSIGN, {Instruction::InstructionSet::MOVI, Instruction::InstructionSet::MOVF,  Instruction::InstructionSet::MOVS}),
     new OpCodeInstMap(OpNode::OpCode::PRINT, {Instruction::InstructionSet::PRTI, Instruction::InstructionSet::PRTF}),
     new OpCodeInstMap(OpNode::OpCode::INVALID, {})
 };
 
-static Instruction::InstructionSet getInstr(const OpNode::OpCode opc, const Type *t) {
+static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) {
+    switch(e->getType()) {
+    case IntrCodeElem::ElemType::VAR_TYPE:
+    case IntrCodeElem::ElemType::TEMP_VAR_TYPE:
+    case IntrCodeElem::ElemType::REF_EXPR_TYPE:
+    {
+        VariableEntry *ve = (VariableEntry*)(e->getElem());
+        return regMgr->getVEReg(ve, inst_vec);
+    }
+    case IntrCodeElem::ElemType::VAL_TYPE:
+    {
+        ValueNode *vn = (ValueNode*)(e->getElem());
+        return vn->value()->toString();
+    }
+    break;
+    case IntrCodeElem::ElemType::INV_NODE_TYPE:
+    case IntrCodeElem::ElemType::PARAM_TYPE:
+        throw -1;
+        //Control Should not reach here, so some error
+    case IntrCodeElem::ElemType::QUAD_TYPE:
+    case IntrCodeElem::ElemType::LABEL_TYPE:
+        //TODO
+        break;
+    }
+    return "";
+}
+static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem *e1, IntrCodeElem *e2, IntrCodeElem *e3) {
     int instNum = 0;
+    vector<Instruction*> *inst_vec = new vector<Instruction*>();
+    Type *inst_type = e3->getElem()->type();
+    instNum = Type::isFloat(inst_type->tag()) ? 1:0;
     switch(opc) {
     case OpNode::OpCode::LT:
-        break;
     case OpNode::OpCode::LE:
+        opc = OpNode::OpCode::GE;
+        swap(e1,e2);
+    case OpNode::OpCode::GT:
+    case OpNode::OpCode::GE:
+        inst_type = e1->getElem()->type();
+        instNum = Type::isFloat(inst_type->tag()) ? 1:0;
+        break;
+    case OpNode::OpCode::ASSIGN:
+        if( Type::isString(inst_type->tag()))
+            instNum = 2;
         break;
     case OpNode::OpCode::SHL:
         break;
     case OpNode::OpCode::SHR:
         break;
     default:
-        if(Type::isFloat(t->tag()))
-            instNum = 1;
-        else
-            instNum = 0;
+        break;
     }
-    return OpCodeInstMap::fetchInstr(opc, instNum);
+    Instruction::InstructionSet instCode = OpCodeInstMap::fetchInstr(opc, instNum);
+    string param1 = instructionParam(e1, inst_vec);
+    string param2 = "", param3 = "";
+    if (e2) {
+        param2 = instructionParam(e2, inst_vec);
+        param3 = instructionParam(e3, inst_vec);
+    }
+    else
+        param2 = instructionParam(e3, inst_vec);
+
+    Instruction *inst = new Instruction(instCode, param1, param2, param3);
+    inst_vec->push_back(inst);
+    return inst_vec;
 }
 
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
@@ -238,7 +282,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
     IntrCodeElem *ve1, *ve2, *ve3;
     string regName1 = "", regName2 = "", regName3 = "";
     vector<Instruction*>* inst_set = new vector<Instruction*>();
-    Instruction *instr;
+    vector<Instruction*> *instructionSet;
     OpNode::OpCode opc;
     for(vector<Quadruple*>::iterator it = quad->begin(); it != quad->end(); ++it) {
         opc = (*it)->getOpc();
@@ -253,8 +297,9 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
             delete(ve3);
 
         //TODO:: Map the opcode to instruction set
-        instr = new Instruction(getInstr(opc, ve3->getElem()->type()), regName1, regName2, regName3);
-        inst_set->push_back(instr);
+        instructionSet = getInstructionSet(opc, ve1, ve2, ve3);
+        mergeVec(inst_set, instructionSet);
+        delete(instructionSet);
     }
     return inst_set;
 }
@@ -268,7 +313,7 @@ bool Quadruple::checkRegOrTemp(IntrCodeElem *ve, string &regName) {
         else {
             regName = ((VariableEntry*)ve->getElem())->getReg();
         }
-	// delete(ve);
+        // delete(ve);
     }
     return ((VariableEntry*)ve->getElem())->isTemp();
 }

@@ -104,6 +104,10 @@ void RegMgr::purgeReg(string regName) {
     }
 }
 
+string RegMgr::getVEReg(VariableEntry *ve, vector<Instruction*> *inst_vec) {
+    //Implement
+    return "";
+}
 
 string RegMgr::getNextLabel() {
     ostringstream os;

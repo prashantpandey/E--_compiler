@@ -215,18 +215,18 @@ vector<Instruction*>* FunctionEntry::codeGen() {
             if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
                 VariableEntry *ve = (VariableEntry *) ste;
                 if (ve->varKind() == VariableEntry::VarKind::LOCAL_VAR) {
-		    IntrCodeElem *elem = NULL;
-		    if(ve->initVal() == NULL || ve->initVal()->value() == NULL) {
-			elem = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
-		    }
-		    else {
-			mergeVec(iCodeTable_, ve->initVal()->iCodeGen());
-			elem = ve->initVal()->getTVar();
-		    }
-		    iCodeTable_->push_back(new Quadruple(OpNode::OpCode::ASSIGN, new IntrCodeElem(ve, IntrCodeElem::ElemType::VAR_TYPE), elem));
-		}
-	    }
-	}
+                    IntrCodeElem *elem = NULL;
+                    if(ve->initVal() == NULL || ve->initVal()->value() == NULL) {
+                        elem = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
+                    }
+                    else {
+                        mergeVec(iCodeTable_, ve->initVal()->iCodeGen());
+                        elem = ve->initVal()->getTVar();
+                    }
+                    iCodeTable_->push_back(new Quadruple(OpNode::OpCode::ASSIGN, new IntrCodeElem(ve, IntrCodeElem::ElemType::VAR_TYPE), elem));
+                }
+            }
+        }
     }
 
     mergeVec(iCodeTable_, body_->iCodeGen());
@@ -245,7 +245,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 void FunctionEntry::checkType() const
 {
     if (body())
-	body()->typeCheck();
+        body()->typeCheck();
 }
 
 void ClassEntry::print(ostream& out, int indent) const
@@ -280,32 +280,32 @@ void FunctionEntry::print(ostream& out, int indent) const
     const SymTab *st = NULL;
     int i = 0;
     if ((st = symTab()) != nullptr) {
-	SymTab::const_iterator it = st->begin();
-	for (i=0; it != (st->end()); i++, ++it)  {
-	    SymTabEntry *ste = (SymTabEntry *)(*it);
-	    if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
-		VariableEntry *ve = (VariableEntry *) ste;
-		if (ve->varKind() != VariableEntry::VarKind::PARAM_VAR) {
-		    break;
-		}
-	    } else {
-		break;
-	    }
-	}
-	if (i != 0) {
-	    printST(out, indent, '\0', '\0', false, 0, i);
-	}
+        SymTab::const_iterator it = st->begin();
+        for (i=0; it != (st->end()); i++, ++it)  {
+            SymTabEntry *ste = (SymTabEntry *)(*it);
+            if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
+                VariableEntry *ve = (VariableEntry *) ste;
+                if (ve->varKind() != VariableEntry::VarKind::PARAM_VAR) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        if (i != 0) {
+            printST(out, indent, '\0', '\0', false, 0, i);
+        }
 
     }
     out << ")";
     if (body() != NULL || (st != nullptr && st->size() > i)) {
-	cout << " {";
-	if (st != nullptr && st->size() > i)
-	    printST(out, indent, '\0', ';', true, i, st->size());
-	else
-	    prtln(out, indent);
-	if (body() != NULL)
-	    body()->printWithoutBraces(out, indent);
-	cout << "}";
+        cout << " {";
+        if (st != nullptr && st->size() > i)
+            printST(out, indent, '\0', ';', true, i, st->size());
+        else
+            prtln(out, indent);
+        if (body() != NULL)
+            body()->printWithoutBraces(out, indent);
+        cout << "}";
     }
 }

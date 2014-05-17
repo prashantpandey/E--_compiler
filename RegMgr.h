@@ -97,6 +97,7 @@ public:
     string fetchNextAvailReg(bool isInt, VariableEntry *ve = NULL, int priority = 0, vector<Instruction*> *instructionSet = NULL);
     void purgeReg(string regName);
     string getNextLabel();
+    string getVEReg(VariableEntry *ve, vector<Instruction*> *inst_vec);
 
     ~RegMgr() {
         delete iReg_;

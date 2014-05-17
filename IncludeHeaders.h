@@ -24,26 +24,30 @@
 #include "SymTabEntry.h"
 
 class IntrCodeElem {
-    public:
-	enum class ElemType {
-	    VAR_TYPE, TEMP_VAR_TYPE, VAL_TYPE,
-	    INV_NODE_TYPE, REF_EXPR_TYPE, QUAD_TYPE,
-	    LABEL_TYPE, REG_TYPE, PARAM_TYPE
-	};
+public:
+    enum class ElemType {
+        VAR_TYPE, TEMP_VAR_TYPE, VAL_TYPE,
+        INV_NODE_TYPE, REF_EXPR_TYPE, QUAD_TYPE,
+        LABEL_TYPE, PARAM_TYPE
+    };
 
-	IntrCodeElem(ProgramElem *elem, ElemType type) {
-	    progElem_ = elem;
-	    type_ = type;
-	};
+    IntrCodeElem(ProgramElem *elem, ElemType type) {
+        progElem_ = elem;
+        type_ = type;
+    };
 
-	ProgramElem* getElem()  { return progElem_; };
-	ElemType getType() { return type_; };
+    ProgramElem* getElem()  {
+        return progElem_;
+    };
+    ElemType getType() {
+        return type_;
+    };
 
-	static string toString(IntrCodeElem *ice);
+    static string toString(IntrCodeElem *ice);
 
-    private:
-	ElemType type_;
-	ProgramElem* progElem_;
+private:
+    ElemType type_;
+    ProgramElem* progElem_;
 };
 
 #include "Ast.h"

@@ -209,7 +209,7 @@ public:
 
     void insertQuadrupleSet(vector<Quadruple *> *instrVector) {
         if (instrVector != NULL)
-	    mergeVec(iCodeTable_, instrVector);
+            mergeVec(iCodeTable_, instrVector);
     }
 
     void setMem (bool inMem) {
@@ -232,7 +232,7 @@ public:
     void setReg(string regName) {
         regName_ = regName;
     };
-    
+
     string getReg() {
         return regName_;
     };
@@ -266,7 +266,7 @@ public:
         SymTabEntry(name, SymTabEntry::Kind::FUNCTION_KIND, line,column, file, type) {
         body_ = nullptr;
         argCnt_ = 0;
-	iCodeTable_ = new vector<Quadruple*>();
+        iCodeTable_ = new vector<Quadruple*>();
     };
     ~FunctionEntry() {};
 
