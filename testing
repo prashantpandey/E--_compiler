@@ -2,29 +2,31 @@
 
 event open (string a1 , int a2 , unsigned int a3);
 
-event a(int x);
+int i = 2 ;
+int j = 3 ;
+int k = 4.0 ;
+double f = 3.3;
 
-int b;
-int c;
-int s;
-int e;
-int i;
+byte b ;
+string s ;
 
-void foo(int h){
-    int a = h;
-    a= 0;
-}
-void abc() {
-    int g = 2;
-    int h;
-    h = 100;
-    foo(h);
+int g(int x, double y, CString u) {
+         int a,b,c;
+         return 1;
 };
 
-//a(e) -> {;};
+int f(){
+ 	int a,b;
+        return ((a+b));
 
-open(file, flags, mode) -> {
-        i = s ; 
-	flags = flags + mode;
-	};
+ };
+
+open(file, flags, mode) -> { 
+
+    i = (23 * (-i)/j) - f - (45 % j) ;
+
+    i = s * 1 % f;
+    i = b + s - f ;
+} ;
+
 
