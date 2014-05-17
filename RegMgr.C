@@ -105,8 +105,29 @@ void RegMgr::purgeReg(string regName) {
 }
 
 string RegMgr::getVEReg(VariableEntry *ve, vector<Instruction*> *inst_vec) {
-    //Implement
-    return "";
+
+    if (!ve->isMem())
+        return ve->getReg();
+    bool isFloat = Type::isFloat(ve->type()->tag());
+    switch(ve->varKind()) {
+    case  VariableEntry::VarKind::GLOBAL_VAR:
+        ve->setReg(fetchNextAvailReg(!isFloat, ve, 0, inst_vec));
+        inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, GLOBAL_REG, to_string(ve->offSet()) ,TEMP_REG));
+        inst_vec->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, TEMP_REG));
+        break;
+    case  VariableEntry::VarKind::LOCAL_VAR:
+        ve->setReg(fetchNextAvailReg(!isFloat, ve, 0, inst_vec));
+        inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, BP_REG, to_string(ve->offSet()) ,TEMP_REG));
+        inst_vec->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, TEMP_REG));
+        break;
+    case  VariableEntry::VarKind::TEMP_VAR:
+        ve->setReg(fetchNextAvailReg(!isFloat, ve, 0, inst_vec));
+    case  VariableEntry::VarKind::PARAM_VAR:
+        //TODO
+    default:
+	break;
+    }
+    return ve->getReg();
 }
 
 string RegMgr::getNextLabel() {
