@@ -298,7 +298,7 @@ public:
 
     void print(ostream& os, int indent) const;
 
-    void printICode(vector<Quadruple*> *iquad);
+    void printICode();
 
 private:
     CompoundStmtNode* body_;

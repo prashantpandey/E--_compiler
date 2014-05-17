@@ -153,9 +153,6 @@ string IntrCodeElem::toString(IntrCodeElem *ice) {
     return string("");
 }
 
-
-
-
 string Quadruple::fetchTempVar() {
     ostringstream os;
     os << "T" << tempCnt_++;
