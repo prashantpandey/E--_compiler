@@ -1227,48 +1227,44 @@ vector<Quadruple*>* OpNode::iCodeGen() {
 	mergeVec(quad, arg_[i]->iCodeGen());
 	operands->push_back(arg_[i]->getTVar());
 
-	    /*
-	   switch(arg_[i]->exprNodeType()) {
-	   case ExprNode::ExprNodeType::OP_NODE:
-	   operands->push_back(new IntrCodeElem(new VariableEntry(arg_[i]->getTReg(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE));
-	   break;
-	   case ExprNode::ExprNodeType::REF_EXPR_NODE:
-	   operands->push_back(new IntrCodeElem(((RefExprNode*)arg_[i])->symTabEntry(), IntrCodeElem::ElemType::VAR_TYPE));
-	   break;
-	   case ExprNode::ExprNodeType::VALUE_NODE:
-	   operands->push_back(new IntrCodeElem(new VariableEntry(arg_[i]->value()->toString(), VariableEntry::VarKind::TEMP_VAR, t), IntrCodeElem::ElemType::VAL_TYPE));
-	   break;
-	   case ExprNode::ExprNodeType::INV_NODE:
-	   if (Type::isInt(t->tag()) || Type::isString(t->tag()))
-	   reg = RETI_REG;
-	   else if (Type::isFloat(t->tag()))
-	   reg = RETF_REG;
-	   operands->push_back(new IntrCodeElem(new VariableEntry(reg, VariableEntry::VarKind::TEMP_VAR, t), IntrCodeElem::ElemType::INV_NODE_TYPE));
-	   break;
-	   }
-	   */
-    }
-
-    IntrCodeElem* tempVarEnt = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
-    switch(arity_) {
-	case 1:
-	    quad->push_back(new Quadruple(opCode_, operands->at(0), NULL, tempVarEnt));
+	/*  
+	    switch(arg_[i]->exprNodeType()) {
+	    case ExprNode::ExprNodeType::OP_NODE:
+	    operands->push_back(new IntrCodeElem(new VariableEntry(arg_[i]->getTReg(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE));
 	    break;
-	case 2:
-	    if(opCode_ != OpNode::OpCode::ASSIGN)
-		quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), tempVarEnt));
-	    else 
-		quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1)));
+	    case ExprNode::ExprNodeType::REF_EXPR_NODE:
+	    operands->push_back(new IntrCodeElem(((RefExprNode*)arg_[i])->symTabEntry(), IntrCodeElem::ElemType::VAR_TYPE));
 	    break;
+	    case ExprNode::ExprNodeType::VALUE_NODE:
+	    operands->push_back(new IntrCodeElem(new VariableEntry(arg_[i]->value()->toString(), VariableEntry::VarKind::TEMP_VAR, t), IntrCodeElem::ElemType::VAL_TYPE));
+	    break;
+	    case ExprNode::ExprNodeType::INV_NODE:
+	    if (Type::isInt(t->tag()) || Type::isString(t->tag()))
+	    reg = RETI_REG;
+	    else if (Type::isFloat(t->tag()))
+	    reg = RETF_REG;
+	    operands->push_back(new IntrCodeElem(new VariableEntry(reg, VariableEntry::VarKind::TEMP_VAR, t), IntrCodeElem::ElemType::INV_NODE_TYPE));
+	    break;
+	    }
+	    }
+	    */
     }
-    // TODO:: reset temp count*/
+	IntrCodeElem* tempVarEnt = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
+	switch(arity_) {
+	    case 1:
+		quad->push_back(new Quadruple(opCode_, operands->at(0), NULL, tempVarEnt));
+		break;
+	    case 2:
+		if(opCode_ == OpNode::OpCode::ASSIGN) 
+		    quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), NULL));
+		else
+		    quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), tempVarEnt));
+		break;
+	}
 
-    setTVar(tempVarEnt);
-    return quad;
+	setTVar(tempVarEnt);
+	return quad;
 }
-
-
-
 
 void
 OpNode::print(ostream& os, int indent) const {

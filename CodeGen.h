@@ -306,7 +306,6 @@ public:
     string toString();
 
     static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad);
-    static bool checkRegOrTemp(IntrCodeElem *ve, string &regName);
     static int tempCnt_;
     static string fetchTempVar();
     static void resetTempCnt();

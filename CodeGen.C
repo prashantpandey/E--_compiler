@@ -331,4 +331,35 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
         delete(instructionSet);
     }
     return inst_set;
+    /*  
+        checkRegOrTemp(ve1, regName1);
+	checkRegOrTemp(ve2, regName2);
+	checkRegOrTemp(ve3, regName3);
+	//printf("%s %t %s %t %s", (ve1->name()).c_str(), (ve2->name()).c_str(), (ve3->name()).c_str());
+	//printf("REg1 %s reg2 %s reg3 %s ", regName1.c_str(), regName2.c_str(), regName3.c_str()); 
+        //TODO:: Map the opcode to instruction set
+        instr = new Instruction(getInstr(opc, ve3->type()), regName1, regName2, regName3, "", "from icodeTOasm");
+        inst_set->push_back(instr);
+    }
+    return inst_set;
+    */
 }
+
+/*  
+bool Quadruple::checkRegOrTemp(IntrCodeElem *ve, string &regName) {
+    if(ve != NULL) {
+        if(ve->isTemp()) { // temperary true
+            regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->type()->tag()), ve, 0);
+            ve->setReg(regName);
+        }
+        else {
+            regName = ve->getReg();
+        }
+
+	//printf("\n %s", regName.c_str());
+	// delete(ve);
+    }
+    return false;
+//    return ve->isTemp();
+}
+*/
