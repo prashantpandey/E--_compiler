@@ -211,6 +211,7 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::JMPC, {}),
     new OpCodeInstMap(OpNode::OpCode::CALL, {}),
     new OpCodeInstMap(OpNode::OpCode::RET, {}),
+    new OpCodeInstMap(OpNode::OpCode::MOVIF, {Instruction::InstructionSet::MOVIF}),
     new OpCodeInstMap(OpNode::OpCode::DEFAULT, {})
 };
 
@@ -257,7 +258,7 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
         instNum = Type::isFloat(inst_type->tag()) ? 1:0;
         break;
     case OpNode::OpCode::ASSIGN:
-        if( Type::isString(inst_type->tag()))
+        if(Type::isString(inst_type->tag()))
             instNum = 2;
         break;
     case OpNode::OpCode::SHL:
@@ -298,8 +299,13 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
         if (opc == OpNode::OpCode::JMP) {
             inst_set->push_back(new Instruction(Instruction::InstructionSet::JMP, ((IntrLabel*)ve1)->getLabel()));
             continue;
-        }
-
+        } else if (opc == OpNode::OpCode::RET) {
+	    string reg = instructionParam(ve1, inst_set);
+	    VariableEntry *ve = (VariableEntry*)(ve1->getElem());
+	    bool isFloat = Type::isFloat(ve->type()->tag());
+            inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF:Instruction::InstructionSet::MOVI, reg, isFloat ? RETF_REG : RETI_REG));
+	    continue;
+	}
         instructionSet = getInstructionSet(opc, ve1, ve2, ve3, label);
         mergeVec(inst_set, instructionSet);
         delete(instructionSet);
