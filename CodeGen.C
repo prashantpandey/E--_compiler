@@ -105,8 +105,6 @@ string Quadruple::toString() {
         }
     }
 
-    //TODO:: Change how labels can be fetched
-
     if(label_ != "")
         os << label_ << ": ";
     os << opc << " " << param1 << " " << param2 << " " << param3 ;

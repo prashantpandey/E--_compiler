@@ -196,6 +196,18 @@ vector<Instruction*>* VariableEntry::fetchExprRegValue() {
     return exprInst;
 }
 
+
+void FunctionEntry::printICode(vector<Quadruple*> *iquad){
+    
+	ostringstream os;
+        for(vector<Quadruple*>::iterator it = iquad->begin(); it != iquad->end(); ++it) {
+            os << (*it)->toString();
+        }
+        cout << os.str();
+
+}
+
+
 vector<Instruction*>* FunctionEntry::codeGen() {
 
     if(body() == NULL) {
@@ -207,7 +219,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "", aLabel_, "Function Start: Saving BP"));
     inst_vec->push_back(Instruction::decrSP());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, SP_REG, BP_REG));
-
+    vector<Quadruple*> *iquad;
     const SymTab *st = NULL;
     if ((st = symTab()) != nullptr) {
         for (SymTab::const_iterator it = st->begin(); it != (st->end()); ++it)  {
@@ -220,7 +232,8 @@ vector<Instruction*>* FunctionEntry::codeGen() {
                         elem = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
                     }
                     else {
-                        mergeVec(iCodeTable_, ve->initVal()->iCodeGen());
+			iquad = ve->initVal()->iCodeGen();
+                        mergeVec(iCodeTable_, iquad);
                         elem = ve->initVal()->getTVar();
                     }
                     iCodeTable_->push_back(new Quadruple(OpNode::OpCode::ASSIGN, new IntrCodeElem(ve, IntrCodeElem::ElemType::VAR_TYPE), elem));
@@ -228,8 +241,12 @@ vector<Instruction*>* FunctionEntry::codeGen() {
             }
         }
     }
+    
+    iquad = NULL;
+    iquad = body_->iCodeGen();
 
-    mergeVec(iCodeTable_, body_->iCodeGen());
+    mergeVec(iCodeTable_, iquad);
+    printICode(iCodeTable_);
     //TODO:Generate Low level Code
     //mergeVec(inst_vec, body()->codeGen());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, BP_REG, SP_REG, "", "" ,"Function Exit: Restoring BP"));
