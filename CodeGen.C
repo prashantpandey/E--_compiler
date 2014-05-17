@@ -17,7 +17,6 @@
  */
 
 #include "IncludeHeaders.h"
-
 //  Add  book keeping for the special puspose registers
 //  Stack pointer: R999
 //  Base Point: R998
@@ -261,6 +260,10 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
         if(Type::isString(inst_type->tag()))
             instNum = 2;
         break;
+    case OpNode::OpCode::CALL:
+        break;//TODO
+    case OpNode::OpCode::JMPC:
+        break;//TODO
     case OpNode::OpCode::SHL:
         break;
     case OpNode::OpCode::SHR:
@@ -283,18 +286,40 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
     return inst_vec;
 }
 
+static void insertIntoSet(IntrCodeElem* e,  set<IntrCodeElem*> *entrySet) {
+    if (e == NULL)
+	return;
+    switch(e->getType()) {
+    case IntrCodeElem::ElemType::VAR_TYPE:
+    case IntrCodeElem::ElemType::TEMP_VAR_TYPE:
+    case IntrCodeElem::ElemType::REF_EXPR_TYPE:
+	entrySet->insert(e);
+	break;
+    default:
+	break;
+    }
+
+}
+//TODO: For CALL parse entryset and flush all the variables onto stack
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
 
     IntrCodeElem *ve1, *ve2, *ve3;
     string label = "";
+    set<IntrCodeElem*> *entrySet = new set<IntrCodeElem*>();
     vector<Instruction*>* inst_set = new vector<Instruction*>();
     vector<Instruction*> *instructionSet;
     OpNode::OpCode opc;
     for(vector<Quadruple*>::iterator it = quad->begin(); it != quad->end(); ++it) {
-        opc = (*it)->getOpc();
+        
+	opc = (*it)->getOpc();
         ve1 = (*it)->getOpr1();
         ve2 = (*it)->getOpr2();
         ve3 = (*it)->getRes();
+
+	insertIntoSet(ve1, entrySet);
+	insertIntoSet(ve2, entrySet);
+	insertIntoSet(ve3, entrySet);
+
         label = (*it)->getLabel();
         if (opc == OpNode::OpCode::JMP) {
             inst_set->push_back(new Instruction(Instruction::InstructionSet::JMP, ((IntrLabel*)ve1)->getLabel()));
