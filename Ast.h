@@ -225,7 +225,7 @@ public:
         AND, OR, NOT,
         BITNOT, BITAND, BITOR, BITXOR, SHL, SHR,
         ASSIGN, PRINT, INVALID,
-        JMP, JMPC, CALL, RET,
+        JMP, JMPC, CALL, RET, MOVIF
         DEFAULT
     };
 
