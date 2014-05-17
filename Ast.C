@@ -1227,7 +1227,7 @@ vector<Quadruple*>* OpNode::iCodeGen() {
 	mergeVec(quad, arg_[i]->iCodeGen());
 	operands->push_back(arg_[i]->getTVar());
 
-	/*
+	    /*
 	   switch(arg_[i]->exprNodeType()) {
 	   case ExprNode::ExprNodeType::OP_NODE:
 	   operands->push_back(new IntrCodeElem(new VariableEntry(arg_[i]->getTReg(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE));
@@ -1255,7 +1255,10 @@ vector<Quadruple*>* OpNode::iCodeGen() {
 	    quad->push_back(new Quadruple(opCode_, operands->at(0), NULL, tempVarEnt));
 	    break;
 	case 2:
-	    quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), tempVarEnt));
+	    if(opCode_ != OpNode::OpCode::ASSIGN)
+		quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), tempVarEnt));
+	    else 
+		quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1)));
 	    break;
     }
     // TODO:: reset temp count*/
