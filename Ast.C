@@ -362,7 +362,6 @@ const Type* ValueNode::typeCheck() const {
 vector<Quadruple*>* ValueNode::iCodeGen() {
     vector<Quadruple*> *quad = new vector<Quadruple*>();
     IntrCodeElem* tempVar = new IntrCodeElem(this, IntrCodeElem::ElemType::VAL_TYPE);
-    quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, tempVar));
     setTVar(tempVar);
     return quad;
 }
@@ -381,11 +380,10 @@ void RefExprNode::print(ostream& os, int indent) const
 vector<Quadruple*>* RefExprNode::iCodeGen() {
     vector<Quadruple*> *quad = new vector<Quadruple*>();
     IntrCodeElem *tempVar = new IntrCodeElem(sym_, IntrCodeElem::ElemType::REF_EXPR_TYPE);
-    if(getResultType()->tag() != sym_->type()) {
+    if(getResultType()->tag() != sym_->type()->tag()) {
 	IntrCodeElem *newTemp = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
-	quad->push_back(new Quadruple(OpNode::OpCode::MOVIF, tempVar, newTemp));
+	quad->push_back(new Quadruple(OpNode::OpCode::MOVIF, tempVar, NULL, newTemp));
     }
-    quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, tempVar));
     setTVar(tempVar);
     return quad;
 }
