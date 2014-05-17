@@ -206,7 +206,12 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::SHR, {}),
     new OpCodeInstMap(OpNode::OpCode::ASSIGN, {Instruction::InstructionSet::MOVI, Instruction::InstructionSet::MOVF,  Instruction::InstructionSet::MOVS}),
     new OpCodeInstMap(OpNode::OpCode::PRINT, {Instruction::InstructionSet::PRTI, Instruction::InstructionSet::PRTF}),
-    new OpCodeInstMap(OpNode::OpCode::INVALID, {})
+    new OpCodeInstMap(OpNode::OpCode::INVALID, {}),
+    new OpCodeInstMap(OpNode::OpCode::JMP, {}),
+    new OpCodeInstMap(OpNode::OpCode::JMPC, {}),
+    new OpCodeInstMap(OpNode::OpCode::CALL, {}),
+    new OpCodeInstMap(OpNode::OpCode::RET, {}),
+    new OpCodeInstMap(OpNode::OpCode::DEFAULT, {})
 };
 
 static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) {
@@ -235,7 +240,8 @@ static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) 
     }
     return "";
 }
-static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem *e1, IntrCodeElem *e2, IntrCodeElem *e3) {
+
+static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem *e1, IntrCodeElem *e2, IntrCodeElem *e3, string label) {
     int instNum = 0;
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     Type *inst_type = e3->getElem()->type();
@@ -271,16 +277,15 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
     else
         param2 = instructionParam(e3, inst_vec);
 
-    Instruction *inst = new Instruction(instCode, param1, param2, param3);
+    Instruction *inst = new Instruction(instCode, param1, param2, param3, label);
     inst_vec->push_back(inst);
     return inst_vec;
 }
 
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
-    // TODO:: IMplement Expression Optimization
 
     IntrCodeElem *ve1, *ve2, *ve3;
-    string regName1 = "", regName2 = "", regName3 = "";
+    string label = "";
     vector<Instruction*>* inst_set = new vector<Instruction*>();
     vector<Instruction*> *instructionSet;
     OpNode::OpCode opc;
@@ -289,31 +294,15 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
         ve1 = (*it)->getOpr1();
         ve2 = (*it)->getOpr2();
         ve3 = (*it)->getRes();
-        if(checkRegOrTemp(ve1, regName1))
-            delete(ve1);
-        if(checkRegOrTemp(ve2, regName2))
-            delete(ve2);
-        if(checkRegOrTemp(ve3, regName3))
-            delete(ve3);
+        label = (*it)->getLabel();
+        if (opc == OpNode::OpCode::JMP) {
+            inst_set->push_back(new Instruction(Instruction::InstructionSet::JMP, ((IntrLabel*)ve1)->getLabel()));
+            continue;
+        }
 
-        //TODO:: Map the opcode to instruction set
-        instructionSet = getInstructionSet(opc, ve1, ve2, ve3);
+        instructionSet = getInstructionSet(opc, ve1, ve2, ve3, label);
         mergeVec(inst_set, instructionSet);
         delete(instructionSet);
     }
     return inst_set;
-}
-
-bool Quadruple::checkRegOrTemp(IntrCodeElem *ve, string &regName) {
-    if(ve != NULL) {
-        if(((VariableEntry*)ve->getElem())->isTemp()) { // temperary true
-            regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->getElem()->type()->tag()), ((VariableEntry*)(ve->getElem())), 0);
-            ((VariableEntry*)ve->getElem())->setReg(regName);
-        }
-        else {
-            regName = ((VariableEntry*)ve->getElem())->getReg();
-        }
-        // delete(ve);
-    }
-    return ((VariableEntry*)ve->getElem())->isTemp();
 }
