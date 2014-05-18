@@ -296,6 +296,7 @@ static void insertIntoSet(IntrCodeElem* e,  set<IntrCodeElem*> *entrySet) {
 
 }
 //TODO: For CALL parse entryset and flush all the variables onto stack
+//How to handle global?
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
 
     IntrCodeElem *ve1, *ve2, *ve3;
@@ -325,6 +326,35 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
 	    bool isFloat = Type::isFloat(ve->type()->tag());
             inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF:Instruction::InstructionSet::MOVI, reg, isFloat ? RETF_REG : RETI_REG));
 	    continue;
+	} else if (opc == OpNode::OpCode::CALL) {
+	    std::set<IntrCodeElem*>::iterator it;
+	    string reg = instructionParam(ve3, inst_set);
+	    for (it=entrySet->begin(); it!=entrySet->end(); ++it) {
+		VariableEntry *ve = (VariableEntry*)((*it)->getElem());
+		if (ve->isMem())
+		    continue;
+		bool isFloat = Type::isFloat(ve->type()->tag());
+		inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::STF : Instruction::InstructionSet::STI, 
+		    ve->getReg(), SP_REG, "" , "Flushing Registers"));
+		inst_set->push_back(Instruction::decrSP());
+	    }
+	    InvocationNode *in = (InvocationNode*)(ve1->getElem());
+	    mergeVec(inst_set, in->codeGen());
+	    VariableEntry *retVe = (VariableEntry*)(ve3->getElem());
+	    bool isFloat = Type::isFloat(retVe->type()->tag());
+	    inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF : Instruction::InstructionSet::MOVI
+		, retVe->getReg(), isFloat ? RETF_REG : RETI_REG, "", "Getting return Value"));
+	    std::set<IntrCodeElem*>::reverse_iterator rit;
+	    for (rit=entrySet->rbegin(); rit!=entrySet->rend(); ++rit) {
+		VariableEntry *ve = (VariableEntry*)((*rit)->getElem());
+		    if (ve->isMem())
+			continue;
+		bool isFloat = Type::isFloat(ve->type()->tag());
+		inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, 
+		    SP_REG, ve->getReg(), "", "Loading Back Registers"));
+		inst_set->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
+	    }
+
 	}
         instructionSet = getInstructionSet(opc, ve1, ve2, ve3, label);
         mergeVec(inst_set, instructionSet);

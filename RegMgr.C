@@ -77,6 +77,8 @@ string RegMgr::fetchNextAvailReg(bool isInt, VariableEntry *ve, int priority, ve
     }
     string reg_str = os.str();
     if (ve != NULL) {
+	ve->setReg(reg_str);
+	ve->setMem(false);
         regMap_.insert(make_pair<string, VEntryPriority*>(string(reg_str), new VEntryPriority(ve, priority)));
     }
     return reg_str;
