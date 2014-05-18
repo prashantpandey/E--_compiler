@@ -111,7 +111,7 @@ private:
 
 class OpCodeInstMap {
 public:
-    static OpCodeInstMap* opCodeInstMap_[30];
+    static OpCodeInstMap* opCodeInstMap_[31];
 
     OpCodeInstMap(OpNode::OpCode oprCode, initializer_list<Instruction::InstructionSet> list) {
         int i = 0;

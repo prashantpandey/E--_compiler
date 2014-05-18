@@ -225,7 +225,7 @@ public:
         AND, OR, NOT,
         BITNOT, BITAND, BITOR, BITXOR, SHL, SHR,
         ASSIGN, PRINT, INVALID,
-        JMP, JMPC, CALL, RET, MOVIF,
+        JMP, JMPC, CALL, RET, MOVIF, IN,
         DEFAULT
     };
 
@@ -415,8 +415,7 @@ public:
 
     virtual string getLabel() = 0;
 
-    virtual vector<Instruction*>* codeGen() = 0;
-    virtual void purgeRegisters() = 0;
+    virtual vector<Quadruple*>* iCodeGen() = 0;
     virtual bool hasSeqOps() const=0;
     virtual bool hasNeg() const=0;
     virtual bool hasAnyOrOther() const=0;
@@ -458,7 +457,7 @@ public:
         return params_;
     }
 
-    virtual vector<Instruction*>* codeGen();
+    virtual vector<Quadruple*>* iCodeGen();
 
     const ExprNode* cond() const {
         return cond_;
@@ -483,8 +482,6 @@ public:
     list<OpNode*>& asgs() {
         return asgs_;
     }
-
-    virtual void purgeRegisters();
 
     const Type* typeCheck() const;
     bool hasSeqOps() const;
@@ -530,10 +527,7 @@ public:
         return pat2_;
     }
 
-    virtual vector<Instruction*>* codeGen();
-    virtual void purgeRegisters() {
-        pat1_->purgeRegisters();
-    }
+    virtual vector<Quadruple*>* iCodeGen();
 
     bool hasNeg() const;
     bool hasSeqOps() const;

@@ -67,7 +67,14 @@ string Instruction::toString() {
     if(label_ != "")
         os << label_ << ": ";
     if(instr_ != InstructionSet::BLANK) {
-        os << name(instr_) << " " << param1_ << " " << param2_ << " " << param3_ ;
+	
+        os << name(instr_);
+	if (param1_ != "") 
+	    os << " " << param1_;
+	if (param2_ != "") 
+	    os << " " << param2_;
+	if (param3_ != "") 
+	    os << " " << param3_;
         if(comment_ != "")
             os << " // " << comment_;
         os << endl;
@@ -206,6 +213,7 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::CALL, {}),
     new OpCodeInstMap(OpNode::OpCode::RET, {}),
     new OpCodeInstMap(OpNode::OpCode::MOVIF, {Instruction::InstructionSet::MOVIF}),
+    new OpCodeInstMap(OpNode::OpCode::IN, {Instruction::InstructionSet::INI, Instruction::InstructionSet::INF}),
     new OpCodeInstMap(OpNode::OpCode::DEFAULT, {})
 };
 
@@ -267,14 +275,14 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
         break;
     }
     Instruction::InstructionSet instCode = OpCodeInstMap::fetchInstr(opc, instNum);
-    string param1 = instructionParam(e1, inst_vec);
-    string param2 = "", param3 = "";
-    if (e2) {
+    
+    string param1 ="" ,param2 = "", param3 = "";
+    if (e1)
+	param1 = instructionParam(e1, inst_vec);
+    if (e2) 
         param2 = instructionParam(e2, inst_vec);
-        param3 = instructionParam(e3, inst_vec);
-    }
     else
-        param2 = instructionParam(e3, inst_vec);
+        param3 = instructionParam(e3, inst_vec);
 
     Instruction *inst = new Instruction(instCode, param1, param2, param3, label);
     inst_vec->push_back(inst);
@@ -335,7 +343,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
 		    continue;
 		bool isFloat = Type::isFloat(ve->type()->tag());
 		inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::STF : Instruction::InstructionSet::STI, 
-		    ve->getReg(), SP_REG, "" , "Flushing Registers"));
+		    ve->getReg(), SP_REG, "" , "", "Flushing Registers"));
 		inst_set->push_back(Instruction::decrSP());
 	    }
 	    InvocationNode *in = (InvocationNode*)(ve1->getElem());
@@ -343,7 +351,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
 	    VariableEntry *retVe = (VariableEntry*)(ve3->getElem());
 	    bool isFloat = Type::isFloat(retVe->type()->tag());
 	    inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF : Instruction::InstructionSet::MOVI
-		, retVe->getReg(), isFloat ? RETF_REG : RETI_REG, "", "Getting return Value"));
+		, retVe->getReg(), isFloat ? RETF_REG : RETI_REG, "", "", "Getting return Value"));
 	    std::set<IntrCodeElem*>::reverse_iterator rit;
 	    for (rit=entrySet->rbegin(); rit!=entrySet->rend(); ++rit) {
 		VariableEntry *ve = (VariableEntry*)((*rit)->getElem());
@@ -351,10 +359,10 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
 			continue;
 		bool isFloat = Type::isFloat(ve->type()->tag());
 		inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, 
-		    SP_REG, ve->getReg(), "", "Loading Back Registers"));
+		    SP_REG, ve->getReg(), "", "", "Loading Back Registers"));
 		inst_set->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
 	    }
-
+	    continue;
 	}
         instructionSet = getInstructionSet(opc, ve1, ve2, ve3, label);
         mergeVec(inst_set, instructionSet);

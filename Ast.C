@@ -75,12 +75,10 @@ vector<Instruction*>* RuleNode::codeGen() {
 
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     inst_vec->push_back(new Instruction(pat_->getLabel()));
-    mergeVec(inst_vec, pat_->codeGen());
-    iCodeTable_ = reaction_->iCodeGen();
+    iCodeTable_ = pat_->iCodeGen();
+    mergeVec(iCodeTable_, reaction_->iCodeGen());
     printICode();
-    //TODO: Generate machine code and merge
-    //mergeVec(inst_vec, reaction_->codeGen());
-    pat_->purgeRegisters();
+    mergeVec(inst_vec, Quadruple::iCodeToAsmGen(iCodeTable_));
     return inst_vec;
 }
 
@@ -524,7 +522,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, reg, SP_REG));
     inst_vec->push_back(Instruction::decrSP());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, ((FunctionEntry*)symTabEntry())->getALabel()));
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, nullptr, nullptr, label));
+    //inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, nullptr, nullptr, label));
 
     return inst_vec;
 }
@@ -634,29 +632,18 @@ const Type* ExprStmtNode::typeCheck() const {
     return &Type::errorType;
 }
 
-vector<Instruction*>* PrimitivePatNode::codeGen() {
-    vector<Instruction*>* inst_vec = new vector<Instruction*>();
+vector<Quadruple*>* PrimitivePatNode::iCodeGen() {
+    vector<Quadruple*>* quad_vec = new vector<Quadruple*>();
     for (vector<VariableEntry*>::const_iterator it = params_->begin();
 	    it != params_->end(); ++it) {
 	VariableEntry *ve = (*it);
-	bool isFloat = Type::isFloat(ve->type()->tag());
-	string reg = regMgr->fetchNextAvailReg(!isFloat, ve, 1, inst_vec);
-	inst_vec->push_back(new Instruction(isFloat?Instruction::InstructionSet::INF:Instruction::InstructionSet::INI, reg));
-	ve->setReg(reg);
-	ve->setMem(false);
+	IntrCodeElem* tempVarEnt = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, 
+		ve->type()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
+	quad_vec->push_back(new Quadruple(OpNode::OpCode::IN, NULL, NULL, tempVarEnt));
     }
-    return inst_vec;
+    return quad_vec;
 }
 
-void PrimitivePatNode::purgeRegisters() {
-    for (vector<VariableEntry*>::const_iterator it = params_->begin();
-	    it != params_->end(); ++it) {
-	VariableEntry *ve = (*it);
-	if (!ve->isMem()) {
-	    regMgr->purgeReg(ve->getReg());
-	}
-    }
-}
 
 void PrimitivePatNode::print(ostream& os, int indent) const
 {
@@ -705,9 +692,8 @@ void PatNode::print(ostream& os, int indent) const
 }
 
 
-vector<Instruction*>* PatNode::codeGen()  {
-    //TODO:Figure out how to label event
-    vector<Instruction*>* inst_vec = pat1_->codeGen();
+vector<Quadruple*>* PatNode::iCodeGen()  {
+    vector<Quadruple*>* inst_vec = pat1_->iCodeGen();
 
     return inst_vec;
 }
@@ -1249,7 +1235,8 @@ vector<Quadruple*>* OpNode::iCodeGen() {
 	    }
 	    */
     }
-	IntrCodeElem* tempVarEnt = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
+	IntrCodeElem* tempVarEnt = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, 
+		getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
 	switch(arity_) {
 	    case 1:
 		quad->push_back(new Quadruple(opCode_, operands->at(0), NULL, tempVarEnt));
