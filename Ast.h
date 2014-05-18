@@ -873,9 +873,9 @@ public:
     StmtNode* reaction() {
         return reaction_;
     };
-    
+
     void printICode();
-    
+
     const Type* typeCheck() const;
 
     void print(ostream& os, int indent=0) const;
