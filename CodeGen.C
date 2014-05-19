@@ -214,14 +214,19 @@ static bool isAirthmeticOpr(OpNode::OpCode opc) {
         return false;
     }
 }
+
+static inline bool isAssigment(OpNode::OpCode opc) {
+    return (opc == OpNode::OpCode::ASSIGN);
+}
 static void optimiseQuadruples(vector<Quadruple*> *quads) {
     vector<Quadruple*>::iterator it1, it2;
     int quadSize = quads->size();
-    for(int i = 0; i < quadSize - 2; i++) {
+    for(int i = 0; i < quadSize - 1; i++) {
         Quadruple *quad = quads->at(i);
         //cout << "~~~~~~~~~~~~~~~~" << quad->toString();
+        bool isDef = false, isAirthmetic = false;
         set<ProgramElem*> *replaceSet = new set<ProgramElem*>();
-        if (!isAirthmeticOpr(quad->getOpc()))
+        if (!(isAirthmetic = isAirthmeticOpr(quad->getOpc())) && !(isDef = isAssigment(quad->getOpc())))
             continue;
         bool associative = isAssociative(quad->getOpc());
         IntrCodeElem *mOpr1 = quad->getOpr1();
@@ -233,6 +238,19 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
             IntrCodeElem *cOpr2 = quad2->getOpr2();
             IntrCodeElem *cRes = quad2->getRes();
             //cout << "\n*****" << quad2->toString();
+            if (isDef) {
+                if (cOpr1 && cOpr1->equals(mRes))
+                    break;
+                if (cOpr2 && cOpr2->equals(mRes))
+                    break;
+                if (cRes && cRes->equals(mRes)) {
+                    quads->erase(quads->begin() + i);
+                    i--;
+                    quadSize = quads->size();
+                    break;
+                }
+                continue;
+            }
             if (cOpr1 && replaceSet->count(cOpr1->getElem()))
                 quad2->setOpr1(mRes);
             if (cOpr2 && replaceSet->count(cOpr2->getElem()))
@@ -256,13 +274,14 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
 
 
 
+    /*
+        cout << "\nAfter Optimization\n";
 
-    /*cout << "\nAfter Optimization\n";
-
-    for(vector<Quadruple*>::iterator it = quads->begin(); it != quads->end(); ++it) {
-    cout << (*it)->toString();
-    }
-    cout << "\nOptimization END\n";*/
+          for(vector<Quadruple*>::iterator it = quads->begin(); it != quads->end(); ++it) {
+          cout << (*it)->toString();
+          }
+          cout << "\nOptimization END\n";
+        */
 }
 
 OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
