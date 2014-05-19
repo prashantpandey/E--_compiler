@@ -112,11 +112,39 @@ string Quadruple::toString(bool newLine) {
     return os.str();
 }
 
-bool IntrCodeElem::equals(IntrCodeElem *p) {
-    if (p->type_ != this->type_)
+bool IntrCodeElem::uses(IntrCodeElem *p) {
+    if (this->equals(p))
+        return true;
+    switch (type_)
+    {
+    case ElemType::QUAD_TYPE:
+    {
+        Quadruple *quad = (Quadruple*)progElem_;
+        IntrCodeElem *e1 = quad->getOpr1();
+        IntrCodeElem *e2 = quad->getOpr2();
+        if((e1 && e1->uses(p)) || (e2 && e2->uses(p)))
+            return true;
+        break;
+    }
+    case ElemType::PARAM_TYPE:
+    {
+        vector<IntrCodeElem*> *params = ((IntrCodeParams*)progElem_)->getParams();
+        for(vector<IntrCodeElem*>::iterator it = params->begin(); it != params->end(); ++it) {
+            if ((*it)->uses(p))
+                return true;
+        }
+    }
+    break;
+    default:
         return false;
+    }
+    return false;
+}
+bool IntrCodeElem::equals(IntrCodeElem *p) {
     if (this->getElem() == p->getElem())
         return true;
+    if (p->type_ != this->type_)
+        return false;
     switch (this->type_)
     {
     case ElemType::VAL_TYPE:
@@ -239,9 +267,9 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
             IntrCodeElem *cRes = quad2->getRes();
             //cout << "\n*****" << quad2->toString();
             if (isDef) {
-                if (cOpr1 && cOpr1->equals(mRes))
+                if (cOpr1 && cOpr1->uses(mRes))
                     break;
-                if (cOpr2 && cOpr2->equals(mRes))
+                if (cOpr2 && cOpr2->uses(mRes))
                     break;
                 if (cRes && cRes->equals(mRes)) {
                     quads->erase(quads->begin() + i);
@@ -291,9 +319,9 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
                     continue;
                 }
             }
-            if (cOpr1 && cOpr1->equals(mRes))
+            if (cOpr1 && cOpr1->uses(mRes))
                 break;
-            if (cOpr2 && cOpr2->equals(mRes))
+            if (cOpr2 && cOpr2->uses(mRes))
                 break;
         }
 
