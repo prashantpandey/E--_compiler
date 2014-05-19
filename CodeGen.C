@@ -140,6 +140,7 @@ bool IntrCodeElem::uses(IntrCodeElem *p) {
     }
     return false;
 }
+
 bool IntrCodeElem::equals(IntrCodeElem *p) {
     if (this->getElem() == p->getElem())
         return true;
@@ -299,6 +300,8 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
         }
         delete(replaceSet);
     }
+
+    /*Removing redundant temp vars for assignment*/
     quadSize = quads->size();
     for(int i = 0; i < quadSize - 1; i++) {
         int replaceIndex = -1;
@@ -332,6 +335,36 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
             quadSize--;
         }
     }
+
+    bool codeOptimized;
+    do {
+        codeOptimized = false;
+        quadSize = quads->size();
+        for(int i = 0; i < quadSize - 1; i++) {
+            Quadruple *quad = quads->at(i);
+            IntrCodeElem *mRes = quad->getRes();
+            if (!mRes || mRes->getType() != IntrCodeElem::ElemType::TEMP_VAR_TYPE)
+                continue;
+            int j;
+            for(j = i + 1; j < quadSize; j++) {
+                Quadruple *quad2 = quads->at(j);
+                IntrCodeElem *cOpr1 = quad2->getOpr1();
+                IntrCodeElem *cOpr2 = quad2->getOpr2();
+                if (cOpr1 && cOpr1->uses(mRes))
+                    break;
+                if (cOpr2 && cOpr2->uses(mRes))
+                    break;
+            }
+
+            if (j == quadSize) {
+                quads->erase(quads->begin() + i);
+                i--;
+                codeOptimized = true;
+                quadSize--;
+            }
+        }
+    } while(codeOptimized);
+
 
 
 

@@ -175,7 +175,7 @@ vector<Quadruple*>* WhileNode::iCodeGen() {
 
     IntrCodeElem *endLabelTemp =  new IntrCodeElem(new IntrLabel(endLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
     IntrCodeElem *cmpVar = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
-    Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, NULL, cond_->getTVar());
+    Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, cond_->getTVar(), NULL);
     inst_vec->push_back(tempQuad);
     inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), endLabelTemp));
 
@@ -254,7 +254,7 @@ vector<Quadruple*>* IfNode::iCodeGen() {
 
     // TODO: implement short circuit of expressions
     IntrCodeElem *cmpVar = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
-    Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, NULL,  cond_->getTVar());
+    Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, cond_->getTVar(), NULL);
     inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), elseStmt() ? elseLabelTemp : endLabelTemp));
 
     mergeVec(inst_vec, then_->iCodeGen());
