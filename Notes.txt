@@ -148,6 +148,7 @@
     >	Code generation for lt, le, shl, shr opcodes
     >	optimizations: 
 	    >Quadruple set optimization
+	    >Remove unused temps
 	    >spill over
 	    >handle stack overflows
 	    >priority for registers
