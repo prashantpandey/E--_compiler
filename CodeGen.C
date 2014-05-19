@@ -271,17 +271,50 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
         }
         delete(replaceSet);
     }
+    quadSize = quads->size();
+    for(int i = 0; i < quadSize - 1; i++) {
+        int replaceIndex = -1;
+        Quadruple *quad = quads->at(i);
+        IntrCodeElem *mRes = quad->getRes();
+        if (!mRes || mRes->getType() != IntrCodeElem::ElemType::TEMP_VAR_TYPE)
+            continue;
+        int j;
+        for(j = i + 1; j < quadSize; j++) {
+            Quadruple *quad2 = quads->at(j);
+            IntrCodeElem *cOpr1 = quad2->getOpr1();
+            IntrCodeElem *cOpr2 = quad2->getOpr2();
+            if (isAssigment(quad2->getOpc()) && cOpr1->equals(mRes)) {
+                if (replaceIndex > -1) {
+                    break;
+                } else {
+                    replaceIndex = j;
+                    continue;
+                }
+            }
+            if (cOpr1 && cOpr1->equals(mRes))
+                break;
+            if (cOpr2 && cOpr2->equals(mRes))
+                break;
+        }
+
+        if (j == quadSize && replaceIndex > -1) {
+            Quadruple *quad2 = quads->at(replaceIndex);
+            quad->setRes(quad2->getRes());
+            quads->erase(quads->begin() + replaceIndex);
+            quadSize--;
+        }
+    }
 
 
 
     /*
-        cout << "\nAfter Optimization\n";
+       cout << "\nAfter Optimization\n";
 
-          for(vector<Quadruple*>::iterator it = quads->begin(); it != quads->end(); ++it) {
-          cout << (*it)->toString();
-          }
-          cout << "\nOptimization END\n";
-        */
+       for(vector<Quadruple*>::iterator it = quads->begin(); it != quads->end(); ++it) {
+       cout << (*it)->toString();
+       }
+       cout << "\nOptimization END\n";
+     */
 }
 
 OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
