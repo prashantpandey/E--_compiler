@@ -303,9 +303,9 @@ public:
         return label_;
     }
 
-    string toString();
+    string toString(bool newline = true);
 
-    static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad);
+    static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad, bool showComment = true);
     static int tempCnt_;
     static string fetchTempVar();
     static void resetTempCnt();

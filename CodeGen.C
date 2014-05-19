@@ -94,29 +94,29 @@ const char* opCodeName[] = {
     "DEFAULT"
 };
 
-string Quadruple::toString() {
+string Quadruple::toString(bool newLine) {
 
     ostringstream os;
     string param1 = "", param2 = "", param3 = "";
     string opc = opCodeName[(int)opc_];
 
-    if(opr1_ != NULL)
-        param1 = IntrCodeElem::toString(opr1_);
-    if(opr2_ != NULL)
-        param2 = IntrCodeElem::toString(opr2_);
-    if(res_ != NULL)
-        param3 = IntrCodeElem::toString(res_);
+    param1 = IntrCodeElem::toString(opr1_);
+    param2 = IntrCodeElem::toString(opr2_);
+    param3 = IntrCodeElem::toString(res_);
 
     if(label_ != "")
         os << label_ << ": ";
     os << opc << " " << param1 << " " << param2 << " " << param3 ;
-    os << endl;
+    if (newLine)
+        os << endl;
     return os.str();
 }
 
 
 string IntrCodeElem::toString(IntrCodeElem *ice) {
 
+    if (ice == NULL)
+        return "";
     ProgramElem *pe = ice->getElem();
     ElemType et = ice->getType();
     ostringstream os;
@@ -137,7 +137,7 @@ string IntrCodeElem::toString(IntrCodeElem *ice) {
         return ((VariableEntry*)pe)->name();
 
     case ElemType::QUAD_TYPE:
-        return ((Quadruple*)pe)->toString();
+        return ((Quadruple*)pe)->toString(false);
 
     case ElemType::LABEL_TYPE:
         return ((IntrLabel*)pe)->getLabel();
@@ -235,7 +235,7 @@ static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) 
     {
         vector<Quadruple*> *temp = new vector<Quadruple*>();
         temp->push_back((Quadruple*)(e->getElem()));
-        return Quadruple::iCodeToAsmGen(temp)->at(0)->toString(false);
+        return Quadruple::iCodeToAsmGen(temp, false)->at(0)->toString(false);
     }
     case IntrCodeElem::ElemType::LABEL_TYPE:
         return ((IntrLabel*)(e->getElem()))->getLabel();
@@ -243,7 +243,7 @@ static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) 
     return "";
 }
 
-static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem *e1, IntrCodeElem *e2, IntrCodeElem *e3, string label) {
+static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem *e1, IntrCodeElem *e2, IntrCodeElem *e3, string label, string comment) {
     int instNum = 0;
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     if (e3) {
@@ -282,7 +282,7 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
     param2 = instructionParam(e2, inst_vec);
     param3 = instructionParam(e3, inst_vec);
 
-    Instruction *inst = new Instruction(instCode, param1, param2, param3, label);
+    Instruction *inst = new Instruction(instCode, param1, param2, param3, label, comment);
     inst_vec->push_back(inst);
     return inst_vec;
 }
@@ -303,7 +303,7 @@ static void insertIntoSet(IntrCodeElem* e,  set<VariableEntry*> *entrySet) {
 }
 //TODO: For CALL parse entryset and flush all the variables onto stack
 //How to handle global?
-vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
+vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool showComment) {
 
     IntrCodeElem *ve1, *ve2, *ve3;
     string label = "";
@@ -379,7 +379,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
         default:
             break;
         }
-        instructionSet = getInstructionSet(opc, ve1, ve2, ve3, label);
+        instructionSet = getInstructionSet(opc, ve1, ve2, ve3, label, showComment ? (*it)->toString(false) : "");
         mergeVec(inst_set, instructionSet);
         delete(instructionSet);
     }
