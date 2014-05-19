@@ -261,6 +261,11 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
         IntrCodeElem *mOpr1 = quad->getOpr1();
         IntrCodeElem *mOpr2 = quad->getOpr2();
         IntrCodeElem *mRes = quad->getRes();
+        if (isDef) {
+            VariableEntry *ve = ((VariableEntry*)(mRes->getElem()));
+            if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR)
+                continue; //Should not remove definations of global vars
+        }
         for(int j = i + 1; j < quadSize; j++) {
             Quadruple *quad2 = quads->at(j);
             IntrCodeElem *cOpr1 = quad2->getOpr1();
