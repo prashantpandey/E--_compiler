@@ -97,7 +97,7 @@ public:
     };
 
     string name(InstructionSet inst);
-    string toString();
+    string toString(bool newLine = true);
     static Instruction* decrSP();
 
 private:

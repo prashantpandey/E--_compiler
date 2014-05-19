@@ -61,7 +61,7 @@ Instruction* Instruction::decrSP()  {
     return instr;
 }
 
-string Instruction::toString() {
+string Instruction::toString(bool newLine) {
 
     ostringstream os;
     if(label_ != "")
@@ -77,7 +77,8 @@ string Instruction::toString() {
             os << " " << param3_;
         if(comment_ != "")
             os << " // " << comment_;
-        os << endl;
+        if (newLine)
+            os << endl;
     }
     return os.str();
 
@@ -89,7 +90,7 @@ const char* opCodeName[] = {
     "AND", "OR", "NOT",
     "BITNOT", "BITAND", "BITOR", "BITXOR", "SHL", "SHR",
     "ASSIGN", "PRINT", "INVALID",
-    "JMP", "JMPC", "CALL", "RET",
+    "JMP", "JMPC", "CALL", "RET", "MOVIF", "IN",
     "DEFAULT"
 };
 
@@ -99,18 +100,12 @@ string Quadruple::toString() {
     string param1 = "", param2 = "", param3 = "";
     string opc = opCodeName[(int)opc_];
 
-    if(opr1_ != NULL) {
-
+    if(opr1_ != NULL)
         param1 = IntrCodeElem::toString(opr1_);
-
-        if(opr2_ != NULL) {
-            param2 = IntrCodeElem::toString(opr2_);
-        }
-
-        if(res_ != NULL) {
-            param3 = IntrCodeElem::toString(res_);
-        }
-    }
+    if(opr2_ != NULL)
+        param2 = IntrCodeElem::toString(opr2_);
+    if(res_ != NULL)
+        param3 = IntrCodeElem::toString(res_);
 
     if(label_ != "")
         os << label_ << ": ";
@@ -129,8 +124,6 @@ string IntrCodeElem::toString(IntrCodeElem *ice) {
     switch(et) {
 
     case ElemType::VAR_TYPE:
-        return ((VariableEntry*)pe)->name();
-
     case ElemType::TEMP_VAR_TYPE:
         return ((VariableEntry*)pe)->name();
 
@@ -208,8 +201,8 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::ASSIGN, {Instruction::InstructionSet::MOVI, Instruction::InstructionSet::MOVF,  Instruction::InstructionSet::MOVS}),
     new OpCodeInstMap(OpNode::OpCode::PRINT, {Instruction::InstructionSet::PRTI, Instruction::InstructionSet::PRTF}),
     new OpCodeInstMap(OpNode::OpCode::INVALID, {}),
-    new OpCodeInstMap(OpNode::OpCode::JMP, {}),
-    new OpCodeInstMap(OpNode::OpCode::JMPC, {}),
+    new OpCodeInstMap(OpNode::OpCode::JMP, {Instruction::InstructionSet::JMP}),
+    new OpCodeInstMap(OpNode::OpCode::JMPC, {Instruction::InstructionSet::JMPC}),
     new OpCodeInstMap(OpNode::OpCode::CALL, {}),
     new OpCodeInstMap(OpNode::OpCode::RET, {}),
     new OpCodeInstMap(OpNode::OpCode::MOVIF, {Instruction::InstructionSet::MOVIF}),
@@ -218,6 +211,8 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
 };
 
 static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) {
+    if(!e)
+        return "";
     switch(e->getType()) {
     case IntrCodeElem::ElemType::VAR_TYPE:
     case IntrCodeElem::ElemType::TEMP_VAR_TYPE:
@@ -237,9 +232,13 @@ static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) 
         throw -1;
         //Control Should not reach here, so some error
     case IntrCodeElem::ElemType::QUAD_TYPE:
+    {
+        vector<Quadruple*> *temp = new vector<Quadruple*>();
+        temp->push_back((Quadruple*)(e->getElem()));
+        return Quadruple::iCodeToAsmGen(temp)->at(0)->toString(false);
+    }
     case IntrCodeElem::ElemType::LABEL_TYPE:
-        //TODO
-        break;
+        return ((IntrLabel*)(e->getElem()))->getLabel();
     }
     return "";
 }
@@ -247,8 +246,11 @@ static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) 
 static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem *e1, IntrCodeElem *e2, IntrCodeElem *e3, string label) {
     int instNum = 0;
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
-    Type *inst_type = e3->getElem()->type();
-    instNum = Type::isFloat(inst_type->tag()) ? 1:0;
+    if (e3) {
+        Type *inst_type = e3->getElem()->type();
+        instNum = Type::isFloat(inst_type->tag()) ? 1:0;
+    }
+    string param1 ="" ,param2 = "", param3 = "";
     switch(opc) {
     case OpNode::OpCode::LT:
     case OpNode::OpCode::LE:
@@ -256,17 +258,18 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
         swap(e1,e2);
     case OpNode::OpCode::GT:
     case OpNode::OpCode::GE:
-        inst_type = e1->getElem()->type();
+    {
+        Type *inst_type = e1->getElem()->type();
         instNum = Type::isFloat(inst_type->tag()) ? 1:0;
-        break;
+    }
+    break;
     case OpNode::OpCode::ASSIGN:
+    {
+        Type *inst_type = e3->getElem()->type();
         if(Type::isString(inst_type->tag()))
             instNum = 2;
-        break;
-    case OpNode::OpCode::CALL:
-        break;//TODO
-    case OpNode::OpCode::JMPC:
-        break;//TODO
+    }
+    break;
     case OpNode::OpCode::SHL:
         break;
     case OpNode::OpCode::SHR:
@@ -275,28 +278,23 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
         break;
     }
     Instruction::InstructionSet instCode = OpCodeInstMap::fetchInstr(opc, instNum);
-
-    string param1 ="" ,param2 = "", param3 = "";
-    if (e1)
-        param1 = instructionParam(e1, inst_vec);
-    if (e2)
-        param2 = instructionParam(e2, inst_vec);
-    else
-        param3 = instructionParam(e3, inst_vec);
+    param1 = instructionParam(e1, inst_vec);
+    param2 = instructionParam(e2, inst_vec);
+    param3 = instructionParam(e3, inst_vec);
 
     Instruction *inst = new Instruction(instCode, param1, param2, param3, label);
     inst_vec->push_back(inst);
     return inst_vec;
 }
 
-static void insertIntoSet(IntrCodeElem* e,  set<IntrCodeElem*> *entrySet) {
+static void insertIntoSet(IntrCodeElem* e,  set<VariableEntry*> *entrySet) {
     if (e == NULL)
         return;
     switch(e->getType()) {
     case IntrCodeElem::ElemType::VAR_TYPE:
     case IntrCodeElem::ElemType::TEMP_VAR_TYPE:
     case IntrCodeElem::ElemType::REF_EXPR_TYPE:
-        entrySet->insert(e);
+        entrySet->insert((VariableEntry*)(e->getElem()));
         break;
     default:
         break;
@@ -309,7 +307,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
 
     IntrCodeElem *ve1, *ve2, *ve3;
     string label = "";
-    set<IntrCodeElem*> *entrySet = new set<IntrCodeElem*>();
+    set<VariableEntry*> *entrySet = new set<VariableEntry*>();
     vector<Instruction*>* inst_set = new vector<Instruction*>();
     vector<Instruction*> *instructionSet;
     OpNode::OpCode opc;
@@ -319,50 +317,67 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad) {
         ve1 = (*it)->getOpr1();
         ve2 = (*it)->getOpr2();
         ve3 = (*it)->getRes();
-
-        insertIntoSet(ve1, entrySet);
-        insertIntoSet(ve2, entrySet);
-        insertIntoSet(ve3, entrySet);
-
         label = (*it)->getLabel();
-        if (opc == OpNode::OpCode::JMP) {
-            inst_set->push_back(new Instruction(Instruction::InstructionSet::JMP, ((IntrLabel*)ve1)->getLabel()));
-            continue;
-        } else if (opc == OpNode::OpCode::RET) {
-            string reg = instructionParam(ve1, inst_set);
-            VariableEntry *ve = (VariableEntry*)(ve1->getElem());
-            bool isFloat = Type::isFloat(ve->type()->tag());
-            inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF:Instruction::InstructionSet::MOVI, reg, isFloat ? RETF_REG : RETI_REG));
-            continue;
-        } else if (opc == OpNode::OpCode::CALL) {
-            std::set<IntrCodeElem*>::iterator it;
+
+        if (opc == OpNode::OpCode::CALL) {
+            std::set<VariableEntry*>::iterator it;
             string reg = instructionParam(ve3, inst_set);
             for (it=entrySet->begin(); it!=entrySet->end(); ++it) {
-                VariableEntry *ve = (VariableEntry*)((*it)->getElem());
-                if (ve->isMem())
+                VariableEntry *ve = (*it);
+                if (ve->getReg() == "")
                     continue;
                 bool isFloat = Type::isFloat(ve->type()->tag());
                 inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::STF : Instruction::InstructionSet::STI,
-                                                    ve->getReg(), SP_REG, "" , "", "Flushing Registers"));
+                                                    ve->getReg(), SP_REG, "" , "", "Flushing Registers: " + ve->name()));
                 inst_set->push_back(Instruction::decrSP());
             }
             InvocationNode *in = (InvocationNode*)(ve1->getElem());
+
+            vector<IntrCodeElem*> *params = ((IntrCodeParams*)(ve2->getElem()))->getParams();
+            for(vector<IntrCodeElem*>::reverse_iterator it = params->rbegin(); it != params->rend(); ++it) {
+                string val = instructionParam((*it), inst_set);
+                insertIntoSet((*it), entrySet);
+                bool isFloat = Type::isFloat((*it)->getElem()->type()->tag());
+                inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::STF : Instruction::InstructionSet::STI,
+                                                    val, SP_REG, "", "", "Pushing parameter: " + IntrCodeElem::toString((*it))));
+                inst_set->push_back(Instruction::decrSP());
+            }
+
             mergeVec(inst_set, in->codeGen());
             VariableEntry *retVe = (VariableEntry*)(ve3->getElem());
             bool isFloat = Type::isFloat(retVe->type()->tag());
             inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF : Instruction::InstructionSet::MOVI
                                                 , retVe->getReg(), isFloat ? RETF_REG : RETI_REG, "", "", "Getting return Value"));
-            std::set<IntrCodeElem*>::reverse_iterator rit;
+            std::set<VariableEntry*>::reverse_iterator rit;
             for (rit=entrySet->rbegin(); rit!=entrySet->rend(); ++rit) {
-                VariableEntry *ve = (VariableEntry*)((*rit)->getElem());
-                if (ve->isMem())
+                VariableEntry *ve = (*rit);
+                if (ve->getReg() == "")
                     continue;
                 bool isFloat = Type::isFloat(ve->type()->tag());
                 inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI,
-                                                    SP_REG, ve->getReg(), "", "", "Loading Back Registers"));
+                                                    SP_REG, ve->getReg(), "", "", "Loading Back Registers:" + ve->name()));
                 inst_set->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
             }
             continue;
+        }
+
+        insertIntoSet(ve1, entrySet);
+        insertIntoSet(ve2, entrySet);
+        insertIntoSet(ve3, entrySet);
+        switch (opc) {
+        case OpNode::OpCode::RET:
+        {
+            string reg = instructionParam(ve1, inst_set);
+            VariableEntry *ve = (VariableEntry*)(ve1->getElem());
+            bool isFloat = Type::isFloat(ve->type()->tag());
+            inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF:Instruction::InstructionSet::MOVI, reg, isFloat ? RETF_REG : RETI_REG, "", label));
+            continue;
+        }
+        case OpNode::OpCode::DEFAULT:
+            inst_set->push_back(new Instruction(instructionParam(ve1, inst_set)));
+            continue;
+        default:
+            break;
         }
         instructionSet = getInstructionSet(opc, ve1, ve2, ve3, label);
         mergeVec(inst_set, instructionSet);

@@ -214,11 +214,12 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     aLabel_ = regMgr->getNextLabel();
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "", aLabel_, "Function Start: Saving BP"));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "", aLabel_, "Function Start:" + name() + ", Saving BP"));
     inst_vec->push_back(Instruction::decrSP());
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, SP_REG, BP_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, SP_REG, BP_REG, "", "", "Saving SP to BP"));
     vector<Quadruple*> *iquad;
     const SymTab *st = NULL;
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, BP_REG, "2" ,TEMP_REG, "", "Setting temp register to load params"));
     if ((st = symTab()) != nullptr) {
         for (SymTab::const_iterator it = st->begin(); it != (st->end()); ++it)  {
             SymTabEntry *ste = (SymTabEntry *)(*it);
@@ -227,26 +228,32 @@ vector<Instruction*>* FunctionEntry::codeGen() {
                 if (ve->varKind() == VariableEntry::VarKind::LOCAL_VAR) {
                     IntrCodeElem *elem = NULL;
                     if(ve->initVal() == NULL || ve->initVal()->value() == NULL) {
-                        elem = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
+                        elem = new IntrCodeElem(new ValueNode(new Value(0, ve->type()->tag())), IntrCodeElem::ElemType::VAL_TYPE);
                     }
                     else {
                         iquad = ve->initVal()->iCodeGen();
                         mergeVec(iCodeTable_, iquad);
                         elem = ve->initVal()->getTVar();
                     }
-                    iCodeTable_->push_back(new Quadruple(OpNode::OpCode::ASSIGN, new IntrCodeElem(ve, IntrCodeElem::ElemType::VAR_TYPE), elem));
+                    iCodeTable_->push_back(new Quadruple(OpNode::OpCode::ASSIGN, elem, NULL, new IntrCodeElem(ve, IntrCodeElem::ElemType::VAR_TYPE)));
+                } else if(ve->varKind() == VariableEntry::VarKind::PARAM_VAR) {
+                    bool isFloat = Type::isFloat(ve->type()->tag());
+                    ve->setReg(regMgr->fetchNextAvailReg(!isFloat, ve, 0, inst_vec));
+                    inst_vec->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, TEMP_REG,
+                                                        ve->getReg(), "", "", "Loading param: " + ve->name()));
+                    inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, TEMP_REG, "1" ,TEMP_REG));
+
                 }
             }
         }
     }
 
-    iquad = NULL;
     iquad = body_->iCodeGen();
 
     mergeVec(iCodeTable_, iquad);
     printICode();
-    //TODO:Generate Low level Code
-    //mergeVec(inst_vec, body()->codeGen());
+    mergeVec(inst_vec, Quadruple::iCodeToAsmGen(iCodeTable_));
+
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, BP_REG, SP_REG, "", "" ,"Function Exit: Restoring BP"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::LDI, SP_REG, BP_REG, "", "", "Loading BP from stack"));

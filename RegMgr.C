@@ -78,7 +78,6 @@ string RegMgr::fetchNextAvailReg(bool isInt, VariableEntry *ve, int priority, ve
     string reg_str = os.str();
     if (ve != NULL) {
         ve->setReg(reg_str);
-        ve->setMem(false);
         regMap_.insert(make_pair<string, VEntryPriority*>(string(reg_str), new VEntryPriority(ve, priority)));
     }
     return reg_str;
@@ -103,12 +102,13 @@ void RegMgr::purgeReg(string regName) {
     }
     if (regMap_.count(regName) == 1) {
         regMap_.erase(regName);
+        //TODO:Set regName to ""
     }
 }
 
 string RegMgr::getVEReg(VariableEntry *ve, vector<Instruction*> *inst_vec) {
 
-    if (!ve->isMem())
+    if (ve->getReg() != "")
         return ve->getReg();
     bool isFloat = Type::isFloat(ve->type()->tag());
     switch(ve->varKind()) {
@@ -119,8 +119,8 @@ string RegMgr::getVEReg(VariableEntry *ve, vector<Instruction*> *inst_vec) {
         break;
     case  VariableEntry::VarKind::LOCAL_VAR:
         ve->setReg(fetchNextAvailReg(!isFloat, ve, 0, inst_vec));
-        inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, BP_REG, to_string(ve->offSet()) ,TEMP_REG));
-        inst_vec->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, TEMP_REG));
+        //inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, BP_REG, to_string(ve->offSet()) ,TEMP_REG));
+        //inst_vec->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, TEMP_REG));
         break;
     case  VariableEntry::VarKind::TEMP_VAR:
         ve->setReg(fetchNextAvailReg(!isFloat, ve, 0, inst_vec));

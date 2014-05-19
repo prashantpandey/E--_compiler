@@ -173,17 +173,17 @@ vector<Quadruple*>* WhileNode::iCodeGen() {
         inst_vec->at(0)->setLabel(startLabel_);
     }
 
+    IntrCodeElem *endLabelTemp =  new IntrCodeElem(new IntrLabel(endLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
     IntrCodeElem *cmpVar = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
-    Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, cond_->getTVar());
+    Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, NULL, cond_->getTVar());
     inst_vec->push_back(tempQuad);
-    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), NULL, NULL, endLabel_));
+    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), endLabelTemp));
 
     mergeVec(inst_vec, comp_->iCodeGen());
 
     IntrCodeElem *startLabelTemp =  new IntrCodeElem(new IntrLabel(startLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
     inst_vec->push_back(new Quadruple(OpNode::OpCode::JMP, startLabelTemp));
 
-    IntrCodeElem *endLabelTemp =  new IntrCodeElem(new IntrLabel(endLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
     inst_vec->push_back(new Quadruple(OpNode::OpCode::DEFAULT, endLabelTemp));
 
     return inst_vec;
@@ -245,6 +245,8 @@ vector<Quadruple*>* IfNode::iCodeGen() {
 
     elseLabel_ = regMgr->getNextLabel();
     endLabel_ = regMgr->getNextLabel();
+    IntrCodeElem *endLabelTemp =  new IntrCodeElem(new IntrLabel(endLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
+    IntrCodeElem *elseLabelTemp =  new IntrCodeElem(new IntrLabel(elseLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
 
     if(cond_ != NULL) {
         mergeVec(inst_vec, cond_->iCodeGen());
@@ -252,15 +254,13 @@ vector<Quadruple*>* IfNode::iCodeGen() {
 
     // TODO: implement short circuit of expressions
     IntrCodeElem *cmpVar = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
-    Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, cond_->getTVar());
-    inst_vec->push_back(tempQuad);
-    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), NULL, NULL, elseLabel_));
+    Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, NULL,  cond_->getTVar());
+    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), elseStmt() ? elseLabelTemp : endLabelTemp));
 
     mergeVec(inst_vec, then_->iCodeGen());
-    IntrCodeElem *endLabelTemp =  new IntrCodeElem(new IntrLabel(endLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
-    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMP, endLabelTemp));
 
     if(elseStmt() != NULL) {
+        inst_vec->push_back(new Quadruple(OpNode::OpCode::JMP, endLabelTemp));
         vector<Quadruple*>* stmtLst = else_->iCodeGen();
         stmtLst->at(0)->setLabel(elseLabel_);
         mergeVec(inst_vec, stmtLst);
@@ -516,13 +516,12 @@ vector<Instruction*>* InvocationNode::codeGen() {
     vector<Instruction*>* inst_vec = new vector<Instruction*>();
 
     // TODO: Add code for pushing all the params to the stack
-    string reg = regMgr->fetchNextAvailReg(true);
     string label = regMgr->getNextLabel();
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVL, label, reg));
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, reg, SP_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVL, "\"" + label + "\"", RET_ADDR_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, RET_ADDR_REG, SP_REG));
     inst_vec->push_back(Instruction::decrSP());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, ((FunctionEntry*)symTabEntry())->getALabel()));
-    //inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, nullptr, nullptr, label));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, "", "", label));
 
     return inst_vec;
 }
@@ -1243,7 +1242,7 @@ vector<Quadruple*>* OpNode::iCodeGen() {
         break;
     case 2:
         if(opCode_ == OpNode::OpCode::ASSIGN)
-            quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), NULL));
+            quad->push_back(new Quadruple(opCode_, operands->at(1), NULL, operands->at(0)));
         else
             quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), tempVarEnt));
         break;

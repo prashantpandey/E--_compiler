@@ -1,32 +1,20 @@
-
-
 event open (string a1 , int a2 , unsigned int a3);
 
-int i = 2 ;
-int j = 3 ;
-int k = 4.0 ;
-double f = 3.3;
+int a;
+int b;
+int c;
 
-byte b ;
-string s ;
-
-int g(int x, double y, CString u) {
-         int a,b,c;
-         return 1;
+void foo(int h){
+    a = h;
+    if (a > 1){
+	foo(h-1);
+    }
+}
+void abc() {
+    int g = 2;
+    int h;
+    h = 100 * g;
+    foo(h);
 };
 
-int f(){
- 	int a,b;
-        return ((a+b));
-
- };
-
-open(file, flags, mode) -> { 
-
-    i = (23 * (-i)/j) - f - (45 % j) ;
-
-    i = s * 1 % f;
-    i = b + s - f ;
-} ;
-
-
+open(file, flags, mode) -> {;};

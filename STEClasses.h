@@ -159,7 +159,7 @@ public:
         initVal(init);
         const_ = false;
         inMem_ = false;
-        regName_ = string("");
+        regName_ = "";
         temp_ = false;
         iCodeTable_ = new vector<Quadruple*>();
     };
