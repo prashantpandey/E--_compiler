@@ -305,7 +305,7 @@ public:
 
     string toString(bool newline = true);
 
-    static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad, bool showComment = true);
+    static vector<Instruction*>* iCodeToAsmGen(vector<Quadruple*> *quad, bool showComment = true, bool purgeRegisters = true);
     static int tempCnt_;
     static string fetchTempVar();
     static void resetTempCnt();

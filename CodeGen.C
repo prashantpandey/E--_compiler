@@ -112,6 +112,23 @@ string Quadruple::toString(bool newLine) {
     return os.str();
 }
 
+bool IntrCodeElem::equals(IntrCodeElem *p) {
+    if (p->type_ != this->type_)
+        return false;
+    if (this->getElem() == p->getElem())
+        return true;
+    switch (this->type_)
+    {
+    case ElemType::VAL_TYPE:
+        return (((ValueNode*)progElem_)->value()->toString() == ((ValueNode*)p->progElem_)->value()->toString());
+    case ElemType::LABEL_TYPE:
+    case ElemType::QUAD_TYPE:
+    case ElemType::PARAM_TYPE:
+        //TODO
+    default:
+        return false;
+    }
+}
 
 string IntrCodeElem::toString(IntrCodeElem *ice) {
 
@@ -165,15 +182,87 @@ void Quadruple::resetTempCnt() {
 
 bool Quadruple::isEqual(Quadruple *quad) {
     /*
-        if(quad->opc_ == opc_) {
-            if(quad->opr1_->name().compare(opr1_->name()) == 0) {
-                if(quad->opr2_->name().compare(opr2_->name()) ==0) {
-                    return true;
-                }
+       if(quad->opc_ == opc_) {
+       if(quad->opr1_->name().compare(opr1_->name()) == 0) {
+       if(quad->opr2_->name().compare(opr2_->name()) ==0) {
+       return true;
+       }
+       }
+       }
+     */
+    return false;
+}
+
+static bool isAssociative(OpNode::OpCode opc) {
+    switch (opc) {
+    case OpNode::OpCode::PLUS:
+    case OpNode::OpCode::MULT:
+        return true;
+    default:
+        return false;
+    }
+}
+
+static bool isAirthmeticOpr(OpNode::OpCode opc) {
+    switch (opc) {
+    case OpNode::OpCode::PLUS:
+    case OpNode::OpCode::MINUS:
+    case OpNode::OpCode::MULT:
+    case OpNode::OpCode::DIV:
+        return true;
+    default:
+        return false;
+    }
+}
+static void optimiseQuadruples(vector<Quadruple*> *quads) {
+    vector<Quadruple*>::iterator it1, it2;
+    int quadSize = quads->size();
+    for(int i = 0; i < quadSize - 2; i++) {
+        Quadruple *quad = quads->at(i);
+        //cout << "~~~~~~~~~~~~~~~~" << quad->toString();
+        set<ProgramElem*> *replaceSet = new set<ProgramElem*>();
+        if (!isAirthmeticOpr(quad->getOpc()))
+            continue;
+        bool associative = isAssociative(quad->getOpc());
+        IntrCodeElem *mOpr1 = quad->getOpr1();
+        IntrCodeElem *mOpr2 = quad->getOpr2();
+        IntrCodeElem *mRes = quad->getRes();
+        for(int j = i + 1; j < quadSize; j++) {
+            Quadruple *quad2 = quads->at(j);
+            IntrCodeElem *cOpr1 = quad2->getOpr1();
+            IntrCodeElem *cOpr2 = quad2->getOpr2();
+            IntrCodeElem *cRes = quad2->getRes();
+            //cout << "\n*****" << quad2->toString();
+            if (cOpr1 && replaceSet->count(cOpr1->getElem()))
+                quad2->setOpr1(mRes);
+            if (cOpr2 && replaceSet->count(cOpr2->getElem()))
+                quad2->setOpr2(mRes);
+            if (cRes && (cRes->equals(mOpr1) || cRes->equals(mOpr2)))
+                break; // Variables reassigned
+            if (!isAirthmeticOpr(quad2->getOpc()))
+                continue;
+            if (quad2->getOpc() == quad->getOpc() && ((mOpr1->equals(cOpr1) && mOpr2->equals(cOpr2))
+                    || (associative && mOpr1->equals(cOpr2) && mOpr2->equals(cOpr1)))) {
+                //	cout <<"~~~~~~";
+                replaceSet->insert(cRes->getElem());
+                //	cout << "\n&&&&&&&&&&&&&&&&&&& " << cRes->getElem();
+                quads->erase(quads->begin() + j);
+                j--;
+                quadSize = quads->size();
             }
         }
-    */
-    return false;
+        delete(replaceSet);
+    }
+
+
+
+
+    /*cout << "\nAfter Optimization\n";
+
+    for(vector<Quadruple*>::iterator it = quads->begin(); it != quads->end(); ++it) {
+    cout << (*it)->toString();
+    }
+    cout << "\nOptimization END\n";*/
 }
 
 OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
@@ -235,7 +324,7 @@ static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) 
     {
         vector<Quadruple*> *temp = new vector<Quadruple*>();
         temp->push_back((Quadruple*)(e->getElem()));
-        return Quadruple::iCodeToAsmGen(temp, false)->at(0)->toString(false);
+        return Quadruple::iCodeToAsmGen(temp, false, false)->at(0)->toString(false);
     }
     case IntrCodeElem::ElemType::LABEL_TYPE:
         return ((IntrLabel*)(e->getElem()))->getLabel();
@@ -301,10 +390,9 @@ static void insertIntoSet(IntrCodeElem* e,  set<VariableEntry*> *entrySet) {
     }
 
 }
-//TODO: For CALL parse entryset and flush all the variables onto stack
 //How to handle global?
-vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool showComment) {
-
+vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool showComment, bool purgeRegisters) {
+    optimiseQuadruples(quad);
     IntrCodeElem *ve1, *ve2, *ve3;
     string label = "";
     set<VariableEntry*> *entrySet = new set<VariableEntry*>();
@@ -325,6 +413,8 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
             for (it=entrySet->begin(); it!=entrySet->end(); ++it) {
                 VariableEntry *ve = (*it);
                 if (ve->getReg() == "")
+                    continue;
+                if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
                     continue;
                 bool isFloat = Type::isFloat(ve->type()->tag());
                 inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::STF : Instruction::InstructionSet::STI,
@@ -352,6 +442,8 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
             for (rit=entrySet->rbegin(); rit!=entrySet->rend(); ++rit) {
                 VariableEntry *ve = (*rit);
                 if (ve->getReg() == "")
+                    continue;
+                if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
                     continue;
                 bool isFloat = Type::isFloat(ve->type()->tag());
                 inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI,
@@ -383,36 +475,16 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
         mergeVec(inst_set, instructionSet);
         delete(instructionSet);
     }
-    return inst_set;
-    /*
-        checkRegOrTemp(ve1, regName1);
-    checkRegOrTemp(ve2, regName2);
-    checkRegOrTemp(ve3, regName3);
-    //printf("%s %t %s %t %s", (ve1->name()).c_str(), (ve2->name()).c_str(), (ve3->name()).c_str());
-    //printf("REg1 %s reg2 %s reg3 %s ", regName1.c_str(), regName2.c_str(), regName3.c_str());
-        //TODO:: Map the opcode to instruction set
-        instr = new Instruction(getInstr(opc, ve3->type()), regName1, regName2, regName3, "", "from icodeTOasm");
-        inst_set->push_back(instr);
+    if (purgeRegisters) {
+        std::set<VariableEntry*>::iterator it;
+        for (it=entrySet->begin(); it!=entrySet->end(); ++it) {
+            VariableEntry *ve = (*it);
+            if (ve->getReg() == "")
+                continue;
+            if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
+                continue;
+            regMgr->purgeReg(ve->getReg());
+        }
     }
     return inst_set;
-    */
 }
-
-/*
-bool Quadruple::checkRegOrTemp(IntrCodeElem *ve, string &regName) {
-    if(ve != NULL) {
-        if(ve->isTemp()) { // temperary true
-            regName = regMgr->fetchNextAvailReg(!Type::isInt(ve->type()->tag()), ve, 0);
-            ve->setReg(regName);
-        }
-        else {
-            regName = ve->getReg();
-        }
-
-	//printf("\n %s", regName.c_str());
-	// delete(ve);
-    }
-    return false;
-//    return ve->isTemp();
-}
-*/

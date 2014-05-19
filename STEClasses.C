@@ -177,7 +177,6 @@ vector<Instruction*>* VariableEntry::fetchExprRegValue() {
     switch(expr->exprNodeType()) {
     case ExprNode::ExprNodeType::OP_NODE:
         insertQuadrupleSet(initVal()->iCodeGen());
-        // TODO: Call code generation on the quadruple table
         break;
     case ExprNode::ExprNodeType::REF_EXPR_NODE:
         ((VariableEntry*)((RefExprNode*)expr)->symTabEntry())->getReg();
@@ -187,7 +186,6 @@ vector<Instruction*>* VariableEntry::fetchExprRegValue() {
         break;
     case ExprNode::ExprNodeType::INV_NODE:
         insertQuadrupleSet(initVal()->iCodeGen());
-        // TODO: Call code generation on the quadruple table
         break;
     }
     // TODO: Call code generation on the quadruple table
@@ -214,12 +212,14 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     aLabel_ = regMgr->getNextLabel();
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "", aLabel_, "Function Start:" + name() + ", Saving BP"));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, SP_REG, "2" ,TEMP_REG, aLabel_,
+                                        "Function Start:" + name() + ", Setting temp register to load params"));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "",
+                                        "", "Saving BP"));
     inst_vec->push_back(Instruction::decrSP());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, SP_REG, BP_REG, "", "", "Saving SP to BP"));
     vector<Quadruple*> *iquad;
     const SymTab *st = NULL;
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, BP_REG, "2" ,TEMP_REG, "", "Setting temp register to load params"));
     if ((st = symTab()) != nullptr) {
         for (SymTab::const_iterator it = st->begin(); it != (st->end()); ++it)  {
             SymTabEntry *ste = (SymTabEntry *)(*it);

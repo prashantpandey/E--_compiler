@@ -860,11 +860,6 @@ bool PatNode::hasSeqOps() const
 
 bool PatNode::hasAnyOrOther() const
 {
-    /*
-       if(kind() == BasePatNode::PatNodeKind::UNDEFINED)
-       return true;
-       return false;
-       */
     bool flag1 = true;
     bool flag2 = true;
     if(pat1() != NULL) {

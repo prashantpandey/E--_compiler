@@ -6,6 +6,8 @@ int c;
 
 void foo(int h){
     a = h;
+    a = (h + 1) + (a + 1);
+    a = h + 1;
     if (a > 1){
 	foo(h-1);
     }
