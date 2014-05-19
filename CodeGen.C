@@ -495,6 +495,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
         delete(instructionSet);
     }
     if (purgeRegisters) {
+        Quadruple::resetTempCnt();
         std::set<VariableEntry*>::iterator it;
         for (it=entrySet->begin(); it!=entrySet->end(); ++it) {
             VariableEntry *ve = (*it);

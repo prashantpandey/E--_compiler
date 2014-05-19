@@ -388,7 +388,8 @@ vector<Quadruple*>* RefExprNode::iCodeGen() {
     vector<Quadruple*> *quad = new vector<Quadruple*>();
     IntrCodeElem *tempVar = new IntrCodeElem(sym_, IntrCodeElem::ElemType::REF_EXPR_TYPE);
     if(getResultType()->tag() != sym_->type()->tag()) {
-        IntrCodeElem *newTemp = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
+        IntrCodeElem *newTemp = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(),
+                VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
         quad->push_back(new Quadruple(OpNode::OpCode::MOVIF, tempVar, NULL, newTemp));
     }
     setTVar(tempVar);

@@ -1,7 +1,7 @@
 event open (string a1 , int a2 , unsigned int a3);
 
-int a;
-int b;
+int a = 2;
+int b = a + 4;
 int c;
 
 void foo(int h){

@@ -37,10 +37,18 @@ void GlobalEntry::checkType() const
 }
 
 
+static void pICode(vector<Quadruple*> *p) {
+    ostringstream os;
+    for(vector<Quadruple*>::iterator it = p->begin(); it != p->end(); ++it) {
+        os << (*it)->toString();
+    }
+    cout << os.str() << endl;
+}
 
 void GlobalEntry::genFinalCode(string progName) {
     const SymTab *st = NULL;
     progCode_ = new ProgCode(progName);
+    vector<Quadruple*> *iCodeTable_ = new vector<Quadruple*>();
 
     // initialize the global vars in global/static section
     if ((st = symTab()) != nullptr) {
@@ -50,7 +58,20 @@ void GlobalEntry::genFinalCode(string progName) {
         for (; it != (st->end()); ++it) {
             SymTabEntry *ste = (SymTabEntry *)(*it);
             if (ste->kind() == SymTabEntry::Kind::VARIABLE_KIND && ((VariableEntry*)ste)->varKind() == VariableEntry::VarKind::GLOBAL_VAR) {
-                codeModGlobalSec->insertInstructionSet(((VariableEntry*)ste)->codeGen());
+                VariableEntry *ve = (VariableEntry*)ste;
+                if (!ve->isMem()) {
+                    ve->setReg(regMgr->fetchNextAvailReg(!Type::isFloat(ve->type()->tag())));
+                }
+                IntrCodeElem *elem = NULL;
+                if(ve->initVal() == NULL) {
+                    elem = new IntrCodeElem(new ValueNode(new Value(0, ve->type()->tag())), IntrCodeElem::ElemType::VAL_TYPE);
+                }
+                else {
+                    mergeVec(iCodeTable_, ve->initVal()->iCodeGen());
+                    elem = ve->initVal()->getTVar();
+                }
+                iCodeTable_->push_back(new Quadruple(OpNode::OpCode::ASSIGN, elem, NULL, new IntrCodeElem(ve, IntrCodeElem::ElemType::VAR_TYPE)));
+
             }
             if (ste->kind() == SymTabEntry::Kind::FUNCTION_KIND) {
                 FunctionEntry *fe = (FunctionEntry *)ste;
@@ -60,6 +81,8 @@ void GlobalEntry::genFinalCode(string progName) {
             }
 
         }
+        pICode(iCodeTable_);
+        codeModGlobalSec->insertInstructionSet(Quadruple::iCodeToAsmGen(iCodeTable_));
         if (rules_.size() != 0) {
             for(vector<RuleNode*>::const_iterator it = rules_.begin(); it != rules_.end(); ++it) {
                 codeMode = new CodeModule("Rule");
@@ -194,13 +217,8 @@ vector<Instruction*>* VariableEntry::fetchExprRegValue() {
     return exprInst;
 }
 
-
 void FunctionEntry::printICode() {
-    ostringstream os;
-    for(vector<Quadruple*>::iterator it = iCodeTable_->begin(); it != iCodeTable_->end(); ++it) {
-        os << (*it)->toString();
-    }
-    cout << os.str();
+    pICode(iCodeTable_);
 }
 
 
@@ -227,7 +245,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
                 VariableEntry *ve = (VariableEntry *) ste;
                 if (ve->varKind() == VariableEntry::VarKind::LOCAL_VAR) {
                     IntrCodeElem *elem = NULL;
-                    if(ve->initVal() == NULL || ve->initVal()->value() == NULL) {
+                    if(ve->initVal() == NULL) {
                         elem = new IntrCodeElem(new ValueNode(new Value(0, ve->type()->tag())), IntrCodeElem::ElemType::VAL_TYPE);
                     }
                     else {
