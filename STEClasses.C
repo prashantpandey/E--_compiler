@@ -254,7 +254,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     aLabel_ = regMgr->getNextLabel();
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, SP_REG, "2" ,TEMP_REG, aLabel_,
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "2" ,TEMP_REG, aLabel_,
                                         "Function Start-" + name() + ", Setting temp register to load params"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "",
                                         "", "Saving BP"));
@@ -283,7 +283,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
                     ve->setReg(regMgr->fetchNextAvailReg(!isFloat, ve, 0, inst_vec));
                     inst_vec->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, TEMP_REG,
                                                         ve->getReg(), "", "", "Loading param: " + ve->name()));
-                    inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, TEMP_REG, "1" ,TEMP_REG));
+                    inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, TEMP_REG, "1" ,TEMP_REG));
 
                 }
             }
