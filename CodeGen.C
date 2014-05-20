@@ -417,7 +417,7 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::DEFAULT, {})
 };
 
-static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) {
+static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec, bool isTarget = false) {
     if(!e)
         return "";
     switch(e->getType()) {
@@ -426,7 +426,7 @@ static string instructionParam(IntrCodeElem *e, vector<Instruction*> *inst_vec) 
     case IntrCodeElem::ElemType::REF_EXPR_TYPE:
     {
         VariableEntry *ve = (VariableEntry*)(e->getElem());
-        return regMgr->getVEReg(ve, inst_vec);
+        return regMgr->getVEReg(ve, inst_vec, isTarget);
     }
     case IntrCodeElem::ElemType::VAL_TYPE:
     {
@@ -487,7 +487,7 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
     Instruction::InstructionSet instCode = OpCodeInstMap::fetchInstr(opc, instNum);
     param1 = instructionParam(e1, inst_vec);
     param2 = instructionParam(e2, inst_vec);
-    param3 = instructionParam(e3, inst_vec);
+    param3 = instructionParam(e3, inst_vec, true);
 
     Instruction *inst = new Instruction(instCode, param1, param2, param3, label, comment);
     inst_vec->push_back(inst);
@@ -527,12 +527,15 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
 
         if (opc == OpNode::OpCode::CALL) {
             std::set<VariableEntry*>::iterator it;
-            string reg = instructionParam(ve3, inst_set);
+            string reg = instructionParam(ve3, inst_set, true);
             for (it=entrySet->begin(); it!=entrySet->end(); ++it) {
                 VariableEntry *ve = (*it);
                 if (ve->getReg() == "")
                     continue;
-                if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
+                if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && ve->isMem()) {
+                    regMgr->purgeReg(ve->getReg());
+                    continue;
+                } else if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
                     continue;
                 bool isFloat = Type::isFloat(ve->type()->tag());
                 inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::STF : Instruction::InstructionSet::STI,

@@ -75,6 +75,7 @@ vector<Instruction*>* RuleNode::codeGen() {
 
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     inst_vec->push_back(new Instruction(pat_->getLabel()));
+    jmpName_ = pat_->getLabel().substr(PrimitivePatNode::labelPrefix.length());
     iCodeTable_ = pat_->iCodeGen();
     mergeVec(iCodeTable_, reaction_->iCodeGen());
     printICode();

@@ -874,6 +874,10 @@ public:
         return reaction_;
     };
 
+    string getJmpName() {
+        return jmpName_;
+    }
+
     void printICode();
 
     const Type* typeCheck() const;
@@ -886,6 +890,7 @@ private:
     BlockEntry    *rste_;
     BasePatNode *pat_;
     StmtNode *reaction_;
+    string jmpName_;
 
     RuleNode(const RuleNode&);
     vector<Quadruple*>* iCodeTable_;

@@ -49,6 +49,7 @@ void GlobalEntry::genFinalCode(string progName) {
     const SymTab *st = NULL;
     progCode_ = new ProgCode(progName);
     vector<Quadruple*> *iCodeTable_ = new vector<Quadruple*>();
+    vector<string> *ruleNames = new vector<string>();
 
     // initialize the global vars in global/static section
     if ((st = symTab()) != nullptr) {
@@ -87,11 +88,33 @@ void GlobalEntry::genFinalCode(string progName) {
             for(vector<RuleNode*>::const_iterator it = rules_.begin(); it != rules_.end(); ++it) {
                 codeMode = new CodeModule("Rule");
                 codeMode->insertInstructionSet((*it)->codeGen());
-                codeMode->insertInstructionSet(new Instruction(Instruction::InstructionSet::JMPI, RET_ADDR_EREG));
+                ruleNames->push_back((*it)->getJmpName());
+                codeMode->insertInstructionSet(new Instruction(Instruction::InstructionSet::JMP, "EventMStart"));
                 progCode_->insertModule(codeMode);
             }
         }
         Instruction* firstInst = codeModGlobalSec->firstInst();
+        vector<Instruction*> *inst_set = new vector<Instruction*>();
+
+        string evnReg = regMgr->fetchNextAvailReg(true);
+        inst_set->push_back(new Instruction(Instruction::InstructionSet::IN, evnReg, "", "", "EventMStart"));
+        inst_set->push_back(new Instruction(Instruction::InstructionSet::JMPC, "GT 0 " + evnReg, "EventMOut", "", ""));
+        bool anyEvent = false;
+        for(unsigned int i=0; i < ruleNames->size(); i++) {
+            string name = ruleNames->at(i);
+            if (name.compare("any") == 0) {
+                anyEvent = true;
+                continue;
+            }
+            int f = name.at(0);
+            inst_set->push_back(new Instruction(Instruction::InstructionSet::JMPC, "EQ " + to_string(f) + " " + evnReg, PrimitivePatNode::labelPrefix + (char)f));
+        }
+        if(anyEvent)
+            inst_set->push_back(new Instruction(Instruction::InstructionSet::JMP, PrimitivePatNode::labelPrefix + "any"));
+        inst_set->push_back(new Instruction(Instruction::InstructionSet::JMP, "EventMStart"));
+        inst_set->push_back(new Instruction(Instruction::InstructionSet::PRTS, "\"\\nDone\\n\"", "", "", "EventMOut"));
+        codeModGlobalSec->insertInstructionSet(inst_set);
+
         if (firstInst)
             firstInst->setLabel("begin");
         progCode_->insertModule(codeModGlobalSec);
