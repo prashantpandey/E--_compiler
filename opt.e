@@ -4,8 +4,9 @@ string s = "\\n";
 
 int abc(int a2, double f) {
     double x = a2 + f;
-    double y = a2 + 1;
-    double z = a2 + 1;
+    int y = a2 + 1;
+    int z = a2 + 1;
+    double g = a2 + f;
 
     while (a2 < 1000) {
 	x = a2 + f;

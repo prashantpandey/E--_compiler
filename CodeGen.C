@@ -255,7 +255,7 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
         //cout << "~~~~~~~~~~~~~~~~" << quad->toString();
         bool isDef = false, isAirthmetic = false;
         set<ProgramElem*> *replaceSet = new set<ProgramElem*>();
-	if (quad->getLabel() == "")
+	if (quad->getLabel() != "")
 	    continue;
         if (!(isAirthmetic = isAirthmeticOpr(quad->getOpc())) && !(isDef = isAssigment(quad->getOpc())))
             continue;
@@ -275,7 +275,7 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
             IntrCodeElem *cRes = quad2->getRes();
             //cout << "\n*****" << quad2->toString();
             if (isDef) {
-		if (quad2->getOpc() == OpNode::OpCode::JMP || quad2->getOpc() == OpNode::OpCode::JMP)
+		if (quad2->getOpc() == OpNode::OpCode::JMP || quad2->getOpc() == OpNode::OpCode::JMPC)
 		    break;
                 if (cOpr1 && cOpr1->uses(mRes))
                     break;
@@ -289,7 +289,7 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
                 }
                 continue;
             }
-		if (quad2->getOpc() == OpNode::OpCode::JMP || quad2->getOpc() == OpNode::OpCode::JMP)
+	    if (quad2->getOpc() == OpNode::OpCode::JMP || quad2->getOpc() == OpNode::OpCode::JMPC)
 		    break;
             if (cOpr1 && replaceSet->count(cOpr1->getElem()))
                 quad2->setOpr1(mRes);

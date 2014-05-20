@@ -23,6 +23,7 @@ int abc(int a2, double f) {
         a2 = a2 + 1;
     }
 
+    prt->s;
     prt -> tp1;
     prt->s;
     if (tp3 < 100)
