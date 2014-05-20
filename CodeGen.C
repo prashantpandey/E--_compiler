@@ -539,7 +539,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
                     continue;
                 bool isFloat = Type::isFloat(ve->type()->tag());
                 inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::STF : Instruction::InstructionSet::STI,
-                                                    ve->getReg(), SP_REG, "" , "", "Flushing Registers: " + ve->name()));
+                                                    ve->getReg(), SP_REG, "" , "", "Flushing Registers- " + ve->name()));
                 inst_set->push_back(Instruction::decrSP());
             }
             InvocationNode *in = (InvocationNode*)(ve1->getElem());
@@ -550,7 +550,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
                 insertIntoSet((*it), entrySet);
                 bool isFloat = Type::isFloat((*it)->getElem()->type()->tag());
                 inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::STF : Instruction::InstructionSet::STI,
-                                                    val, SP_REG, "", "", "Pushing parameter: " + IntrCodeElem::toString((*it))));
+                                                    val, SP_REG, "", "", "Pushing parameter- " + IntrCodeElem::toString((*it))));
                 inst_set->push_back(Instruction::decrSP());
             }
 

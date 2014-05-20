@@ -126,12 +126,12 @@ void GlobalEntry::genFinalCode(string progName) {
 void GlobalEntry::serializeAsm(ostream& os) const
 {
     vector<CodeModule*> *modules = progCode_->getModule();
-
+    os << "JMP begin\n";
     for(vector<CodeModule*>::iterator it = modules->begin(); it != modules->end(); ++it) {
+        os << "//\n";
         for (vector<Instruction*>::iterator inst = ((*it)->getInstructions())->begin(); inst != ((*it)->getInstructions())->end(); ++inst) {
             os << (*inst)->toString();
         }
-        os << "\n";
     }
 }
 
@@ -254,7 +254,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     aLabel_ = regMgr->getNextLabel();
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, SP_REG, "2" ,TEMP_REG, aLabel_,
-                                        "Function Start:" + name() + ", Setting temp register to load params"));
+                                        "Function Start-" + name() + ", Setting temp register to load params"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "",
                                         "", "Saving BP"));
     inst_vec->push_back(Instruction::decrSP());
