@@ -219,7 +219,11 @@ main(int argc, char *argv[], char *envp[]) {
         ge->print(cout, 0);
         if (errCount() == 0) {
             ge->genFinalCode("test");
-            ofstream fos(string(yyfilename) + ".i");
+	    string fileName = string(yyfilename);
+	    int dotIndex = fileName.find('.');
+	    if(dotIndex > -1)
+		fileName = fileName.substr(0, dotIndex);
+            ofstream fos(fileName + ".i");
             ge->serializeAsm(fos);
             fos.close();
         }
