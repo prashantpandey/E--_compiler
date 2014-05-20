@@ -562,6 +562,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, ((FunctionEntry*)symTabEntry())->getALabel()));
     inst_vec->push_back(new Instruction(label));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, "R000"));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTS, "\"\\n\""));
 
     return inst_vec;
 }
