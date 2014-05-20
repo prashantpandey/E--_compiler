@@ -350,6 +350,8 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
             IntrCodeElem *mRes = quad->getRes();
             if (!mRes || mRes->getType() != IntrCodeElem::ElemType::TEMP_VAR_TYPE)
                 continue;
+	    if (quad->getOpc() == OpNode::OpCode::CALL)
+		continue;
             int j;
             for(j = i + 1; j < quadSize; j++) {
                 Quadruple *quad2 = quads->at(j);
@@ -372,16 +374,14 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
 
 
 
-
-    /*
+/*
        cout << "\nAfter Optimization\n";
 
        for(vector<Quadruple*>::iterator it = quads->begin(); it != quads->end(); ++it) {
        cout << (*it)->toString();
        }
        cout << "\nOptimization END\n";
-     */
-}
+*/}
 
 OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::UMINUS, {Instruction::InstructionSet::NEG, Instruction::InstructionSet::FNEG}),
@@ -578,7 +578,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
                 if (ve->getReg() == "")
                     continue;
                 if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && ve->isMem()) {
-                    regMgr->purgeReg(ve->getReg());
+                    regMgr->purgeReg(ve->getReg(), inst_set);
                     continue;
                 } else if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
                     continue;
@@ -652,7 +652,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
                 continue;
             if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
                 continue;
-            regMgr->purgeReg(ve->getReg());
+            regMgr->purgeReg(ve->getReg(), inst_set);
         }
     }
     return inst_set;

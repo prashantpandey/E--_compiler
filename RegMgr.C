@@ -84,7 +84,7 @@ string RegMgr::fetchNextAvailReg(bool isInt, VariableEntry *ve, int priority, ve
 }
 
 
-void RegMgr::purgeReg(string regName) {
+void RegMgr::purgeReg(string regName, vector<Instruction*> *inst_vec) {
 
     const char *tmp = regName.c_str();
     tmp++;
@@ -101,8 +101,17 @@ void RegMgr::purgeReg(string regName) {
         fReg_[fCountStart_] = true;
     }
     if (regMap_.count(regName) == 1) {
+        unordered_map<string,VEntryPriority*>::iterator got = regMap_.find (regName);
+        if ( got != regMap_.end() && inst_vec) {
+            VariableEntry *ve = got->second->entry();
+	    if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && ve->isMem()) {
+		bool isFloat = Type::isFloat(ve->type()->tag());
+		inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, GLOBAL_REG, to_string(ve->offSet()) ,TEMP_REG));
+		inst_vec->push_back(new Instruction(isFloat ? Instruction::InstructionSet::STI : Instruction::InstructionSet::STF,ve->getReg(), TEMP_REG));
+	    }
+	    ve->setReg("");
+    }
         regMap_.erase(regName);
-        //TODO:Set regName to ""
     }
 }
 
@@ -116,7 +125,7 @@ string RegMgr::getVEReg(VariableEntry *ve, vector<Instruction*> *inst_vec, bool 
         ve->setReg(fetchNextAvailReg(!isFloat, ve, 0, inst_vec));
         if (!isTarget) {
             inst_vec->push_back(new Instruction(Instruction::InstructionSet::SUB, GLOBAL_REG, to_string(ve->offSet()) ,TEMP_REG));
-            inst_vec->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, TEMP_REG));
+            inst_vec->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI, TEMP_REG, ve->getReg() ));
         }
         break;
     case  VariableEntry::VarKind::LOCAL_VAR:
