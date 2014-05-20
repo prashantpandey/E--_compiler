@@ -110,7 +110,7 @@ void GlobalEntry::genFinalCode(string progName) {
                 continue;
             }
             int f = name.at(0);
-            inst_set->push_back(new Instruction(Instruction::InstructionSet::JMPC, "EQ " + to_string(f) + " " + evnReg, PrimitivePatNode::labelPrefix + (char)f));
+            inst_set->push_back(new Instruction(Instruction::InstructionSet::JMPC, "EQ " + to_string(f) + " " + evnReg, PrimitivePatNode::labelPrefix + name));
         }
         if(anyEvent)
             inst_set->push_back(new Instruction(Instruction::InstructionSet::JMP, PrimitivePatNode::labelPrefix + "any"));
@@ -130,6 +130,36 @@ void GlobalEntry::serializeAsm(ostream& os) const
     os << "JMP begin\n";
     for(vector<CodeModule*>::iterator it = modules->begin(); it != modules->end(); ++it) {
         os << "//\n";
+	for (unsigned int i = 0; i < (*it)->getInstructions()->size(); i++) {
+	    Instruction *inst = (*it)->getInstructions()->at(i);
+	    if(inst->getInstr() == Instruction::InstructionSet::BLANK) {
+		Instruction *nextInst = (*it)->getInstructions()->at(i + 1);
+		if (nextInst->getLabel() != "") {
+		    string labelToReplace = nextInst->getLabel();
+		    nextInst->setLabel("");
+		    string labelToReplaceWith = inst->getLabel();
+		    //merge labels
+		    for (unsigned int j = 0; j < (*it)->getInstructions()->size(); j++) {
+			nextInst = (*it)->getInstructions()->at(j);
+			switch(nextInst->getInstr())
+			{
+			case Instruction::InstructionSet::JMP: 
+			    if (nextInst->getParam1() == labelToReplace)
+				nextInst->setParam1(labelToReplaceWith);
+			    break;
+			case Instruction::InstructionSet::JMPC: 
+			    if (nextInst->getParam2() == labelToReplace)
+				nextInst->setParam2(labelToReplaceWith);
+			    break;
+			default:
+			    if (nextInst->getLabel() == labelToReplace)
+				nextInst->setLabel(labelToReplaceWith);
+			    break;
+			}
+		    }
+		}
+	    }
+	}
         for (vector<Instruction*>::iterator inst = ((*it)->getInstructions())->begin(); inst != ((*it)->getInstructions())->end(); ++inst) {
             os << (*inst)->toString();
         }
