@@ -40,7 +40,7 @@ using namespace std;
 #define GLOBAL_REG "R003"
 #define RET_ADDR_REG "R004"
 #define RET_ADDR_EREG "R005"
-#define TEMP_REG "ROO6"
+#define TEMP_REG "R006"
 
 #define GLOBAL_MAX_REG_COUNT 100
 
