@@ -1,26 +1,12 @@
-event open (string a1 , int a2 , unsigned int a3);
+event a(int a2, double a3);
 
-int a = 2;
-int b = a + 4;
-int c;
-
-void foo(int h){
-    a = h;
-    a = h << 2;
-    a = h >> a;
-    a = (h + 1) + (a + 1);
-    a = h + 1;
-}
-void abc() {
-    int g = 2;
-    int h;
+void abc(int a2, double f) {
     string c = "Hello World..!!!";
-    h = 100 * g;
-    foo(h);
-    prt -> g;
+    prt -> a2;
+    prt -> f;
     prt -> c;
 };
 
-open(file, flags, mode) -> {
-    abc();
+a(a2, a3) -> {
+   abc(a2, a3);
 ;};
