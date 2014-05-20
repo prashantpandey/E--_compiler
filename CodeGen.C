@@ -255,6 +255,8 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
         //cout << "~~~~~~~~~~~~~~~~" << quad->toString();
         bool isDef = false, isAirthmetic = false;
         set<ProgramElem*> *replaceSet = new set<ProgramElem*>();
+	if (quad->getLabel() == "")
+	    continue;
         if (!(isAirthmetic = isAirthmeticOpr(quad->getOpc())) && !(isDef = isAssigment(quad->getOpc())))
             continue;
         bool associative = isAssociative(quad->getOpc());
@@ -344,7 +346,7 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
             quadSize--;
         }
     }
-
+/*
     bool codeOptimized;
     do {
         codeOptimized = false;
@@ -376,7 +378,7 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
         }
     } while(codeOptimized);
 
-
+*/
 
 /*
        cout << "\nAfter Optimization\n";
@@ -533,6 +535,26 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
     param1 = instructionParam(e1, inst_vec);
     param2 = instructionParam(e2, inst_vec);
     param3 = instructionParam(e3, inst_vec, true);
+    if (isAirthmeticOpr(opc)) {
+	if(instNum == 1) {
+	    string reg = regMgr->fetchNextAvailReg(false);
+	    if(param1.c_str()[0] == 'R') {
+		inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVIF, param1, reg));
+	    param1 = reg;
+	    } else if (param1.c_str()[0] != 'F'){
+		if(param1.find(".") == string::npos)
+	    	param1 = param1 + ".0";
+	    }
+	    string reg1 = regMgr->fetchNextAvailReg(false);
+	    if(param2.c_str()[0] == 'R') {
+		inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVIF, param2, reg1));
+		param2 = reg1;
+	    } else if (param2.c_str()[0] != 'F'){
+		if(param2.find(".") == string::npos)
+	    	param2 = param2 + ".0";
+	    }
+	}
+    }
     
     Instruction::InstructionSet instCode = OpCodeInstMap::fetchInstr(opc, instNum);
     Instruction *inst = new Instruction(instCode, param1, param2, param3, label, comment);
