@@ -164,7 +164,7 @@ public:
     }
 
     virtual vector<Quadruple*>* iCodeGen() = 0;
-
+    
     void print(ostream& os, int indent=0) const=0;
 
 private:
@@ -280,9 +280,15 @@ public:
     {
         return &arg_;
     }
+
     void print(ostream& os, int indent=0) const;
 
     vector<Quadruple*>* iCodeGen();
+
+    vector<Quadruple*>* iCodeGen(string trueLabel, string falseLabel, int flag);
+
+    static OpCode negOpCode(OpCode opc);
+
 
 private:
     const Type* typeCheck() const;
@@ -801,6 +807,7 @@ private:
     StmtNode *then_, *else_;
     string endLabel_;
     string elseLabel_;
+    string startLabel_;
 
     IfNode(const IfNode&);
 };
