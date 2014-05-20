@@ -478,6 +478,7 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
     case OpNode::OpCode::ASSIGN:
     {
         Type *inst_type = e3->getElem()->type();
+        instNum = Type::isFloat(inst_type->tag()) ? 1:0;
         if(Type::isString(inst_type->tag()))
             instNum = 2;
     }
@@ -485,6 +486,7 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
     case OpNode::OpCode::PRINT:
     {
         Type *inst_type = e1->getElem()->type();
+        instNum = Type::isFloat(inst_type->tag()) ? 1:0;
         if(Type::isString(inst_type->tag()))
             instNum = 2;
     }
