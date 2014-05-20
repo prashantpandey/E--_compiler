@@ -368,6 +368,7 @@ while_stmt		: while_hdr expr_star statement_star {
 			    SymTabEntry* ste = stm.currentScope();
 			    if(ste->kind() == SymTabEntry::Kind::WHILE_BLOCK_KIND) {
 				string key = ((WhileBlockEntry*)ste)->returnStringLabel();
+				// cout << key << endl;
 				$$ = new WhileNode($2, $3, key, $1);
 			    }
 			    stm.leaveScope();

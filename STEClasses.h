@@ -122,7 +122,7 @@ public:
         string label;
         unsigned int i = 0;
         label.append("while_");
-        for(i = 0; i <= whileLabel_.size(); i++) {
+        for(i = 0; i < whileLabel_.size(); i++) {
             label.append(to_string(whileLabel_[i]));
             label.append("_");
         }
