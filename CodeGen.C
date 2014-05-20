@@ -458,6 +458,11 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
         instNum = Type::isFloat(inst_type->tag()) ? 1:0;
     }
     string param1 ="" ,param2 = "", param3 = "";
+    
+    param1 = instructionParam(e1, inst_vec);
+    param2 = instructionParam(e2, inst_vec);
+    param3 = instructionParam(e3, inst_vec, true);
+    
     switch(opc) {
     case OpNode::OpCode::LT:
     case OpNode::OpCode::LE:
@@ -485,17 +490,42 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
     }
     break;
     case OpNode::OpCode::SHL:
-        break;
+    {
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, param1, param3, "", "", "SHL start: " + comment));
+	string label1 = regMgr->getNextLabel();
+	string label2 = regMgr->getNextLabel();
+	string tempReg = regMgr->fetchNextAvailReg(true);
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, param2, tempReg));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, "0", TEMP_REG));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, "GT " + tempReg + " " + TEMP_REG, label2,"", label1));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MUL, param3, "2", param3));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, "1", TEMP_REG, TEMP_REG));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, label1, "", "", "", "SHL Ends"));
+	inst_vec->push_back(new Instruction(label2));
+	regMgr->purgeReg(tempReg);
+        return inst_vec;
+    }
     case OpNode::OpCode::SHR:
-        break;
+    {
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, param1, param3, "", "", "SHL start: " + comment));
+	string label1 = regMgr->getNextLabel();
+	string label2 = regMgr->getNextLabel();
+	string tempReg = regMgr->fetchNextAvailReg(true);
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, param2, tempReg));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, "0", TEMP_REG));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, "GT " + tempReg + " " + TEMP_REG, label2,"", label1));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::DIV, param3, "2", param3));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, "1", TEMP_REG, TEMP_REG));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, label1, "", "", "", "SHL Ends"));
+	inst_vec->push_back(new Instruction(label2));
+	regMgr->purgeReg(tempReg);
+        return inst_vec;
+    }
     default:
         break;
     }
-    Instruction::InstructionSet instCode = OpCodeInstMap::fetchInstr(opc, instNum);
-    param1 = instructionParam(e1, inst_vec);
-    param2 = instructionParam(e2, inst_vec);
-    param3 = instructionParam(e3, inst_vec, true);
 
+    Instruction::InstructionSet instCode = OpCodeInstMap::fetchInstr(opc, instNum);
     Instruction *inst = new Instruction(instCode, param1, param2, param3, label, comment);
     inst_vec->push_back(inst);
     return inst_vec;
