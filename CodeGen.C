@@ -350,6 +350,8 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
             IntrCodeElem *mRes = quad->getRes();
             if (!mRes || mRes->getType() != IntrCodeElem::ElemType::TEMP_VAR_TYPE)
                 continue;
+	    if (quad->getOpc() == OpNode::OpCode::CALL)
+		continue;
             int j;
             for(j = i + 1; j < quadSize; j++) {
                 Quadruple *quad2 = quads->at(j);
@@ -372,16 +374,14 @@ static void optimiseQuadruples(vector<Quadruple*> *quads) {
 
 
 
-
-    /*
+/*
        cout << "\nAfter Optimization\n";
 
        for(vector<Quadruple*>::iterator it = quads->begin(); it != quads->end(); ++it) {
        cout << (*it)->toString();
        }
        cout << "\nOptimization END\n";
-     */
-}
+*/}
 
 OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::UMINUS, {Instruction::InstructionSet::NEG, Instruction::InstructionSet::FNEG}),
