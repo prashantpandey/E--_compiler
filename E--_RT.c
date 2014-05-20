@@ -163,6 +163,7 @@ void E_RT_init(int argc, char* argv[]) {
       exit(1);
    }
    mem = mem+m2;
+   R000 = mem;
 }
 
 void E_RT_exit() {

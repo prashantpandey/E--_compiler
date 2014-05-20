@@ -8,7 +8,7 @@ BISON = bison
 parser:   driveParse.o E--_lexer.o E--_parser.o RegMgr.o  STEClasses.o SymTabMgr.o Value.o Type.o SymTabEntry.o Error.o ParserUtil.o SymTab.o CodeGen.o Ast.o
 	$(CXX) -o $@  $^ -lfl
 assembler:	driver.o ICode_lexer.o ICode_parser.o ICode.tab.h 
-	$(CC) -o demo ICode_lexer.o ICode_parser.o driver.o -lfl
+	$(CC) -g -o  demo ICode_lexer.o ICode_parser.o driver.o -lfl
 
 
 E--_lexer.o:    E--_lexer.C E--.tab.h

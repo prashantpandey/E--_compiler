@@ -55,7 +55,7 @@ void GlobalEntry::genFinalCode(string progName) {
     if ((st = symTab()) != nullptr) {
         SymTab::const_iterator it = st->begin();
         CodeModule* codeModGlobalSec =  new CodeModule("GlobalSec");
-	codeModGlobalSec->insertInstructionSet(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, "", "", "begin"));
+	codeModGlobalSec->insertInstructionSet(new Instruction(Instruction::InstructionSet::MOVI,"10000", SP_REG, "", "begin"));
         CodeModule* codeMode =  NULL;
         for (; it != (st->end()); ++it) {
             SymTabEntry *ste = (SymTabEntry *)(*it);
@@ -97,8 +97,11 @@ void GlobalEntry::genFinalCode(string progName) {
         vector<Instruction*> *inst_set = new vector<Instruction*>();
 
         string evnReg = regMgr->fetchNextAvailReg(true);
+        inst_set->push_back(new Instruction(Instruction::InstructionSet::IN, evnReg));
+        inst_set->push_back(new Instruction(Instruction::InstructionSet::IN, evnReg));
+        inst_set->push_back(new Instruction(Instruction::InstructionSet::IN, evnReg));
         inst_set->push_back(new Instruction(Instruction::InstructionSet::IN, evnReg, "", "", "EventMStart"));
-        inst_set->push_back(new Instruction(Instruction::InstructionSet::JMPC, "GT 0 " + evnReg, "EventMOut", "", ""));
+        inst_set->push_back(new Instruction(Instruction::InstructionSet::JMPC, "GT 64 " + evnReg, "EventMOut", "", ""));
         bool anyEvent = false;
         for(unsigned int i=0; i < ruleNames->size(); i++) {
             string name = ruleNames->at(i);
