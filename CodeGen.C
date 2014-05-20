@@ -578,7 +578,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
                 if (ve->getReg() == "")
                     continue;
                 if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && ve->isMem()) {
-                    regMgr->purgeReg(ve->getReg());
+                    regMgr->purgeReg(ve->getReg(), inst_set);
                     continue;
                 } else if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
                     continue;
@@ -652,7 +652,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
                 continue;
             if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
                 continue;
-            regMgr->purgeReg(ve->getReg());
+            regMgr->purgeReg(ve->getReg(), inst_set);
         }
     }
     return inst_set;
