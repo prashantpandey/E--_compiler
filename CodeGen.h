@@ -88,6 +88,18 @@ public:
         return label_;
     };
 
+    void setParam1(string param1) {
+        param1_ = param1;
+    };
+    
+    void setParam2(string param2) {
+        param2_ = param2;
+    };
+    
+    void setParam3(string param3) {
+        param3_ = param3;
+    };
+    
     void setLabel(string label) {
         label_ = label;
     };

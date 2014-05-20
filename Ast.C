@@ -166,9 +166,9 @@ const Type* WhileNode::typeCheck() const {
 vector<Quadruple*>* WhileNode::iCodeGen() {
     vector<Quadruple*>* inst_vec = new vector<Quadruple*>();
 
-    startLabel_ = key_ + "_start";
+    startLabel_ = key_ + "start";
     beginLabel_ = key_ + "begin";
-    endLabel_ = key_ + "_end";
+    endLabel_ = key_ + "end";
 
     if(cond_ != NULL) {
         mergeVec(inst_vec, ((OpNode*)cond_)->iCodeGen(beginLabel_, endLabel_, 0));
@@ -660,7 +660,7 @@ vector<Quadruple*>* BreakStmtNode::iCodeGen() {
     ostringstream os;
     os << "while_";
     int i = 0;
-    for(vector<int>::iterator it = label.begin(); it != label.end() && i < cnt; ++it, i++) {
+    for(vector<int>::iterator it = label.begin(); it != label.end() && i <= (cnt - num_); ++it, i++) {
         os << to_string(*it) << "_";
     }
     os << "end";
