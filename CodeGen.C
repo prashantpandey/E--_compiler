@@ -604,7 +604,7 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
 		VariableEntry *retVe = (VariableEntry*)(ve3->getElem());
 		bool isFloat = Type::isFloat(retVe->type()->tag());
 		inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF : Instruction::InstructionSet::MOVI
-                                                , retVe->getReg(), isFloat ? RETF_REG : RETI_REG, "", "", "Getting return Value"));
+                                                , isFloat ? RETF_REG : RETI_REG,retVe->getReg(), "", "", "Getting return Value"));
 	    }
             std::set<VariableEntry*>::reverse_iterator rit;
             for (rit=entrySet->rbegin(); rit!=entrySet->rend(); ++rit) {
