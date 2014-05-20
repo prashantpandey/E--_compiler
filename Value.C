@@ -69,7 +69,15 @@ void Value::print(ostream& os, int indent) const {
         os << Type::name(type_->tag());
     }
 }
-
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}
 
 string Value::toString() const {
 
@@ -89,8 +97,11 @@ string Value::toString() const {
         if (Type::isString(type_->tag())) {
             if (sVal_ == NULL)
                 os << "0";
-            else
-                os << "\"" << *sVal_ << "\"";
+            else {
+		string newStr = *sVal_;
+		replaceAll(newStr,"\n","\\n");
+                os << "\"" << newStr << "\"";
+		}
         }
         else if (Type::isInt(t)) {
             if (Type::isSigned(t))
