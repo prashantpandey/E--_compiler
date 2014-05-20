@@ -1,12 +1,16 @@
-event a(int a2, double a3);
+event xyz(int a2, double a3);
 
 void abc(int a2, double f) {
-    string c = "Hello World..!!!";
-    prt -> a2;
-    prt -> f;
-    prt -> c;
+    int g = 0;
+    
+    if((2>3) && (6>7) || (g>0)) {
+	g = 3;
+    }
+    else {
+	g = 4;
+    }
 };
 
-a(a2, a3) -> {
+xyz(a2, a3) -> {
    abc(a2, a3);
 ;};

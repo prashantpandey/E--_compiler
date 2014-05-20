@@ -76,7 +76,7 @@ string Instruction::toString(bool newLine) {
         if (param3_ != "")
             os << " " << param3_;
         if(comment_ != "")
-            os << " // " << comment_;
+            os << "\t\t\t\t// " << comment_;
         if (newLine)
             os << endl;
     }
