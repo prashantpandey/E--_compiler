@@ -595,10 +595,12 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
             }
 
             mergeVec(inst_set, in->codeGen());
-            VariableEntry *retVe = (VariableEntry*)(ve3->getElem());
-            bool isFloat = Type::isFloat(retVe->type()->tag());
-            inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF : Instruction::InstructionSet::MOVI
+	    if(ve3) {
+		VariableEntry *retVe = (VariableEntry*)(ve3->getElem());
+		bool isFloat = Type::isFloat(retVe->type()->tag());
+		inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::MOVF : Instruction::InstructionSet::MOVI
                                                 , retVe->getReg(), isFloat ? RETF_REG : RETI_REG, "", "", "Getting return Value"));
+	    }
             std::set<VariableEntry*>::reverse_iterator rit;
             for (rit=entrySet->rbegin(); rit!=entrySet->rend(); ++rit) {
                 VariableEntry *ve = (*rit);

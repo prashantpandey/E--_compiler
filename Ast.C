@@ -526,7 +526,10 @@ vector<Quadruple*>* InvocationNode::iCodeGen() {
 
     IntrCodeParams* invcParam = new IntrCodeParams(paramTVar);
     IntrCodeElem* invcVar = new IntrCodeElem(this, IntrCodeElem::ElemType::INV_NODE_TYPE);
-    IntrCodeElem* tempVar = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
+    Type *resultType = getResultType();
+    IntrCodeElem* tempVar = nullptr;
+    if (resultType->tag() != Type::TypeTag::VOID)
+	tempVar = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
     quad->push_back(new Quadruple(OpNode::OpCode::CALL, invcVar, new IntrCodeElem(invcParam, IntrCodeElem::ElemType::PARAM_TYPE), tempVar));
     setTVar(tempVar);
 
