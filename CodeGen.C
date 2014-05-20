@@ -554,7 +554,7 @@ static void insertIntoSet(IntrCodeElem* e,  set<VariableEntry*> *entrySet) {
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool showComment, bool purgeRegisters) {
     
     // Optimize Intermediate code before code gen
-    optimiseQuadruples(quad);
+    //optimiseQuadruples(quad);
 
     IntrCodeElem *ve1, *ve2, *ve3;
     string label = "";

@@ -28,6 +28,6 @@ a(a2, a3) -> {
     //prt -> a3;
     //prt -> s;
    res = abc(a2, a3);
-   //prt -> res;
+   prt -> res;
 
 ;};

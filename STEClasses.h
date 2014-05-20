@@ -304,6 +304,10 @@ public:
         return aLabel_;
     }
 
+    string getExitLabel() const {
+	return exitLabel_;
+    }
+
     void incrementArgCnt(int offset) {
         argCnt_ += offset;
     }
@@ -316,6 +320,7 @@ private:
     CompoundStmtNode* body_;
     int argCnt_;
     string aLabel_;
+    string exitLabel_;
     vector<Quadruple*>* iCodeTable_;
 };
 
