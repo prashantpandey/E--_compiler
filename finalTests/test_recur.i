@@ -14,7 +14,7 @@ PRTF F001				// PRINT f
 PRTS R007				// PRINT s  
 ADD R008 1 R010				// PLUS a2 1 T0
 MOVI R010 R008				// ASSIGN T0  a2
-JMPC EQ R008 85 Label2				// JMPC EQ a2 85  Label2 
+JMPC GE R008 85 Label2				// JMPC GE a2 85  Label2 
 JMP Label4				// JMP Label4  
 Label2: MOVI R008 R002
 JMP Label1				// JMP Label1  
@@ -31,8 +31,11 @@ SUB R000 1 R000
 MOVL Label5 R004
 STI R004 R000
 SUB R000 1 R000
+PRTI R000
+PRTS "\n"
 JMP Label0
-Label5: MOVI R002 R012				// Getting return Value
+Label5: PRTI R000
+MOVI R002 R012				// Getting return Value
 LDI R000 R010				// Loading Back Registers:T0
 ADD R000 1 R000
 LDF R000 F001				// Loading Back Registers:f
@@ -62,8 +65,11 @@ SUB R000 1 R000
 MOVL Label6 R004
 STI R004 R000
 SUB R000 1 R000
+PRTI R000
+PRTS "\n"
 JMP Label0
-Label6: MOVI R002 R014				// Getting return Value
+Label6: PRTI R000
+MOVI R002 R014				// Getting return Value
 LDF R000 F010				// Loading Back Registers:a3
 ADD R000 1 R000
 LDI R000 R010				// Loading Back Registers:a2

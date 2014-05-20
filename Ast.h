@@ -846,6 +846,7 @@ private:
     ExprNode *cond_;
     StmtNode *comp_;
     string startLabel_;
+    string beginLabel_;
     string endLabel_;
     string key_;
 

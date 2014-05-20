@@ -167,10 +167,11 @@ vector<Quadruple*>* WhileNode::iCodeGen() {
     vector<Quadruple*>* inst_vec = new vector<Quadruple*>();
 
     startLabel_ = key_ + "_start";
+    beginLabel_ = key_ + "begin";
     endLabel_ = key_ + "_end";
 
     if(cond_ != NULL) {
-        mergeVec(inst_vec, ((OpNode*)cond_)->iCodeGen(startLabel_, endLabel_, 0));
+        mergeVec(inst_vec, ((OpNode*)cond_)->iCodeGen(beginLabel_, endLabel_, 0));
         inst_vec->at(0)->setLabel(startLabel_);
     }
 
@@ -182,8 +183,10 @@ vector<Quadruple*>* WhileNode::iCodeGen() {
     inst_vec->push_back(tempQuad);
     inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), endLabelTemp));
     */
-
-    mergeVec(inst_vec, comp_->iCodeGen());
+    
+    vector<Quadruple*> *stmtLst = comp_->iCodeGen();
+    stmtLst->at(0)->setLabel(beginLabel_);
+    mergeVec(inst_vec, stmtLst);
 
     IntrCodeElem *startLabelTemp =  new IntrCodeElem(new IntrLabel(startLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
     inst_vec->push_back(new Quadruple(OpNode::OpCode::JMP, startLabelTemp));
@@ -557,8 +560,12 @@ vector<Instruction*>* InvocationNode::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVL, label, RET_ADDR_REG));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, RET_ADDR_REG, SP_REG));
     inst_vec->push_back(Instruction::decrSP());
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, "R000"));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTS, "\"\\n\""));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, ((FunctionEntry*)symTabEntry())->getALabel()));
     inst_vec->push_back(new Instruction(label));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, "R000"));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTS, "\"\\n\""));
 
     return inst_vec;
 }
