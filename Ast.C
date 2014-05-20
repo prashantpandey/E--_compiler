@@ -75,6 +75,7 @@ vector<Instruction*>* RuleNode::codeGen() {
 
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     inst_vec->push_back(new Instruction(pat_->getLabel()));
+    jmpName_ = pat_->getLabel().substr(PrimitivePatNode::labelPrefix.length());
     iCodeTable_ = pat_->iCodeGen();
     mergeVec(iCodeTable_, reaction_->iCodeGen());
     printICode();
@@ -269,6 +270,25 @@ vector<Quadruple*>* IfNode::iCodeGen() {
     inst_vec->push_back(new Quadruple(OpNode::OpCode::DEFAULT, endLabelTemp));
 
     return inst_vec;
+}
+
+void PrtNode::print(ostream& os, int indent) const {
+   // TODO: Add print body. 
+}
+
+const Type* PrtNode::typeCheck() const {
+    if(prt_.compare("prt") != 0 || ((VariableEntry*)(refExpr_->symTabEntry()))->varKind() == VariableEntry::VarKind::UNDEFINED) {
+	return &Type::errorType;
+    }
+    return &Type::voidType;
+}
+
+
+vector<Quadruple*>* PrtNode::iCodeGen() {
+    vector<Quadruple*> *quad = new vector<Quadruple*>();
+    IntrCodeElem *intr = new IntrCodeElem(refExpr_->symTabEntry(), IntrCodeElem::ElemType::VAR_TYPE);
+    quad->push_back(new Quadruple(OpNode::OpCode::PRINT, intr));
+    return quad;
 }
 
 PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* params,

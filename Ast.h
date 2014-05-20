@@ -365,6 +365,7 @@ private:
     const SymTabEntry *ste_; // reference semantics
 };
 
+
 /****************************************************************/
 // There are 3 kinds of PatNodes:
 //   PrimitivePatNodes are of the form: event|cond
@@ -552,7 +553,7 @@ private:
 class StmtNode: public AstNode {
 public:
     enum class StmtNodeKind {
-        ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE, BREAK
+        ILLEGAL=-1, EXPR, IF, COMPOUND, RETURN, WHILE, BREAK, PRINT
     };
 public:
     StmtNode(StmtNodeKind skm, int line=0, int column=0, string file=""):
@@ -845,6 +846,31 @@ private:
 
 /****************************************************************/
 
+class PrtNode : public StmtNode {
+
+public:
+    PrtNode(string prt, RefExprNode *refExpr, int ln = 0, int col = 0, string fl = "" ): 
+    StmtNode(StmtNode::StmtNodeKind::PRINT, ln,col,fl) {
+	prt_ = prt;
+	refExpr_ = refExpr;
+    };
+    
+    const Type* typeCheck() const;
+
+    void print(ostream& os, int indent) const;
+    
+    vector<Quadruple*>* iCodeGen();
+
+    RefExprNode *getRefExpr() { return refExpr_; };
+    string getPrt() { return prt_; };
+    
+private:
+    RefExprNode *refExpr_;
+    string prt_;
+};
+
+/****************************************************************/
+
 class RuleNode: public AstNode {
 public:
     RuleNode(BlockEntry *re, BasePatNode* pat, StmtNode* reaction,
@@ -874,6 +900,10 @@ public:
         return reaction_;
     };
 
+    string getJmpName() {
+        return jmpName_;
+    }
+
     void printICode();
 
     const Type* typeCheck() const;
@@ -886,6 +916,7 @@ private:
     BlockEntry    *rste_;
     BasePatNode *pat_;
     StmtNode *reaction_;
+    string jmpName_;
 
     RuleNode(const RuleNode&);
     vector<Quadruple*>* iCodeTable_;

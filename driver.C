@@ -29,7 +29,7 @@ extern int yyparse();
 extern int yylinenum;
 extern const char* yyfilename;
 extern YYSTYPE yylval;
-extern int compilationError = false;
+int compilationError = false;
 
 ofstream outs;
 

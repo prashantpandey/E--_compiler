@@ -161,6 +161,7 @@ public:
         inMem_ = false;
         regName_ = "";
         temp_ = false;
+        spillOverAllowed_ = true;
         iCodeTable_ = new vector<Quadruple*>();
     };
 
@@ -215,12 +216,22 @@ public:
     void setMem (bool inMem) {
         inMem_ = inMem;
     };
+
     void setMem() {
         setMem(true);
     };
+
     bool isMem() {
         return inMem_;
     };
+
+    void setSpillOverAllowed(bool val) {
+        spillOverAllowed_ = val;
+    }
+
+    bool spillOverAllowed() {
+        return spillOverAllowed_;
+    }
 
     bool isTemp() {
         return temp_;
@@ -247,6 +258,7 @@ private:
     bool inMem_;
     string regName_;
     bool temp_;
+    bool spillOverAllowed_;
     vector<Quadruple*>* iCodeTable_;
 };
 
