@@ -278,6 +278,7 @@ void PrtNode::print(ostream& os, int indent) const {
 
 const Type* PrtNode::typeCheck() const {
     if(prt_.compare("prt") != 0 || ((VariableEntry*)(refExpr_->symTabEntry()))->varKind() == VariableEntry::VarKind::UNDEFINED) {
+        errMsg("Mismatch in type of " + refExpr_->symTabEntry()->name() , this);
 	return &Type::errorType;
     }
     return &Type::voidType;
