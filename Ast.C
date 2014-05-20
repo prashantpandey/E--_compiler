@@ -170,15 +170,18 @@ vector<Quadruple*>* WhileNode::iCodeGen() {
     endLabel_ = key_ + "_end";
 
     if(cond_ != NULL) {
-        mergeVec(inst_vec, cond_->iCodeGen());
+        mergeVec(inst_vec, ((OpNode*)cond_)->iCodeGen(startLabel_, endLabel_, 0));
         inst_vec->at(0)->setLabel(startLabel_);
     }
 
     IntrCodeElem *endLabelTemp =  new IntrCodeElem(new IntrLabel(endLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
+    
+    /*  
     IntrCodeElem *cmpVar = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
     Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, cond_->getTVar(), NULL);
     inst_vec->push_back(tempQuad);
     inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), endLabelTemp));
+    */
 
     mergeVec(inst_vec, comp_->iCodeGen());
 
@@ -244,25 +247,31 @@ const Type* IfNode::typeCheck() const
 vector<Quadruple*>* IfNode::iCodeGen() {
     vector<Quadruple*>* inst_vec = new vector<Quadruple*>();
 
+    startLabel_ = regMgr->getNextLabel();
     elseLabel_ = regMgr->getNextLabel();
     endLabel_ = regMgr->getNextLabel();
     IntrCodeElem *endLabelTemp =  new IntrCodeElem(new IntrLabel(endLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
-    IntrCodeElem *elseLabelTemp =  new IntrCodeElem(new IntrLabel(elseLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
+    
+    //IntrCodeElem *elseLabelTemp =  new IntrCodeElem(new IntrLabel(elseLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
 
     if(cond_ != NULL) {
-        mergeVec(inst_vec, cond_->iCodeGen());
+        mergeVec(inst_vec, ((OpNode*)cond_)->iCodeGen(startLabel_, elseLabel_, 0));
     }
-
-    // TODO: implement short circuit of expressions
+    
+    /*  
     IntrCodeElem *cmpVar = new IntrCodeElem(new ValueNode(new Value(0, Type::TypeTag::INT)), IntrCodeElem::ElemType::VAL_TYPE);
     Quadruple *tempQuad = new Quadruple(OpNode::OpCode::EQ, cmpVar, cond_->getTVar(), NULL);
     inst_vec->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), elseStmt() ? elseLabelTemp : endLabelTemp));
+    */
+    
+    vector<Quadruple*>* stmtLst = then_->iCodeGen();
+    stmtLst->at(0)->setLabel(startLabel_);
+    mergeVec(inst_vec, stmtLst);
 
-    mergeVec(inst_vec, then_->iCodeGen());
 
     if(elseStmt() != NULL) {
         inst_vec->push_back(new Quadruple(OpNode::OpCode::JMP, endLabelTemp));
-        vector<Quadruple*>* stmtLst = else_->iCodeGen();
+        stmtLst = else_->iCodeGen();
         stmtLst->at(0)->setLabel(elseLabel_);
         mergeVec(inst_vec, stmtLst);
     }
@@ -546,7 +555,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, RET_ADDR_REG, SP_REG));
     inst_vec->push_back(Instruction::decrSP());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, ((FunctionEntry*)symTabEntry())->getALabel()));
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, "", "", label));
+    inst_vec->push_back(new Instruction(label));
 
     return inst_vec;
 }
@@ -1223,52 +1232,120 @@ const char* opCodeStr_[] = {
     "ASSIGN", "PRINT", "INVALID"
 };
 
+OpNode::OpCode OpNode::negOpCode(OpNode::OpCode opc) {
+    switch(opc) {
+	case OpNode::OpCode::GE:
+	    return OpNode::OpCode::LT;
+	case OpNode::OpCode::GT:
+	    return OpNode::OpCode::LE;
+	case OpNode::OpCode::LT:
+	    return OpNode::OpCode::GE;
+	case OpNode::OpCode::LE:
+	    return OpNode::OpCode::GT;
+	case OpNode::OpCode::EQ:
+	    return OpNode::OpCode::NE;
+	case OpNode::OpCode::NE:
+	    return OpNode::OpCode::EQ;
+	default:
+	    break;
+    }
+    return OpNode::OpCode::DEFAULT;
+}
+
+
+vector<Quadruple*>* OpNode::iCodeGen(string trueLabel, string falseLabel, int flag) {
+    vector<Quadruple*>* quad = new vector<Quadruple*>();
+    vector<IntrCodeElem*>* operands = new vector<IntrCodeElem*>();
+    string reg;
+    
+    if(opCode_ == OpNode::OpCode::AND) {
+	string newLabel = regMgr->getNextLabel();
+	mergeVec(quad, ((OpNode*)arg_[0])->iCodeGen(newLabel, falseLabel, 1));
+	quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, new IntrCodeElem(new IntrLabel(newLabel), IntrCodeElem::ElemType::LABEL_TYPE)));
+	mergeVec(quad, ((OpNode*)arg_[1])->iCodeGen(trueLabel, falseLabel, 1));
+    }
+    else if(opCode_ == OpNode::OpCode::OR) {
+	string newLabel = regMgr->getNextLabel();
+	mergeVec(quad, ((OpNode*)arg_[0])->iCodeGen(trueLabel, newLabel, 2));	
+	quad->push_back(new Quadruple(OpNode::OpCode::DEFAULT, new IntrCodeElem(new IntrLabel(newLabel), IntrCodeElem::ElemType::LABEL_TYPE)));
+	mergeVec(quad, ((OpNode*)arg_[1])->iCodeGen(trueLabel, falseLabel, 2));	
+    }
+    else if(opCode_ == OpNode::OpCode::NOT) {
+	mergeVec(quad, ((OpNode*)arg_[0])->iCodeGen(falseLabel, trueLabel, 0));	
+    }
+    else {
+	for(int i = 0; i < (signed int)arity_; i++) {
+	    mergeVec(quad, arg_[i]->iCodeGen());
+	    operands->push_back(arg_[i]->getTVar());
+	}
+	Quadruple *tempQuad = NULL;
+	switch(arity_) {
+	    case 1:
+		tempQuad = new Quadruple(opCode_, operands->at(0));
+		break;
+	    case 2:
+		tempQuad = new Quadruple(opCode_, operands->at(0), operands->at(1));
+		break;
+	}
+	if(flag == 1) {
+	    tempQuad->setOpc(OpNode::negOpCode(opCode_));
+	    quad->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), 
+	    new IntrCodeElem(new IntrLabel(falseLabel), IntrCodeElem::ElemType::LABEL_TYPE)));
+	}
+	else {
+	    quad->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), 
+	    new IntrCodeElem(new IntrLabel(trueLabel), IntrCodeElem::ElemType::LABEL_TYPE)));
+	}
+    }
+    return quad;
+}
+
 vector<Quadruple*>* OpNode::iCodeGen() {
     vector<Quadruple*>* quad = new vector<Quadruple*>();
     vector<IntrCodeElem*>* operands = new vector<IntrCodeElem*>();
     string reg;
     for(int i = 0; i < (signed int)arity_; i++) {
-        mergeVec(quad, arg_[i]->iCodeGen());
-        operands->push_back(arg_[i]->getTVar());
+	mergeVec(quad, arg_[i]->iCodeGen());
+	operands->push_back(arg_[i]->getTVar());
 
-        /*
-            switch(arg_[i]->exprNodeType()) {
-            case ExprNode::ExprNodeType::OP_NODE:
-            operands->push_back(new IntrCodeElem(new VariableEntry(arg_[i]->getTReg(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE));
-            break;
-            case ExprNode::ExprNodeType::REF_EXPR_NODE:
-            operands->push_back(new IntrCodeElem(((RefExprNode*)arg_[i])->symTabEntry(), IntrCodeElem::ElemType::VAR_TYPE));
-            break;
-            case ExprNode::ExprNodeType::VALUE_NODE:
-            operands->push_back(new IntrCodeElem(new VariableEntry(arg_[i]->value()->toString(), VariableEntry::VarKind::TEMP_VAR, t), IntrCodeElem::ElemType::VAL_TYPE));
-            break;
-            case ExprNode::ExprNodeType::INV_NODE:
-            if (Type::isInt(t->tag()) || Type::isString(t->tag()))
-            reg = RETI_REG;
-            else if (Type::isFloat(t->tag()))
-            reg = RETF_REG;
-            operands->push_back(new IntrCodeElem(new VariableEntry(reg, VariableEntry::VarKind::TEMP_VAR, t), IntrCodeElem::ElemType::INV_NODE_TYPE));
-            break;
-            }
-            }
-            */
-    }
-    IntrCodeElem* tempVarEnt = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR,
-            getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
-    switch(arity_) {
+	/*
+	   switch(arg_[i]->exprNodeType()) {
+	   case ExprNode::ExprNodeType::OP_NODE:
+	   operands->push_back(new IntrCodeElem(new VariableEntry(arg_[i]->getTReg(), VariableEntry::VarKind::TEMP_VAR, getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE));
+	   break;
+	   case ExprNode::ExprNodeType::REF_EXPR_NODE:
+	   operands->push_back(new IntrCodeElem(((RefExprNode*)arg_[i])->symTabEntry(), IntrCodeElem::ElemType::VAR_TYPE));
+	   break;
+	   case ExprNode::ExprNodeType::VALUE_NODE:
+	   operands->push_back(new IntrCodeElem(new VariableEntry(arg_[i]->value()->toString(), VariableEntry::VarKind::TEMP_VAR, t), IntrCodeElem::ElemType::VAL_TYPE));
+	   break;
+	   case ExprNode::ExprNodeType::INV_NODE:
+	   if (Type::isInt(t->tag()) || Type::isString(t->tag()))
+	   reg = RETI_REG;
+	   else if (Type::isFloat(t->tag()))
+	   reg = RETF_REG;
+	   operands->push_back(new IntrCodeElem(new VariableEntry(reg, VariableEntry::VarKind::TEMP_VAR, t), IntrCodeElem::ElemType::INV_NODE_TYPE));
+	   break;
+	   }
+	   }
+	   */
+}
+IntrCodeElem* tempVarEnt = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR,
+	    getResultType()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
+switch(arity_) {
     case 1:
-        quad->push_back(new Quadruple(opCode_, operands->at(0), NULL, tempVarEnt));
-        break;
+	quad->push_back(new Quadruple(opCode_, operands->at(0), NULL, tempVarEnt));
+	break;
     case 2:
-        if(opCode_ == OpNode::OpCode::ASSIGN)
-            quad->push_back(new Quadruple(opCode_, operands->at(1), NULL, operands->at(0)));
-        else
-            quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), tempVarEnt));
-        break;
-    }
+	if(opCode_ == OpNode::OpCode::ASSIGN)
+	    quad->push_back(new Quadruple(opCode_, operands->at(1), NULL, operands->at(0)));
+	else
+	    quad->push_back(new Quadruple(opCode_, operands->at(0), operands->at(1), tempVarEnt));
+	break;
+}
 
-    setTVar(tempVarEnt);
-    return quad;
+setTVar(tempVarEnt);
+return quad;
 }
 
 void
@@ -1276,40 +1353,40 @@ OpNode::print(ostream& os, int indent) const {
     int iopcode = static_cast<int>(opCode_);
     if (opInfo[iopcode].prtType_ == OpNode::OpPrintType::PREFIX) {
 
-        os << opInfo[iopcode].name_;
+	os << opInfo[iopcode].name_;
 
-        if(coercedType())
-            os << "(" << Type::name(coercedType()->tag()) << ")";
-        if (arity_ > 0) {
-            if (opInfo[iopcode].needParen_)
-                os << '(';
-            for (unsigned i=0; i < arity_-1; i++) {
-                if (arg_[i])
-                    arg_[i]->print(os, indent);
-                else os << "NULL";
-                os << ", ";
-            }
-            if (arg_[arity_-1])
-                arg_[arity_-1]->print(os, indent);
-            else os << "NULL";
-            if (opInfo[iopcode].needParen_)
-                os << ") ";
-        }
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
+	if (arity_ > 0) {
+	    if (opInfo[iopcode].needParen_)
+		os << '(';
+	    for (unsigned i=0; i < arity_-1; i++) {
+		if (arg_[i])
+		    arg_[i]->print(os, indent);
+		else os << "NULL";
+		os << ", ";
+	    }
+	    if (arg_[arity_-1])
+		arg_[arity_-1]->print(os, indent);
+	    else os << "NULL";
+	    if (opInfo[iopcode].needParen_)
+		os << ") ";
+	}
     }
     else if ((opInfo[iopcode].prtType_ == OpNode::OpPrintType::INFIX) && (arity_ == 2)) {
-        if(coercedType())
-            os << "(" << Type::name(coercedType()->tag()) << ")";
-        if (opInfo[iopcode].needParen_)
-            os << "(";
-        if (arg_[0])
-            arg_[0]->print(os, indent);
-        else os << "NULL";
-        os << opInfo[iopcode].name_;
-        if (arg_[1])
-            arg_[1]->print(os, indent);
-        else os << "NULL";
-        if (opInfo[iopcode].needParen_)
-            os << ")";
+	if(coercedType())
+	    os << "(" << Type::name(coercedType()->tag()) << ")";
+	if (opInfo[iopcode].needParen_)
+	    os << "(";
+	if (arg_[0])
+	    arg_[0]->print(os, indent);
+	else os << "NULL";
+	os << opInfo[iopcode].name_;
+	if (arg_[1])
+	    arg_[1]->print(os, indent);
+	else os << "NULL";
+	if (opInfo[iopcode].needParen_)
+	    os << ")";
     }
     else internalErr("Unhandled case in OpNode::print");
 }
