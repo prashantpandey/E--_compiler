@@ -614,9 +614,9 @@ vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool sh
                 if (ve->varKind() == VariableEntry::VarKind::GLOBAL_VAR && !ve->isMem())
                     continue;
                 bool isFloat = Type::isFloat(ve->type()->tag());
+                inst_set->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
                 inst_set->push_back(new Instruction(isFloat ? Instruction::InstructionSet::LDF : Instruction::InstructionSet::LDI,
                                                     SP_REG, ve->getReg(), "", "", "Loading Back Registers:" + ve->name()));
-                inst_set->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
             }
             continue;
         }
