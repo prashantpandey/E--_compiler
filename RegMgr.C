@@ -129,6 +129,7 @@ string RegMgr::getVEReg(VariableEntry *ve, vector<Instruction*> *inst_vec, bool 
     case  VariableEntry::VarKind::TEMP_VAR:
         ve->setReg(fetchNextAvailReg(!isFloat, ve, 0, inst_vec));
     case  VariableEntry::VarKind::PARAM_VAR:
+        ve->setReg(fetchNextAvailReg(!isFloat, ve, 0, inst_vec));
         //TODO
     default:
         break;

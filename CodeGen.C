@@ -466,7 +466,6 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
     switch(opc) {
     case OpNode::OpCode::LT:
     case OpNode::OpCode::LE:
-        opc = OpNode::OpCode::GE;
         swap(e1,e2);
     case OpNode::OpCode::GT:
     case OpNode::OpCode::GE:
@@ -527,6 +526,10 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
         break;
     }
 
+    param1 = instructionParam(e1, inst_vec);
+    param2 = instructionParam(e2, inst_vec);
+    param3 = instructionParam(e3, inst_vec, true);
+    
     Instruction::InstructionSet instCode = OpCodeInstMap::fetchInstr(opc, instNum);
     Instruction *inst = new Instruction(instCode, param1, param2, param3, label, comment);
     inst_vec->push_back(inst);

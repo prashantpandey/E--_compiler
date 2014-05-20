@@ -542,7 +542,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
 
     // TODO: Add code for pushing all the params to the stack
     string label = regMgr->getNextLabel();
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVL, "\"" + label + "\"", RET_ADDR_REG));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVL, label, RET_ADDR_REG));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, RET_ADDR_REG, SP_REG));
     inst_vec->push_back(Instruction::decrSP());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, ((FunctionEntry*)symTabEntry())->getALabel()));
@@ -661,8 +661,7 @@ vector<Quadruple*>* PrimitivePatNode::iCodeGen() {
     for (vector<VariableEntry*>::const_iterator it = params_->begin();
             it != params_->end(); ++it) {
         VariableEntry *ve = (*it);
-        IntrCodeElem* tempVarEnt = new IntrCodeElem(new VariableEntry(Quadruple::fetchTempVar(), VariableEntry::VarKind::TEMP_VAR,
-                ve->type()), IntrCodeElem::ElemType::TEMP_VAR_TYPE);
+        IntrCodeElem* tempVarEnt = new IntrCodeElem(ve, IntrCodeElem::ElemType::VAR_TYPE);
         quad_vec->push_back(new Quadruple(OpNode::OpCode::IN, NULL, NULL, tempVarEnt));
     }
     return quad_vec;

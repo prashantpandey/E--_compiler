@@ -55,6 +55,7 @@ void GlobalEntry::genFinalCode(string progName) {
     if ((st = symTab()) != nullptr) {
         SymTab::const_iterator it = st->begin();
         CodeModule* codeModGlobalSec =  new CodeModule("GlobalSec");
+	codeModGlobalSec->insertInstructionSet(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, "", "", "begin"));
         CodeModule* codeMode =  NULL;
         for (; it != (st->end()); ++it) {
             SymTabEntry *ste = (SymTabEntry *)(*it);
@@ -93,7 +94,6 @@ void GlobalEntry::genFinalCode(string progName) {
                 progCode_->insertModule(codeMode);
             }
         }
-        Instruction* firstInst = codeModGlobalSec->firstInst();
         vector<Instruction*> *inst_set = new vector<Instruction*>();
 
         string evnReg = regMgr->fetchNextAvailReg(true);
@@ -114,9 +114,7 @@ void GlobalEntry::genFinalCode(string progName) {
         inst_set->push_back(new Instruction(Instruction::InstructionSet::JMP, "EventMStart"));
         inst_set->push_back(new Instruction(Instruction::InstructionSet::PRTS, "\"\\nDone\\n\"", "", "", "EventMOut"));
         codeModGlobalSec->insertInstructionSet(inst_set);
-
-        if (firstInst)
-            firstInst->setLabel("begin");
+	
         progCode_->insertModule(codeModGlobalSec);
     }
 
