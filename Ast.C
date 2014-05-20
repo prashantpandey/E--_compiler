@@ -272,6 +272,25 @@ vector<Quadruple*>* IfNode::iCodeGen() {
     return inst_vec;
 }
 
+void PrtNode::print(ostream& os, int indent) const {
+   // TODO: Add print body. 
+}
+
+const Type* PrtNode::typeCheck() const {
+    if(prt_.compare("prt") != 0 || ((VariableEntry*)(refExpr_->symTabEntry()))->varKind() == VariableEntry::VarKind::UNDEFINED) {
+	return &Type::errorType;
+    }
+    return &Type::voidType;
+}
+
+
+vector<Quadruple*>* PrtNode::iCodeGen() {
+    vector<Quadruple*> *quad = new vector<Quadruple*>();
+    IntrCodeElem *intr = new IntrCodeElem(refExpr_->symTabEntry(), IntrCodeElem::ElemType::VAR_TYPE);
+    quad->push_back(new Quadruple(OpNode::OpCode::PRINT, intr));
+    return quad;
+}
+
 PrimitivePatNode::PrimitivePatNode(EventEntry* ee, vector<VariableEntry*>* params,
                                    ExprNode* c,
                                    int line, int column, string file):

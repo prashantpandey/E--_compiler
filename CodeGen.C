@@ -406,7 +406,7 @@ OpCodeInstMap* OpCodeInstMap::opCodeInstMap_[] = {
     new OpCodeInstMap(OpNode::OpCode::SHL, {}),
     new OpCodeInstMap(OpNode::OpCode::SHR, {}),
     new OpCodeInstMap(OpNode::OpCode::ASSIGN, {Instruction::InstructionSet::MOVI, Instruction::InstructionSet::MOVF,  Instruction::InstructionSet::MOVS}),
-    new OpCodeInstMap(OpNode::OpCode::PRINT, {Instruction::InstructionSet::PRTI, Instruction::InstructionSet::PRTF}),
+    new OpCodeInstMap(OpNode::OpCode::PRINT, {Instruction::InstructionSet::PRTI, Instruction::InstructionSet::PRTF, Instruction::InstructionSet::PRTS}),
     new OpCodeInstMap(OpNode::OpCode::INVALID, {}),
     new OpCodeInstMap(OpNode::OpCode::JMP, {Instruction::InstructionSet::JMP}),
     new OpCodeInstMap(OpNode::OpCode::JMPC, {Instruction::InstructionSet::JMPC}),
@@ -477,6 +477,13 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
             instNum = 2;
     }
     break;
+    case OpNode::OpCode::PRINT:
+    {
+        Type *inst_type = e1->getElem()->type();
+        if(Type::isString(inst_type->tag()))
+            instNum = 2;
+    }
+    break;
     case OpNode::OpCode::SHL:
         break;
     case OpNode::OpCode::SHR:
@@ -508,13 +515,16 @@ static void insertIntoSet(IntrCodeElem* e,  set<VariableEntry*> *entrySet) {
     }
 
 }
-//How to handle global?
+
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool showComment, bool purgeRegisters) {
+    
+    // Optimize Intermediate code before code gen
     optimiseQuadruples(quad);
+
     IntrCodeElem *ve1, *ve2, *ve3;
     string label = "";
     set<VariableEntry*> *entrySet = new set<VariableEntry*>();
-    vector<Instruction*>* inst_set = new vector<Instruction*>();
+    vector<Instruction*> *inst_set = new vector<Instruction*>();
     vector<Instruction*> *instructionSet;
     OpNode::OpCode opc;
     for(vector<Quadruple*>::iterator it = quad->begin(); it != quad->end(); ++it) {

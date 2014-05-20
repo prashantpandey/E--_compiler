@@ -15,8 +15,11 @@ void foo(int h){
 void abc() {
     int g = 2;
     int h;
+    string c = "Hello World..!!!";
     h = 100 * g;
     foo(h);
+    prt -> g;
+    prt -> c;
 };
 
 open(file, flags, mode) -> {;};

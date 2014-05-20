@@ -304,6 +304,15 @@ statement 		: empty_stmt {$$ = NULL;}
 			| if_then_else_stmt { $$ = $1; }
 			| while_stmt { $$ = $1; }
 			| break_stmt TOK_SEMICOLON { $$ = $1; }
+			| TOK_IDENT TOK_ARROW TOK_IDENT TOK_SEMICOLON {
+			    SymTabEntry *ste = stm.lookUp($3);  
+			    if(ste == NULL) {
+			        ste = new VariableEntry($3, VariableEntry::VarKind::UNDEFINED, &Type::unkT, NULL, yylinenum);
+			    }
+			    RefExprNode *refExpr = new RefExprNode($3, ste, yylinenum);
+			    
+			    $$ = new PrtNode($1, refExpr, yylinenum); 
+			} 
 			| error TOK_SEMICOLON { 
 			    yyerror("Syntax error while parsing a statemnt");
 			    $$ = NULL;		// return NULL statement
