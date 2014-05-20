@@ -1295,6 +1295,7 @@ vector<Quadruple*>* OpNode::iCodeGen(string trueLabel, string falseLabel, int fl
 	else {
 	    quad->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), 
 	    new IntrCodeElem(new IntrLabel(trueLabel), IntrCodeElem::ElemType::LABEL_TYPE)));
+	    quad->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(new IntrLabel(falseLabel), IntrCodeElem::ElemType::LABEL_TYPE)));
 	}
     }
     return quad;
