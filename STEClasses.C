@@ -2,7 +2,7 @@
 #include "IncludeHeaders.h"
 #include "Value.h"
 #include "ParserUtil.h"
-
+extern ofstream qos;
 void GlobalEntry::print(ostream& out, int indent) const
 {
     printST(out, indent, '\0', ';', true);
@@ -42,7 +42,7 @@ static void pICode(vector<Quadruple*> *p) {
     for(vector<Quadruple*>::iterator it = p->begin(); it != p->end(); ++it) {
         os << (*it)->toString();
     }
-    cout << os.str() << endl;
+    qos << os.str() << endl;
 }
 
 void GlobalEntry::genFinalCode(string progName) {

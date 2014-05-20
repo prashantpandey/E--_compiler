@@ -55,7 +55,7 @@ bool genDottyCode;
 bool genPrologCode;
 string outFileSuffix;
 extern FILE* yyin;
-
+ofstream qos;
 void
 printUsage(const char* cmd) {
     cerr << "Usage: " << cmd << //" [-v <num>] "
@@ -216,17 +216,19 @@ main(int argc, char *argv[], char *envp[]) {
     if (ge != NULL) {
         //cout << "Finished parsing, here is the AST\n";
         ge->checkType();
-        ge->print(cout, 0);
-        if (errCount() == 0) {
-            ge->genFinalCode("test");
-	    string fileName = string(yyfilename);
-	    int dotIndex = fileName.find('.');
-	    if(dotIndex > -1)
-		fileName = fileName.substr(0, dotIndex);
-            ofstream fos(fileName + ".i");
-            ge->serializeAsm(fos);
-            fos.close();
-        }
+	ge->print(cout, 0);
+	string fileName = string(yyfilename);
+	int dotIndex = fileName.find('.');
+	if(dotIndex > -1)
+	    fileName = fileName.substr(0, dotIndex);
+	if (errCount() == 0) {
+	    qos.open(fileName + ".q");
+	    ge->genFinalCode("test");
+	    ofstream fos(fileName + ".i");
+	    ge->serializeAsm(fos);
+	    fos.close();
+	    qos.close();
+	}
     }
 #endif
 }

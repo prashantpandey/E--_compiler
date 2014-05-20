@@ -1,7 +1,7 @@
 #include "IncludeHeaders.h"
 #include "ParserUtil.h"
 
-
+extern ofstream qos;
 const string BasePatNode:: labelPrefix = "eventLabel_";
 
 AstNode::AstNode(NodeType nt, int line, int column, string file):
@@ -98,7 +98,7 @@ void RuleNode::printICode() {
     for(vector<Quadruple*>::iterator it = iCodeTable_->begin(); it != iCodeTable_->end(); ++it) {
         os << (*it)->toString();
     }
-    cout << os.str();
+    qos << os.str();
 }
 
 const Type*  RuleNode::typeCheck() const {
