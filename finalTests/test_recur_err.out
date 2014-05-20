@@ -33,19 +33,19 @@ finalTests/test_recur.c:33:1: note: in expansion of macro ‘MOVL’
 finalTests/E--_RT.c:50:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define JMPI(x) goto *(void*)(x)
                        ^
-finalTests/test_recur.c:52:1: note: in expansion of macro ‘JMPI’
+finalTests/test_recur.c:55:1: note: in expansion of macro ‘JMPI’
  JMPI(R004);
  ^
 finalTests/E--_RT.c:53:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
  #define MOVL(l, r) r = (int)(&&l)
                         ^
-finalTests/test_recur.c:63:1: note: in expansion of macro ‘MOVL’
+finalTests/test_recur.c:66:1: note: in expansion of macro ‘MOVL’
  MOVL(Label6, R004);
  ^
 finalTests/E--_RT.c:54:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
  #define MOVS(s, r) r = (int)(s)
                         ^
-finalTests/test_recur.c:77:1: note: in expansion of macro ‘MOVS’
+finalTests/test_recur.c:83:1: note: in expansion of macro ‘MOVS’
  MOVS("\n", R007);
  ^
 Setting memory size to 10000384 words
