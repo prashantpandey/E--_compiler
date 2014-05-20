@@ -254,6 +254,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 
     vector<Instruction*> *inst_vec = new vector<Instruction*>();
     aLabel_ = regMgr->getNextLabel();
+    exitLabel_ = regMgr->getNextLabel();
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "2" ,TEMP_REG, aLabel_,
                                         "Function Start-" + name() + ", Setting temp register to load params"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, BP_REG, SP_REG, "",
@@ -296,7 +297,7 @@ vector<Instruction*>* FunctionEntry::codeGen() {
     printICode();
     mergeVec(inst_vec, Quadruple::iCodeToAsmGen(iCodeTable_));
 
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, BP_REG, SP_REG, "", "" ,"Function Exit: Restoring BP"));
+    inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, BP_REG, SP_REG, "", exitLabel_,"Function Exit: Restoring BP"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::LDI, SP_REG, BP_REG, "", "", "Loading BP from stack"));
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, SP_REG, "1", SP_REG));

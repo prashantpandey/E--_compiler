@@ -255,7 +255,10 @@ vector<Quadruple*>* IfNode::iCodeGen() {
     //IntrCodeElem *elseLabelTemp =  new IntrCodeElem(new IntrLabel(elseLabel_), IntrCodeElem::ElemType::LABEL_TYPE);
 
     if(cond_ != NULL) {
-        mergeVec(inst_vec, ((OpNode*)cond_)->iCodeGen(startLabel_, elseLabel_, 0));
+	if(elseStmt() != NULL) 
+	    mergeVec(inst_vec, ((OpNode*)cond_)->iCodeGen(startLabel_, elseLabel_, 0));
+	else
+	    mergeVec(inst_vec, ((OpNode*)cond_)->iCodeGen(startLabel_, endLabel_, 0));
     }
     
     /*  
@@ -622,6 +625,7 @@ vector<Quadruple*>* ReturnStmtNode::iCodeGen() {
     vector<Quadruple*>* inst_vec = new vector<Quadruple*>();
     mergeVec(inst_vec, expr_->iCodeGen());
     inst_vec->push_back(new Quadruple(OpNode::OpCode::RET, expr_->getTVar()));
+    inst_vec->push_back(new Quadruple(OpNode::OpCode::JMP, new IntrCodeElem(new IntrLabel(funEntry()->getExitLabel()), IntrCodeElem::ElemType::LABEL_TYPE)));
     return inst_vec;
 }
 
@@ -1295,7 +1299,7 @@ vector<Quadruple*>* OpNode::iCodeGen(string trueLabel, string falseLabel, int fl
 	else {
 	    quad->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(tempQuad, IntrCodeElem::ElemType::QUAD_TYPE), 
 	    new IntrCodeElem(new IntrLabel(trueLabel), IntrCodeElem::ElemType::LABEL_TYPE)));
-	    quad->push_back(new Quadruple(OpNode::OpCode::JMPC, new IntrCodeElem(new IntrLabel(falseLabel), IntrCodeElem::ElemType::LABEL_TYPE)));
+	    quad->push_back(new Quadruple(OpNode::OpCode::JMP, new IntrCodeElem(new IntrLabel(falseLabel), IntrCodeElem::ElemType::LABEL_TYPE)));
 	}
     }
     return quad;

@@ -1,7 +1,45 @@
-bison -t -d -v -o ICode_parser.C ICode.y; \
-    mv ICode_parser.H ICode.tab.h
-g++ -c -c -g -Wno-deprecated driver.C
-flex -p -8 -Ce -oICode_lexer.C ICode.l
-g++ -c -c -g -Wno-deprecated ICode_lexer.C
-g++ -c -g -Wno-deprecated ICode_parser.C
 g++ -g -o  demo ICode_lexer.o ICode_parser.o driver.o -lfl
+75
+11
+76
+11
+77
+11
+78
+11
+79
+11
+80
+11
+81
+11
+82
+11
+83
+11
+84
+11
+109366476880
+12
+81
+12
+82
+12
+83
+12
+84
+12
+1094713344
+Done
+
+Dump of Registers R000 to R009:
+R000=10000	R001=0	R002=1094713344	R003=0	R004=4199894
+R005=9971	R006=1094713344	R007=4201434	R008=1094713344	R009=0
+
+Dump of Registers F000 to F009:
+F000=0.000000	F001=0.000000	F002=0.000000	F003=0.000000	F004=0.000000
+F005=0.000000	F006=0.000000	F007=0.000000	F008=0.000000	F009=0.000000
+
+Dump of Memory locations 9990 to 10000:
+00002706:         81 1094713344         81 1094713344         81          0    4199894         80
+0000270e: 1094713344 1094713344         80
