@@ -546,7 +546,7 @@ vector<Instruction*>* InvocationNode::codeGen() {
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::STI, RET_ADDR_REG, SP_REG));
     inst_vec->push_back(Instruction::decrSP());
     inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, ((FunctionEntry*)symTabEntry())->getALabel()));
-    inst_vec->push_back(new Instruction(Instruction::InstructionSet::PRTI, SP_REG, "", "", label));
+    inst_vec->push_back(new Instruction(label));
 
     return inst_vec;
 }
