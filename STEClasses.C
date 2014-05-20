@@ -339,8 +339,23 @@ vector<Instruction*>* FunctionEntry::codeGen() {
 
 void FunctionEntry::checkType() const
 {
+    const SymTab *st = NULL;
+    if ((st = symTab()) != nullptr) {
+	for (SymTab::const_iterator it = st->begin(); it != (st->end()); ++it)  {
+	    SymTabEntry *ste = (SymTabEntry *)(*it);
+	    if ((ste->kind() == SymTabEntry::Kind::VARIABLE_KIND)) {
+		VariableEntry *ve = (VariableEntry *) ste;
+		if (ve->varKind() == VariableEntry::VarKind::LOCAL_VAR) {
+		    if(ve->initVal() != NULL) {
+			ve->initVal()->doTypeCheck();
+		    }
+		}
+	    }
+	}
+    }
+
     if (body())
-        body()->typeCheck();
+	body()->typeCheck();
 }
 
 void ClassEntry::print(ostream& out, int indent) const

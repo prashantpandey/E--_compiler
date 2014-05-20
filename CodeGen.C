@@ -497,8 +497,8 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
 	string label2 = regMgr->getNextLabel();
 	string tempReg = regMgr->fetchNextAvailReg(true);
 	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, param2, tempReg));
-	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, "0", TEMP_REG));
-	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, "GT " + tempReg + " " + TEMP_REG, label2,"", label1));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, "1", TEMP_REG));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, "GT " + string(TEMP_REG) + " " + tempReg, label2,"", label1));
 	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MUL, param3, "2", param3));
 	inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, "1", TEMP_REG, TEMP_REG));
 	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, label1, "", "", "", "SHL Ends"));
@@ -513,8 +513,8 @@ static vector<Instruction*>* getInstructionSet(OpNode::OpCode opc, IntrCodeElem 
 	string label2 = regMgr->getNextLabel();
 	string tempReg = regMgr->fetchNextAvailReg(true);
 	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, param2, tempReg));
-	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, "0", TEMP_REG));
-	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, "GT " + tempReg + " " + TEMP_REG, label2,"", label1));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::MOVI, "1", TEMP_REG));
+	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMPC, "GT " + string(TEMP_REG) + " " + tempReg, label2,"", label1));
 	inst_vec->push_back(new Instruction(Instruction::InstructionSet::DIV, param3, "2", param3));
 	inst_vec->push_back(new Instruction(Instruction::InstructionSet::ADD, "1", TEMP_REG, TEMP_REG));
 	inst_vec->push_back(new Instruction(Instruction::InstructionSet::JMP, label1, "", "", "", "SHL Ends"));
@@ -554,7 +554,7 @@ static void insertIntoSet(IntrCodeElem* e,  set<VariableEntry*> *entrySet) {
 vector<Instruction*>* Quadruple::iCodeToAsmGen(vector<Quadruple*> *quad, bool showComment, bool purgeRegisters) {
     
     // Optimize Intermediate code before code gen
-    //optimiseQuadruples(quad);
+    optimiseQuadruples(quad);
 
     IntrCodeElem *ve1, *ve2, *ve3;
     string label = "";
