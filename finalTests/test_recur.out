@@ -1,0 +1,7 @@
+bison -t -d -v -o ICode_parser.C ICode.y; \
+    mv ICode_parser.H ICode.tab.h
+g++ -c -c -g -Wno-deprecated driver.C
+flex -p -8 -Ce -oICode_lexer.C ICode.l
+g++ -c -c -g -Wno-deprecated ICode_lexer.C
+g++ -c -g -Wno-deprecated ICode_parser.C
+g++ -g -o  demo ICode_lexer.o ICode_parser.o driver.o -lfl
