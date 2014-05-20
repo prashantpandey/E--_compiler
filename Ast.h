@@ -735,7 +735,8 @@ public:
     vector<Quadruple*>* iCodeGen() {
         vector<Quadruple*>* quad = new vector<Quadruple*>();
         for(list<StmtNode*>::iterator it = stmts_->begin(); it != stmts_->end(); ++it) {
-            mergeVec(quad, (*it)->iCodeGen());
+            if ((*it))
+		mergeVec(quad, (*it)->iCodeGen());
         }
         /*
         for(StmtNode* stmt : stmts_) {
