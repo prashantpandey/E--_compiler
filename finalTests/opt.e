@@ -10,7 +10,8 @@ int abc(int a2, double f) {
 
     while (a2 < 1000) {
 	x = a2 + f;
-	a2 = a2 + y;
+	f = f*2 ;
+        a2 = a2+100;
     }
 
     prt -> x;

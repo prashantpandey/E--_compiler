@@ -3,17 +3,31 @@ int res;
 string s = "\\n";
 
 int abc(int a2, double f) {
-    prt -> a2;
-    prt -> s;
-    prt -> f;
-    prt -> s;
+    //prt -> a2;
+    //prt -> s;
+    //prt -> f;
+    //prt -> s;
+    double tp = f;
+    int tp1 = 0;
+    int tp3 = a2+1;
+    int i = 0;
 
-    a2 = a2 + 1;
-    
-    if(a2 == 85) {
-	return a2;
+    while (a2 < 100) {
+        prt -> i;
+	while (tp < (a2+1.0)) {
+	    tp = tp + 10;
+            tp1 = tp1+1;
+	    //break;
+	}
+        tp = f;
+        a2 = a2 + 1;
     }
-    abc(a2, f);
+
+    prt->s;
+    prt -> tp1;
+    prt->s;
+    if (tp3 < 100)
+        abc(tp3, f+1.8);
 
     //string c = "Hello World..!!!";
     //prt -> c;
