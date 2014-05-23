@@ -1,12 +1,12 @@
 INSTALLATION
 -----------------------------------
 1. run make
-2. make a .e file and write your code into it
-3. run ./parser codefilename #(it will generate .i(low level code) and .q(intermidiate code)
-4. rum ./parser codefilename prttype
-5. run ./easm codefilename.i (Make sure there are no errors, only warnings)
-6. run ./erun codefilename.i -dr -df -m 10000000 -dm 9990 10000 > test1.out 2> test1_err.out < test1.in
-    here test1.out is output file, test1_err.out is error file and test1.in is input file.
+2. make a <filename>.e file and write your code into it
+3. run ./parser <filename>.e (it will generate <filename>.i (i.e low level code) and <filename>.q (i.e intermidiate code)
+4. rum ./parser <filename>.e prttype (to see typecheck messages and output)
+5. run ./easm <filename>.i (Make sure there are no errors, only warnings)
+6. run ./erun <filename>.i -dr -df -m 10000000 -dm 9990 10000 > <filename>.out 2> <filename>_err.out < test1.in
+    here <filename>.out is output file, <filename>_err.out is error file and test1.in is input file.
 
 Test Cases Included
 -----------------------------------
@@ -22,7 +22,7 @@ Test Cases Included
     h. opt.e - Checks normal operators and Common subexpression elimination optimization
     i. expr.e - Checks for large expressions
     
-    All test cases contain .out files with expected output.
+    All test cases contain <filename>.out files with expected output.
 
 3. Input file
 ------------------------------------
