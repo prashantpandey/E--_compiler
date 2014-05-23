@@ -1,0 +1,83 @@
+gcc -Wall -g  -o finalTests/anycheck finalTests/anycheck.c
+In file included from finalTests/anycheck.c:1:0:
+finalTests/E--_RT.c: In function ‘E_RT_init’:
+finalTests/E--_RT.c:147:7: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘long unsigned int’ [-Wformat=]
+       fprintf(stderr, "Setting memory size to %d words\n", m1/sizeof(int));
+       ^
+finalTests/E--_RT.c:166:9: warning: assignment makes integer from pointer without a cast [enabled by default]
+    R000 = mem;
+         ^
+finalTests/anycheck.c: In function ‘main’:
+finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ #define PRTS(x) printf((char *)(x))
+                        ^
+finalTests/anycheck.c:14:1: note: in expansion of macro ‘PRTS’
+ PRTS(R008);
+ ^
+finalTests/anycheck.c:14:1: warning: format not a string literal and no format arguments [-Wformat-security]
+In file included from finalTests/anycheck.c:1:0:
+finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ #define PRTS(x) printf((char *)(x))
+                        ^
+finalTests/anycheck.c:16:1: note: in expansion of macro ‘PRTS’
+ PRTS(R008);
+ ^
+finalTests/anycheck.c:16:1: warning: format not a string literal and no format arguments [-Wformat-security]
+In file included from finalTests/anycheck.c:1:0:
+finalTests/E--_RT.c:53:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+ #define MOVL(l, r) r = (int)(&&l)
+                        ^
+finalTests/anycheck.c:26:1: note: in expansion of macro ‘MOVL’
+ MOVL(Label2, R004);
+ ^
+finalTests/E--_RT.c:50:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ #define JMPI(x) goto *(void*)(x)
+                       ^
+finalTests/anycheck.c:43:1: note: in expansion of macro ‘JMPI’
+ JMPI(R004);
+ ^
+finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ #define PRTS(x) printf((char *)(x))
+                        ^
+finalTests/anycheck.c:47:1: note: in expansion of macro ‘PRTS’
+ PRTS(R008);
+ ^
+finalTests/anycheck.c:47:1: warning: format not a string literal and no format arguments [-Wformat-security]
+In file included from finalTests/anycheck.c:1:0:
+finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ #define PRTS(x) printf((char *)(x))
+                        ^
+finalTests/anycheck.c:49:1: note: in expansion of macro ‘PRTS’
+ PRTS(R008);
+ ^
+finalTests/anycheck.c:49:1: warning: format not a string literal and no format arguments [-Wformat-security]
+In file included from finalTests/anycheck.c:1:0:
+finalTests/E--_RT.c:53:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+ #define MOVL(l, r) r = (int)(&&l)
+                        ^
+finalTests/anycheck.c:58:1: note: in expansion of macro ‘MOVL’
+ MOVL(Label3, R004);
+ ^
+finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ #define PRTS(x) printf((char *)(x))
+                        ^
+finalTests/anycheck.c:69:17: note: in expansion of macro ‘PRTS’
+ eventLabel_any: PRTS(R007);
+                 ^
+finalTests/anycheck.c:69:1: warning: format not a string literal and no format arguments [-Wformat-security]
+ eventLabel_any: PRTS(R007);
+ ^
+In file included from finalTests/anycheck.c:1:0:
+finalTests/E--_RT.c:54:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+ #define MOVS(s, r) r = (int)(s)
+                        ^
+finalTests/anycheck.c:73:1: note: in expansion of macro ‘MOVS’
+ MOVS("HI", R007);
+ ^
+finalTests/E--_RT.c:54:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+ #define MOVS(s, r) r = (int)(s)
+                        ^
+finalTests/anycheck.c:74:1: note: in expansion of macro ‘MOVS’
+ MOVS("\n", R008);
+ ^
+Setting memory size to 10000384 words

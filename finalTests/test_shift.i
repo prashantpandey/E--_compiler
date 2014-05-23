@@ -54,12 +54,8 @@ SUB R000 1 R000
 MOVL Label6 R004
 STI R004 R000
 SUB R000 1 R000
-PRTI R000
-PRTS "\n"
 JMP Label0
-Label6: PRTI R000
-PRTS "\n"
-MOVI R002 R006				// Getting return Value
+Label6: MOVI R002 R006				// Getting return Value
 ADD R000 1 R000
 LDF R000 F014				// Loading Back Registers:a3
 ADD R000 1 R000

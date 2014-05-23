@@ -1,5 +1,5 @@
-gcc -Wall -g  -o finalTests/test_recur finalTests/test_recur.c
-In file included from finalTests/test_recur.c:1:0:
+gcc -Wall -g  -o finalTests/whilecheck finalTests/whilecheck.c
+In file included from finalTests/whilecheck.c:1:0:
 finalTests/E--_RT.c: In function ‘E_RT_init’:
 finalTests/E--_RT.c:147:7: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘long unsigned int’ [-Wformat=]
        fprintf(stderr, "Setting memory size to %d words\n", m1/sizeof(int));
@@ -7,45 +7,47 @@ finalTests/E--_RT.c:147:7: warning: format ‘%d’ expects argument of type ‘
 finalTests/E--_RT.c:166:9: warning: assignment makes integer from pointer without a cast [enabled by default]
     R000 = mem;
          ^
-finalTests/test_recur.c: In function ‘main’:
+finalTests/whilecheck.c: In function ‘main’:
 finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define PRTS(x) printf((char *)(x))
                         ^
-finalTests/test_recur.c:14:1: note: in expansion of macro ‘PRTS’
- PRTS(R007);
+finalTests/whilecheck.c:31:14: note: in expansion of macro ‘PRTS’
+ while_1_end: PRTS(R007);
+              ^
+finalTests/whilecheck.c:31:1: warning: format not a string literal and no format arguments [-Wformat-security]
+ while_1_end: PRTS(R007);
  ^
-finalTests/test_recur.c:14:1: warning: format not a string literal and no format arguments [-Wformat-security]
-In file included from finalTests/test_recur.c:1:0:
+In file included from finalTests/whilecheck.c:1:0:
 finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define PRTS(x) printf((char *)(x))
                         ^
-finalTests/test_recur.c:16:1: note: in expansion of macro ‘PRTS’
+finalTests/whilecheck.c:33:1: note: in expansion of macro ‘PRTS’
  PRTS(R007);
  ^
-finalTests/test_recur.c:16:1: warning: format not a string literal and no format arguments [-Wformat-security]
-In file included from finalTests/test_recur.c:1:0:
+finalTests/whilecheck.c:33:1: warning: format not a string literal and no format arguments [-Wformat-security]
+In file included from finalTests/whilecheck.c:1:0:
 finalTests/E--_RT.c:53:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
  #define MOVL(l, r) r = (int)(&&l)
                         ^
-finalTests/test_recur.c:30:1: note: in expansion of macro ‘MOVL’
+finalTests/whilecheck.c:59:1: note: in expansion of macro ‘MOVL’
  MOVL(Label5, R004);
  ^
 finalTests/E--_RT.c:50:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define JMPI(x) goto *(void*)(x)
                        ^
-finalTests/test_recur.c:47:1: note: in expansion of macro ‘JMPI’
+finalTests/whilecheck.c:90:1: note: in expansion of macro ‘JMPI’
  JMPI(R004);
  ^
 finalTests/E--_RT.c:53:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
  #define MOVL(l, r) r = (int)(&&l)
                         ^
-finalTests/test_recur.c:58:1: note: in expansion of macro ‘MOVL’
+finalTests/whilecheck.c:101:1: note: in expansion of macro ‘MOVL’
  MOVL(Label6, R004);
  ^
 finalTests/E--_RT.c:54:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
  #define MOVS(s, r) r = (int)(s)
                         ^
-finalTests/test_recur.c:71:1: note: in expansion of macro ‘MOVS’
+finalTests/whilecheck.c:113:1: note: in expansion of macro ‘MOVS’
  MOVS("\n", R007);
  ^
 Setting memory size to 10000384 words

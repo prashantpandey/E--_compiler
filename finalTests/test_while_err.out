@@ -17,56 +17,56 @@ finalTests/test_while.c:17:1: note: in expansion of macro ‘MOVS’
 finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define PRTS(x) printf((char *)(x))
                         ^
-finalTests/test_while.c:23:1: note: in expansion of macro ‘PRTS’
+finalTests/test_while.c:22:1: note: in expansion of macro ‘PRTS’
  PRTS(R011);
  ^
-finalTests/test_while.c:23:1: warning: format not a string literal and no format arguments [-Wformat-security]
+finalTests/test_while.c:22:1: warning: format not a string literal and no format arguments [-Wformat-security]
 In file included from finalTests/test_while.c:1:0:
 finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define PRTS(x) printf((char *)(x))
                         ^
-finalTests/test_while.c:29:1: note: in expansion of macro ‘PRTS’
+finalTests/test_while.c:27:1: note: in expansion of macro ‘PRTS’
  PRTS(R011);
  ^
-finalTests/test_while.c:29:1: warning: format not a string literal and no format arguments [-Wformat-security]
+finalTests/test_while.c:27:1: warning: format not a string literal and no format arguments [-Wformat-security]
 In file included from finalTests/test_while.c:1:0:
 finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define PRTS(x) printf((char *)(x))
                         ^
-finalTests/test_while.c:35:1: note: in expansion of macro ‘PRTS’
+finalTests/test_while.c:32:1: note: in expansion of macro ‘PRTS’
  PRTS(R011);
  ^
-finalTests/test_while.c:35:1: warning: format not a string literal and no format arguments [-Wformat-security]
+finalTests/test_while.c:32:1: warning: format not a string literal and no format arguments [-Wformat-security]
 In file included from finalTests/test_while.c:1:0:
 finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define PRTS(x) printf((char *)(x))
                         ^
-finalTests/test_while.c:41:1: note: in expansion of macro ‘PRTS’
+finalTests/test_while.c:37:1: note: in expansion of macro ‘PRTS’
  PRTS(R011);
  ^
-finalTests/test_while.c:41:1: warning: format not a string literal and no format arguments [-Wformat-security]
+finalTests/test_while.c:37:1: warning: format not a string literal and no format arguments [-Wformat-security]
 In file included from finalTests/test_while.c:1:0:
 finalTests/E--_RT.c:44:24: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define PRTS(x) printf((char *)(x))
                         ^
-finalTests/test_while.c:50:1: note: in expansion of macro ‘PRTS’
+finalTests/test_while.c:45:1: note: in expansion of macro ‘PRTS’
  PRTS(R011);
  ^
-finalTests/test_while.c:50:1: warning: format not a string literal and no format arguments [-Wformat-security]
+finalTests/test_while.c:45:1: warning: format not a string literal and no format arguments [-Wformat-security]
 In file included from finalTests/test_while.c:1:0:
 finalTests/E--_RT.c:50:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
  #define JMPI(x) goto *(void*)(x)
                        ^
-finalTests/test_while.c:62:1: note: in expansion of macro ‘JMPI’
+finalTests/test_while.c:57:1: note: in expansion of macro ‘JMPI’
  JMPI(R004);
  ^
 finalTests/E--_RT.c:53:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
  #define MOVL(l, r) r = (int)(&&l)
                         ^
-finalTests/test_while.c:73:1: note: in expansion of macro ‘MOVL’
+finalTests/test_while.c:68:1: note: in expansion of macro ‘MOVL’
  MOVL(Label2, R004);
  ^
-finalTests/test_while.c:56:1: warning: label ‘Label1’ defined but not used [-Wunused-label]
+finalTests/test_while.c:51:1: warning: label ‘Label1’ defined but not used [-Wunused-label]
  Label1: MOVI(R001, R000);
  ^
 Setting memory size to 10000384 words

@@ -1,0 +1,58 @@
+#include "E--_RT.c"
+int main(int argc, char *argv[]) {
+	E_RT_init(argc, argv);
+JMP(begin);
+Label0: R005=ADD(R000,2);
+STI(R001, R000);
+R000=SUB(R000,1);
+MOVI(R000, R001);
+LDI(R005, R006);
+R005=ADD(R005,1);
+LDF(R005, F001);
+R005=ADD(R005,1);
+MOVI(0, R007);
+JMPC(GE(3, 2), Label5);
+Label6: JMPC(GE(7, 6), Label5);
+Label5: JMPC(GT(R007, 0), Label2);
+JMP(Label3);
+Label2: MOVI(3, R007);
+JMP(Label4);
+Label3: MOVI(4, R007);
+Label4: MOVI(R001, R000);
+R000=ADD(R000,1);
+LDI(R000, R001);
+R000=ADD(R000,1);
+LDI(R000, R004);
+R000=ADD(R000,2);
+JMPI(R004);
+eventLabel_xyz: INI(R007);
+INF(F007);
+STI(R007, R000);
+R000=SUB(R000,1);
+STF(F007, R000);
+R000=SUB(R000,1);
+STF(F007, R000);
+R000=SUB(R000,1);
+STI(R007, R000);
+R000=SUB(R000,1);
+MOVL(Label7, R004);
+STI(R004, R000);
+R000=SUB(R000,1);
+JMP(Label0);
+Label7: R000=ADD(R000,1);
+LDF(R000, F007);
+R000=ADD(R000,1);
+LDI(R000, R007);
+JMP(EventMStart);
+begin: MOVI(10000, R000);
+IN(R007);
+IN(R007);
+IN(R007);
+EventMStart: IN(R007);
+JMPC(GT(64, R007), EventMOut);
+JMPC(EQ(120, R007), eventLabel_xyz);
+JMP(EventMStart);
+EventMOut: PRTS("\nDone\n");
+
+	E_RT_exit(); return 0;
+}

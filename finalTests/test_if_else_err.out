@@ -1,0 +1,26 @@
+gcc -Wall -g  -o finalTests/test_if_else finalTests/test_if_else.c
+In file included from finalTests/test_if_else.c:1:0:
+finalTests/E--_RT.c: In function ‘E_RT_init’:
+finalTests/E--_RT.c:147:7: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘long unsigned int’ [-Wformat=]
+       fprintf(stderr, "Setting memory size to %d words\n", m1/sizeof(int));
+       ^
+finalTests/E--_RT.c:166:9: warning: assignment makes integer from pointer without a cast [enabled by default]
+    R000 = mem;
+         ^
+finalTests/test_if_else.c: In function ‘main’:
+finalTests/E--_RT.c:50:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ #define JMPI(x) goto *(void*)(x)
+                       ^
+finalTests/test_if_else.c:27:1: note: in expansion of macro ‘JMPI’
+ JMPI(R004);
+ ^
+finalTests/E--_RT.c:53:24: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+ #define MOVL(l, r) r = (int)(&&l)
+                        ^
+finalTests/test_if_else.c:38:1: note: in expansion of macro ‘MOVL’
+ MOVL(Label7, R004);
+ ^
+finalTests/test_if_else.c:15:1: warning: label ‘Label6’ defined but not used [-Wunused-label]
+ Label6: JMPC(GE(7, 6), Label5);
+ ^
+Setting memory size to 10000384 words
